@@ -1,0 +1,1939 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Actividad de Escucha de Llamadas · TMLF Academy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #0b1a2e;
+      --navy-mid: #132844;
+      --navy-light: #1a3558;
+      --gold: #c9a84c;
+      --gold-soft: #f5e6b8;
+      --gold-glow: rgba(201,168,76,0.12);
+      --beige: #faf6ee;
+      --beige-dark: #f0e8d8;
+      --cream: #fffdf7;
+      --white: #ffffff;
+      --text: #1a1a1a;
+      --text-mid: #4a4a4a;
+      --text-muted: #7a7a7a;
+      --border: #e2ddd2;
+      --border-light: #eee9df;
+      --success: #1b7a42;
+      --success-bg: #e8f5ee;
+      --success-border: #b8dcc6;
+      --warning: #8a6d1b;
+      --warning-bg: #fef8e7;
+      --warning-border: #ecdba3;
+      --danger: #9b2c2c;
+      --danger-bg: #fde8e8;
+      --danger-border: #e8b4b4;
+      --shadow-sm: 0 1px 3px rgba(11,26,46,0.06);
+      --shadow-md: 0 4px 16px rgba(11,26,46,0.08);
+      --radius: 12px;
+      --radius-lg: 16px;
+      --font-body: 'DM Sans', sans-serif;
+      --font-display: 'Cormorant Garamond', serif;
+      --font-label: 'Barlow Condensed', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--beige);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, var(--navy-light) 100%);
+      padding: 32px 28px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -40%; right: -10%;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .header-inner { max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
+
+    .header-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--font-label); font-size: 11px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 1.8px; color: var(--gold);
+      background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.2);
+      padding: 5px 14px; border-radius: 20px; margin-bottom: 14px;
+    }
+    .header h1 {
+      font-family: var(--font-display); font-size: 32px; font-weight: 600;
+      color: var(--white); margin-bottom: 8px; letter-spacing: -0.3px;
+    }
+    .header p { font-size: 14px; color: rgba(255,255,255,0.55); line-height: 1.6; max-width: 720px; }
+
+    .tabs { display: flex; gap: 8px; margin-top: 20px; }
+
+    .tab-btn {
+      font-family: var(--font-label); font-size: 13px; font-weight: 600;
+      letter-spacing: 0.5px; text-transform: uppercase;
+      padding: 10px 20px; border: 1px solid rgba(255,255,255,0.12); border-radius: 8px;
+      background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.55);
+      cursor: pointer; transition: all 0.2s ease;
+    }
+    .tab-btn:hover { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); }
+    .tab-btn.active { background: var(--gold); color: var(--navy); border-color: var(--gold); }
+
+    /* ── LAYOUT ── */
+    .main { max-width: 1200px; margin: 0 auto; padding: 24px 28px 40px; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-sm);
+    }
+    .card-title {
+      font-family: var(--font-display); font-size: 22px; font-weight: 600;
+      color: var(--navy); margin-bottom: 4px;
+    }
+    .card-subtitle { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; }
+
+    /* ── FORMS ── */
+    .field { margin-bottom: 16px; }
+    .field label {
+      display: block; font-family: var(--font-label); font-size: 12px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-mid); margin-bottom: 6px;
+    }
+    input, select, textarea {
+      width: 100%; font-family: var(--font-body); font-size: 14px;
+      padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px;
+      background: var(--cream); color: var(--text); transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    textarea { min-height: 80px; resize: vertical; }
+    input:focus, select:focus, textarea:focus {
+      outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-glow);
+    }
+
+    button {
+      font-family: var(--font-label); font-size: 13px; font-weight: 600;
+      letter-spacing: 0.5px; text-transform: uppercase; border: none; border-radius: 8px;
+      padding: 11px 22px; cursor: pointer; transition: all 0.2s ease;
+    }
+    .btn-gold { background: var(--gold); color: var(--navy); }
+    .btn-gold:hover { background: #b89940; }
+    .btn-secondary { background: var(--beige); color: var(--navy); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--beige-dark); }
+    .btn-danger { background: #7a2020; color: var(--white); }
+    .btn-danger:hover { background: #631a1a; }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+
+    .status-box {
+      margin-top: 14px; padding: 12px 16px; border-radius: 8px;
+      font-size: 13px; line-height: 1.5; display: none;
+    }
+    .status-box.success { display: block; background: var(--success-bg); color: var(--success); border: 1px solid var(--success-border); }
+    .status-box.error { display: block; background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger-border); }
+
+    /* ── SCALE LEGEND ── */
+    .scale-items { display: grid; gap: 10px; }
+    .scale-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 12px 14px; border-radius: 10px; background: var(--cream); border: 1px solid var(--border-light);
+    }
+    .scale-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+    .scale-dot.ok { background: var(--success); }
+    .scale-dot.mid { background: var(--warning); }
+    .scale-dot.no { background: var(--danger); }
+    .scale-label {
+      font-family: var(--font-label); font-size: 13px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.4px; color: var(--navy);
+    }
+    .scale-desc { font-size: 12px; color: var(--text-muted); line-height: 1.4; margin-top: 2px; }
+
+    .footer-note {
+      margin-top: 20px; font-size: 12px; color: var(--text-muted); line-height: 1.5;
+      padding: 12px 14px; background: var(--gold-glow); border-radius: 8px; border-left: 3px solid var(--gold);
+    }
+
+    /* ── SUB-TABS (activity selector) ── */
+    .sub-tabs {
+      display: flex; gap: 6px; margin-bottom: 22px;
+      border-bottom: 2px solid var(--border); padding-bottom: 0;
+    }
+    .sub-tab {
+      font-family: var(--font-label); font-size: 13px; font-weight: 600;
+      letter-spacing: 0.4px; text-transform: uppercase;
+      padding: 10px 18px; border: none; border-radius: 8px 8px 0 0;
+      background: transparent; color: var(--text-muted); cursor: pointer;
+      transition: all 0.2s ease; border-bottom: 3px solid transparent; margin-bottom: -2px;
+    }
+    .sub-tab:hover { color: var(--navy); background: var(--gold-glow); }
+    .sub-tab.active {
+      color: var(--navy); background: var(--white);
+      border-bottom-color: var(--gold); font-weight: 700;
+    }
+    .sub-tab .tab-icon { margin-right: 6px; font-size: 15px; }
+
+    .sub-panel { display: none; }
+    .sub-panel.active { display: block; }
+
+    /* ── CRITERIA CARDS ── */
+    .criteria-list { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .criterion {
+      border: 1px solid var(--border); border-radius: var(--radius); padding: 18px;
+      background: var(--white); transition: border-color 0.2s, box-shadow 0.2s;
+      box-shadow: var(--shadow-sm); display: flex; flex-direction: column;
+    }
+    .criterion:hover { border-color: var(--gold); box-shadow: 0 4px 14px rgba(201,168,76,0.10); }
+
+    .criterion-number {
+      font-family: var(--font-label); font-size: 11px; font-weight: 700;
+      color: var(--gold); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;
+    }
+    .criterion-title {
+      font-family: var(--font-display); font-size: 22px; font-weight: 600;
+      color: var(--navy); line-height: 1.3; margin-bottom: 14px; min-height: 46px;
+    }
+    .criterion-fields { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+    .criterion-fields .field { margin-bottom: 0; }
+    .criterion-fields textarea { min-height: 60px; flex: 1; }
+
+    /* Score Buttons */
+    .score-btn-group {
+      display: flex; gap: 6px; flex-wrap: wrap;
+    }
+    .score-btn {
+      width: 44px; height: 44px; border-radius: 10px; display: flex;
+      align-items: center; justify-content: center; flex-direction: column;
+      font-family: var(--font-label); font-size: 18px; font-weight: 700;
+      color: var(--text-mid); background: var(--cream); border: 2px solid var(--border);
+      cursor: pointer; transition: all 0.2s ease; padding: 2px;
+      letter-spacing: 0;
+    }
+    .score-btn:hover { border-color: var(--gold); background: var(--gold-glow); color: var(--navy); }
+    .score-btn.selected { border-color: var(--gold); background: var(--gold); color: var(--navy); box-shadow: 0 2px 8px rgba(201,168,76,0.3); }
+    .score-btn .score-label {
+      font-size: 7px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.3px; line-height: 1; margin-top: 1px; opacity: 0.7;
+    }
+    .score-btn.selected .score-label { opacity: 1; }
+
+    /* ── EMPATHY SECTION CARDS ── */
+    .empathy-section {
+      background: var(--white); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 20px; box-shadow: var(--shadow-sm); margin-bottom: 16px;
+    }
+    .empathy-section:hover { border-color: var(--gold); }
+
+    .section-icon {
+      width: 36px; height: 36px; border-radius: 10px; display: flex;
+      align-items: center; justify-content: center; font-size: 18px;
+      margin-bottom: 10px;
+    }
+    .section-icon.purple { background: #f0ebff; }
+    .section-icon.teal { background: #e6f7f2; }
+    .section-icon.amber { background: var(--warning-bg); }
+    .section-icon.rose { background: #fce8ef; }
+
+    .section-title {
+      font-family: var(--font-display); font-size: 19px; font-weight: 600;
+      color: var(--navy); margin-bottom: 4px;
+    }
+    .section-desc { font-size: 12px; color: var(--text-muted); line-height: 1.4; margin-bottom: 16px; }
+
+    .checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+
+    .check-chip {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--cream); cursor: pointer; transition: all 0.2s; font-size: 13px;
+      user-select: none;
+    }
+    .check-chip:hover { border-color: var(--gold); background: var(--gold-glow); }
+    .check-chip input { display: none; }
+    .check-chip.selected { background: var(--gold-glow); border-color: var(--gold); color: var(--navy); font-weight: 600; }
+    .check-chip .chip-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      border: 2px solid var(--border); transition: all 0.2s;
+    }
+    .check-chip.selected .chip-dot { background: var(--gold); border-color: var(--gold); }
+
+    .empathy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    /* ── FEEDBACK PREVIEW ── */
+    .feedback-preview {
+      background: linear-gradient(135deg, var(--navy), var(--navy-mid));
+      border-radius: var(--radius-lg); padding: 24px; color: var(--white); margin-top: 20px;
+    }
+    .feedback-preview h3 {
+      font-family: var(--font-display); font-size: 20px; font-weight: 600;
+      color: var(--gold-soft); margin-bottom: 14px;
+    }
+    .feedback-item { margin-bottom: 12px; }
+    .feedback-item-label {
+      font-family: var(--font-label); font-size: 11px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.8px; color: var(--gold); margin-bottom: 4px;
+    }
+    .feedback-item-value { font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.5; }
+
+    /* ── ADMIN ── */
+    .metrics-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+    .metric-card {
+      background: var(--white); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 16px 18px; box-shadow: var(--shadow-sm); position: relative; overflow: hidden;
+    }
+    .metric-card::after {
+      content: ''; position: absolute; top: 0; left: 0;
+      width: 100%; height: 3px; background: linear-gradient(90deg, var(--gold), var(--gold-soft));
+    }
+    .metric-label {
+      font-family: var(--font-label); font-size: 11px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); margin-bottom: 6px;
+    }
+    .metric-value { font-family: var(--font-display); font-size: 30px; font-weight: 700; color: var(--navy); }
+    .metric-value.small { font-size: 16px; line-height: 1.3; }
+
+    .table-wrap {
+      overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius);
+      background: var(--white); box-shadow: var(--shadow-sm);
+    }
+    table { width: 100%; border-collapse: collapse; min-width: 1000px; }
+    th {
+      font-family: var(--font-label); font-size: 11px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-mid);
+      background: var(--beige); padding: 12px; text-align: left;
+      border-bottom: 2px solid var(--border); position: sticky; top: 0; z-index: 1;
+    }
+    td {
+      padding: 12px; border-bottom: 1px solid var(--border-light);
+      font-size: 13px; vertical-align: top; color: var(--text-mid);
+    }
+    tr:last-child td { border-bottom: none; }
+
+    .badge {
+      display: inline-block; font-family: var(--font-label); font-size: 11px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.4px; padding: 4px 10px; border-radius: 20px;
+    }
+    .badge.ok { background: var(--success-bg); color: var(--success); border: 1px solid var(--success-border); }
+    .badge.mid { background: var(--warning-bg); color: var(--warning); border: 1px solid var(--warning-border); }
+    .badge.no { background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger-border); }
+    .badge.info { background: #eef0ff; color: #3b49a8; border: 1px solid #c7cdf0; }
+    .badge.emp { background: #f0ebff; color: #6b3fa0; border: 1px solid #d4c5f0; }
+
+    .hidden { display: none !important; }
+    .login-box { max-width: 520px; }
+    .welcome-tag { font-family: var(--font-display); font-size: 20px; font-weight: 600; color: var(--navy); margin-bottom: 4px; }
+    .divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+    /* ── ADMIN SUB-TABS ── */
+    .admin-tabs { display: flex; gap: 6px; margin-bottom: 18px; }
+    .admin-tab {
+      font-family: var(--font-label); font-size: 12px; font-weight: 600;
+      letter-spacing: 0.4px; text-transform: uppercase; padding: 8px 16px;
+      border: 1px solid var(--border); border-radius: 8px; background: var(--cream);
+      color: var(--text-muted); cursor: pointer; transition: all 0.2s;
+    }
+    .admin-tab:hover { border-color: var(--gold); color: var(--navy); }
+    .admin-tab.active { background: var(--navy); color: var(--white); border-color: var(--navy); }
+
+    /* ── FEEDBACK MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 999;
+      background: rgba(11,26,46,0.6); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+    .modal-box {
+      background: var(--white); border-radius: var(--radius-lg); max-width: 680px; width: 100%;
+      max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(11,26,46,0.25);
+    }
+    .modal-header {
+      background: linear-gradient(135deg, var(--navy), var(--navy-mid));
+      padding: 24px 28px; border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-header h2 {
+      font-family: var(--font-display); font-size: 22px; font-weight: 600; color: var(--white);
+    }
+    .modal-header .modal-badge {
+      font-family: var(--font-label); font-size: 10px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 1.5px; color: var(--gold); background: rgba(201,168,76,0.15);
+      border: 1px solid rgba(201,168,76,0.25); padding: 4px 12px; border-radius: 16px;
+    }
+    .modal-close {
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+      color: white; width: 34px; height: 34px; border-radius: 8px; cursor: pointer;
+      font-size: 18px; display: flex; align-items: center; justify-content: center; transition: 0.2s;
+    }
+    .modal-close:hover { background: rgba(255,255,255,0.2); }
+
+    .modal-body { padding: 24px 28px; }
+
+    .modal-meta {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;
+      padding: 16px; background: var(--beige); border-radius: var(--radius); border: 1px solid var(--border-light);
+    }
+    .modal-meta-item .mm-label {
+      font-family: var(--font-label); font-size: 10px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.8px; color: var(--text-muted); margin-bottom: 2px;
+    }
+    .modal-meta-item .mm-value { font-size: 14px; font-weight: 600; color: var(--navy); }
+
+    .modal-section { margin-bottom: 18px; }
+    .modal-section-title {
+      font-family: var(--font-label); font-size: 12px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.8px; color: var(--gold); margin-bottom: 8px;
+      padding-bottom: 6px; border-bottom: 1px solid var(--border-light);
+    }
+    .modal-section-content { font-size: 14px; color: var(--text-mid); line-height: 1.6; }
+
+    .modal-score-bar {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+      padding: 14px 16px; background: var(--cream); border-radius: var(--radius); border: 1px solid var(--border);
+    }
+    .modal-score-num {
+      font-family: var(--font-display); font-size: 36px; font-weight: 700; color: var(--navy); line-height: 1;
+    }
+    .modal-score-detail { flex: 1; }
+    .modal-score-pct { font-family: var(--font-label); font-size: 14px; font-weight: 600; color: var(--navy); }
+    .modal-score-pts { font-size: 12px; color: var(--text-muted); }
+    .modal-score-fill {
+      height: 6px; border-radius: 3px; background: var(--border); margin-top: 6px; overflow: hidden;
+    }
+    .modal-score-fill-inner { height: 100%; border-radius: 3px; background: var(--gold); transition: width 0.4s ease; }
+
+    .modal-criteria-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 0; border-bottom: 1px solid var(--border-light); font-size: 13px;
+    }
+    .modal-criteria-row:last-child { border-bottom: none; }
+    .modal-criteria-name { color: var(--text-mid); flex: 1; }
+
+    .semaphore-group {
+      margin-bottom: 14px; border-radius: 10px; overflow: hidden;
+      border: 1px solid var(--border-light);
+    }
+    .semaphore-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px; font-family: var(--font-label); font-size: 12px;
+      font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
+    }
+    .semaphore-header .sem-dot {
+      width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+    }
+    .semaphore-header .sem-count {
+      margin-left: auto; font-size: 11px; font-weight: 600; opacity: 0.7;
+    }
+    .semaphore-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 14px; border-top: 1px solid var(--border-light);
+      font-size: 13px; background: var(--white);
+    }
+    .semaphore-row .sem-check { font-size: 14px; flex-shrink: 0; }
+    .semaphore-row .sem-name { flex: 1; color: var(--text-mid); }
+    .semaphore-obs {
+      padding: 2px 14px 8px 36px; font-size: 12px; color: var(--text-muted);
+      background: var(--white); border-top: none;
+    }
+
+    .modal-actions {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      padding: 16px 28px 24px; border-top: 1px solid var(--border-light);
+    }
+
+    @media print {
+      body * { visibility: hidden; }
+      .modal-overlay, .modal-overlay * { visibility: visible; }
+      .modal-overlay { position: static; background: none; backdrop-filter: none; padding: 0; }
+      .modal-box { max-height: none; box-shadow: none; max-width: 100%; }
+      .modal-actions, .modal-close { display: none !important; }
+    }
+
+    @media (max-width: 920px) {
+      .grid-2, .metrics-row, .criteria-list, .empathy-grid { grid-template-columns: 1fr; }
+      .header h1 { font-size: 26px; }
+      .main { padding: 16px; }
+      .sub-tabs { overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-inner">
+      <div class="header-badge">TMLF Academy</div>
+      <h1>Actividad de Escucha de Llamadas</h1>
+      <p>Herramienta de evaluación dual: calidad de llamada y análisis de empatía. Permite generar feedback estructurado para el colaborador evaluado.</p>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="showPanel('collabPanel', this)">Vista Colaborador</button>
+        <button class="tab-btn" onclick="showPanel('resultsPanel', this)">Mis Resultados</button>
+        <button class="tab-btn" onclick="showPanel('adminPanel', this)">Vista Administrador</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- ═══════════════ COLLABORATOR PANEL ═══════════════ -->
+    <section id="collabPanel" class="panel active">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Acerca de esta Actividad</div>
+          <div class="card-subtitle">Esta herramienta integra dos evaluaciones complementarias en una sola sesión.</div>
+          <div class="scale-items">
+            <div class="scale-item">
+              <div class="scale-dot ok"></div>
+              <div>
+                <div class="scale-label">Actividad 1 — Evaluación de Calidad</div>
+                <div class="scale-desc">Evalúa 12 criterios operativos con escala de 0 a 5 (0 = No cumple, 5 = Excelente). Genera calificación y porcentaje por llamada.</div>
+              </div>
+            </div>
+            <div class="scale-item">
+              <div class="scale-dot" style="background:#6b3fa0;"></div>
+              <div>
+                <div class="scale-label">Actividad 2 — Empatía y Feedback</div>
+                <div class="scale-desc">Identifica emociones del cliente, evalúa la empatía del colaborador y genera feedback estructurado.</div>
+              </div>
+            </div>
+          </div>
+          <div class="footer-note">
+            Los resultados y reportes de ambas actividades son visibles <strong>únicamente para el administrador</strong>. El feedback de la Actividad 2 está diseñado para compartirse con el colaborador evaluado.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Ingreso del Colaborador</div>
+          <div class="card-subtitle">Registra tus datos antes de responder. Esto identifica quién realizó la evaluación.</div>
+          <div id="loginSection" class="login-box">
+            <div class="field">
+              <label for="employeeName">Nombre del evaluador</label>
+              <input type="text" id="employeeName" placeholder="Ej. Brenda Domínguez" />
+            </div>
+            <div class="field">
+              <label for="employeeArea">Área / Equipo</label>
+              <input type="text" id="employeeArea" placeholder="Ej. Customer Service" />
+            </div>
+            <div class="field">
+              <label for="evaluatedName">Nombre del colaborador evaluado</label>
+              <input type="text" id="evaluatedName" placeholder="Nombre de quien realizó la llamada" />
+            </div>
+            <div class="field">
+              <label for="callId">Identificador de llamada</label>
+              <input type="text" id="callId" placeholder="Ej. Llamada 001 / Caso ABC123" />
+            </div>
+            <button class="btn-gold" onclick="startActivity()">Ingresar a la actividad</button>
+            <div id="loginStatus" class="status-box"></div>
+          </div>
+
+          <div id="activityIntro" class="hidden">
+            <div class="divider"></div>
+            <div class="welcome-tag" id="welcomeUser"></div>
+            <p id="welcomeEvaluated" style="font-size:13px; color:var(--text-muted); margin-bottom:8px;"></p>
+            <div class="field">
+              <label for="callLink">Link de audio/video o referencia interna</label>
+              <input type="text" id="callLink" placeholder="Pega aquí el enlace si aplica" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SUB-TABS after login ── -->
+      <div id="activityTabs" class="hidden" style="margin-top:22px;">
+        <div class="sub-tabs">
+          <button class="sub-tab active" onclick="showSubPanel('qualityPanel', this)">
+            <span class="tab-icon">📋</span> Evaluación de Calidad
+          </button>
+          <button class="sub-tab" onclick="showSubPanel('empathyPanel', this)">
+            <span class="tab-icon">💬</span> Empatía y Feedback
+          </button>
+        </div>
+
+        <!-- ── ACTIVITY 1: Quality ── -->
+        <div id="qualityPanel" class="sub-panel active">
+          <div class="card" style="background:var(--beige); border-color:var(--border-light); margin-top:0; border-radius: 0 0 var(--radius-lg) var(--radius-lg);">
+            <div class="card-title">Evaluación de Calidad de Llamada</div>
+            <div class="card-subtitle">Califica cada criterio del 0 al 5 según lo observado. Los resultados solo son visibles para el administrador.</div>
+            <form id="evaluationForm">
+              <div id="criteriaContainer" class="criteria-list"></div>
+              <div style="margin-top:20px; background:var(--white); padding:18px; border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow-sm);">
+                <div class="field" style="margin-bottom:0;">
+                  <label for="generalComments">Comentarios generales de calidad</label>
+                  <textarea id="generalComments" placeholder="Hallazgos generales, fortalezas operativas, áreas de mejora." style="min-height:100px;"></textarea>
+                </div>
+              </div>
+              <div class="actions">
+                <button type="submit" class="btn-gold">Guardar evaluación de calidad</button>
+                <button type="button" class="btn-secondary" onclick="resetQualityForm()">Limpiar</button>
+              </div>
+              <div id="formStatus" class="status-box"></div>
+            </form>
+          </div>
+        </div>
+
+        <!-- ── ACTIVITY 2: Empathy & Feedback ── -->
+        <div id="empathyPanel" class="sub-panel">
+          <div class="card" style="background:var(--beige); border-color:var(--border-light); margin-top:0; border-radius: 0 0 var(--radius-lg) var(--radius-lg);">
+            <div class="card-title">Evaluación de Empatía y Feedback</div>
+            <div class="card-subtitle">Analiza la dimensión empática de la llamada y genera retroalimentación para el colaborador evaluado.</div>
+
+            <form id="empathyForm">
+              <div class="empathy-grid">
+
+                <!-- Section 1: Emotions identified -->
+                <div class="empathy-section">
+                  <div class="section-icon purple">🎭</div>
+                  <div class="section-title">Emociones del Cliente</div>
+                  <div class="section-desc">¿Qué emociones identificaste en el cliente durante la llamada?</div>
+                  <div class="checkbox-group" id="emotionsGroup">
+                    <!-- filled by JS -->
+                  </div>
+                  <div class="field" style="margin-bottom:0;">
+                    <label for="emotionsDetail">Detalle / contexto</label>
+                    <textarea id="emotionsDetail" placeholder="¿En qué momento se manifestaron? ¿Qué las detonó?"></textarea>
+                  </div>
+                </div>
+
+                <!-- Section 2: Empathy demonstrated -->
+                <div class="empathy-section">
+                  <div class="section-icon teal">🤝</div>
+                  <div class="section-title">Empatía del Colaborador</div>
+                  <div class="section-desc">Evalúa cómo el colaborador demostró empatía durante la interacción.</div>
+                  <div id="empathyCriteria" class="criteria-list" style="grid-template-columns:1fr; gap:10px;"></div>
+                </div>
+
+                <!-- Section 3: Feedback for evaluated -->
+                <div class="empathy-section">
+                  <div class="section-icon rose">📝</div>
+                  <div class="section-title">Feedback para el Colaborador</div>
+                  <div class="section-desc">Retroalimentación constructiva que se compartirá con <span id="feedbackTargetName" style="font-weight:600; color:var(--navy);">el colaborador evaluado</span>.</div>
+                  <div class="field">
+                    <label for="feedbackStrengths">Fortalezas observadas</label>
+                    <textarea id="feedbackStrengths" placeholder="¿Qué hizo bien el colaborador? ¿Qué vale la pena reforzar?"></textarea>
+                  </div>
+                  <div class="field">
+                    <label for="feedbackImprove">Áreas de mejora</label>
+                    <textarea id="feedbackImprove" placeholder="¿En qué aspectos podría mejorar? Sé específico."></textarea>
+                  </div>
+                  <div class="field" style="margin-bottom:0;">
+                    <label for="feedbackRecommendations">Recomendaciones específicas</label>
+                    <textarea id="feedbackRecommendations" placeholder="Acciones concretas que el colaborador puede implementar en futuras llamadas."></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <div class="actions">
+                <button type="submit" class="btn-gold">Guardar evaluación de empatía</button>
+                <button type="button" class="btn-secondary" onclick="resetEmpathyForm()">Limpiar</button>
+                <button type="button" class="btn-secondary" onclick="previewFeedback()" style="margin-left:auto;">Vista previa del feedback</button>
+              </div>
+              <div id="empathyStatus" class="status-box"></div>
+            </form>
+
+            <!-- Feedback Preview -->
+            <div id="feedbackPreview" class="feedback-preview hidden">
+              <h3>📄 Feedback para <span id="previewName"></span></h3>
+              <div id="previewContent"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ MIS RESULTADOS PANEL ═══════════════ -->
+    <section id="resultsPanel" class="panel">
+      <div class="card" style="max-width:520px; margin:0 auto 24px; text-align:center;">
+        <div style="font-size:36px; margin-bottom:10px;">📊</div>
+        <div class="card-title" style="text-align:center;">Consulta tus Resultados</div>
+        <div class="card-subtitle" style="text-align:center;">Ingresa tu nombre completo para consultar el feedback de tus evaluaciones de llamada.</div>
+        <div class="field">
+          <label for="myResultsName">Tu nombre completo</label>
+          <input type="text" id="myResultsName" placeholder="Ej. Juan Pérez" onkeydown="if(event.key==='Enter')searchMyResults()" />
+        </div>
+        <button class="btn-gold" onclick="searchMyResults()" style="width:100%;">Consultar mis resultados</button>
+        <div id="myResultsStatus" class="status-box"></div>
+      </div>
+
+      <div id="myResultsContent" class="hidden">
+        <!-- Header card -->
+        <div id="myResultsHeader" class="card" style="margin-bottom:20px;"></div>
+
+        <!-- Quality results -->
+        <div id="myQualityResults" class="hidden" style="margin-bottom:20px;">
+          <div class="card" style="background:var(--beige); border-color:var(--border-light);">
+            <div class="card-title">📋 Evaluación de Calidad</div>
+            <div class="card-subtitle">Resultados promedio de tus evaluaciones de calidad de llamada.</div>
+            <div id="myQualityScore"></div>
+            <div id="myQualitySemaphore"></div>
+            <div id="myQualityComments" style="margin-top:16px;"></div>
+          </div>
+        </div>
+
+        <!-- Empathy results -->
+        <div id="myEmpathyResults" class="hidden" style="margin-bottom:20px;">
+          <div class="card" style="background:var(--beige); border-color:var(--border-light);">
+            <div class="card-title">💬 Evaluación de Empatía</div>
+            <div class="card-subtitle">Resultados promedio de tus evaluaciones de empatía y feedback recibido.</div>
+            <div id="myEmpathyScore"></div>
+            <div id="myEmpathySemaphore"></div>
+            <div id="myEmpathyFeedback" style="margin-top:16px;"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ ADMIN PANEL ═══════════════ -->
+    <section id="adminPanel" class="panel">
+
+      <!-- Admin Login Gate -->
+      <div id="adminGate" class="card" style="max-width:440px; margin:40px auto; text-align:center;">
+        <div style="font-size:32px; margin-bottom:12px;">🔒</div>
+        <div class="card-title" style="text-align:center;">Acceso Administrativo</div>
+        <div class="card-subtitle" style="text-align:center;">Los resultados de las evaluaciones solo son visibles para usuarios autorizados.</div>
+        <div class="field">
+          <label for="adminPass">Contraseña</label>
+          <input type="password" id="adminPass" placeholder="Ingresa la contraseña" onkeydown="if(event.key==='Enter')adminLogin()" />
+        </div>
+        <button class="btn-gold" onclick="adminLogin()" style="width:100%;">Ingresar</button>
+        <div id="adminGateStatus" class="status-box"></div>
+      </div>
+
+      <!-- Admin Content (hidden until login) -->
+      <div id="adminContent" class="hidden">
+      <div class="metrics-row">
+        <div class="metric-card">
+          <div class="metric-label">Eval. Calidad</div>
+          <div class="metric-value" id="metricQuality">0</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Eval. Empatía</div>
+          <div class="metric-value" id="metricEmpathy">0</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Promedio cumplimiento</div>
+          <div class="metric-value" id="metricAvg">0%</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Último registro</div>
+          <div class="metric-value small" id="metricLast">—</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Registros</div>
+        <div class="card-subtitle">Consulta, filtra y exporta las evaluaciones registradas.</div>
+
+        <div class="admin-tabs">
+          <button class="admin-tab active" onclick="switchAdminView('quality', this)">Calidad</button>
+          <button class="admin-tab" onclick="switchAdminView('empathy', this)">Empatía y Feedback</button>
+          <button class="admin-tab" onclick="switchAdminView('consolidated', this)">📊 Consolidado por Persona</button>
+        </div>
+
+        <div class="grid-2" style="margin-bottom:16px;">
+          <div class="field">
+            <label for="filterName">Filtrar por evaluador</label>
+            <input type="text" id="filterName" placeholder="Nombre del evaluador" oninput="renderAdminTable()" />
+          </div>
+          <div class="field">
+            <label for="filterEvaluated">Filtrar por evaluado</label>
+            <input type="text" id="filterEvaluated" placeholder="Nombre del colaborador evaluado" oninput="renderAdminTable()" />
+          </div>
+        </div>
+
+        <div class="actions" style="margin-bottom:18px; margin-top:0;">
+          <button class="btn-secondary" onclick="reloadData()">🔄 Recargar datos</button>
+          <button class="btn-secondary" onclick="exportCSV()">Exportar CSV</button>
+          <button class="btn-danger" onclick="clearAllData()">Eliminar todos los registros</button>
+        </div>
+
+        <div id="adminQualityView">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Evaluador</th>
+                  <th>Evaluado</th>
+                  <th>Llamada</th>
+                  <th>% Cumplimiento</th>
+                  <th>Detalle</th>
+                  <th>Comentarios</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="adminQualityBody">
+                <tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:24px;">No hay registros de calidad.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="adminEmpathyView" class="hidden">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Evaluador</th>
+                  <th>Evaluado</th>
+                  <th>Llamada</th>
+                  <th>Emociones</th>
+                  <th>Empatía</th>
+                  <th>Fortalezas</th>
+                  <th>Mejora</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="adminEmpathyBody">
+                <tr><td colspan="9" style="text-align:center; color:var(--text-muted); padding:24px;">No hay registros de empatía.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="adminConsolidatedView" class="hidden">
+          <div class="card-subtitle" style="margin-bottom:14px;">Agrupa todas las evaluaciones por colaborador evaluado. El feedback consolidado <strong>no muestra el nombre de los evaluadores</strong>.</div>
+          <div id="consolidatedCards" style="display:grid; grid-template-columns:1fr 1fr; gap:16px;"></div>
+        </div>
+
+      </div><!-- /adminContent -->
+    </section>
+  </div><!-- /main -->
+
+  <!-- ═══ FEEDBACK MODAL ═══ -->
+  <div id="feedbackModal" class="modal-overlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <div class="modal-badge">TMLF Academy · Feedback</div>
+          <h2 id="modalTitle">Feedback de Evaluación</h2>
+        </div>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-actions">
+        <button class="btn-gold" onclick="printFeedback()">🖨️ Imprimir / PDF</button>
+        <button class="btn-secondary" onclick="copyFeedback()">📋 Copiar texto</button>
+        <button class="btn-secondary" onclick="emailFeedback()">✉️ Enviar por correo</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ═══ DATA ═══ */
+    const criteria = [
+      'Saludo Corporativo',
+      'Verificación Técnica Inicial',
+      'Compartir pantalla con el cliente y Aclaración De Dinámica De La Videollamada',
+      'Filtros De Seguridad',
+      '¿Motivo De La Llamada? (Parafraseo)',
+      'Regálame 3 Minutos Para Que Pueda Verificar Su Caso, En Ese Tiempo Se Le Puede Poner Un Video De Información General',
+      'Proceso Interno (Antes De Sent To Uscis)',
+      'Proceso Externo (Después De Sent To Uscis)',
+      'Asistencia Adicional',
+      'Documentación',
+      'Mensaje De TXT Al Finalizar',
+      'Salida corporativa'
+    ];
+
+    const EMOTIONS = [
+      'Frustración', 'Ansiedad', 'Confusión', 'Enojo', 'Tristeza',
+      'Miedo', 'Desesperación', 'Alivio', 'Gratitud', 'Desconfianza', 'Calma'
+    ];
+
+    const EMPATHY_CRITERIA = [
+      'Reconoció las emociones del cliente',
+      'Utilizó frases empáticas',
+      'Adaptó su tono de voz al estado emocional',
+      'Validó las preocupaciones del cliente',
+      'Mostró paciencia ante la resistencia del cliente',
+      'Ofreció contención antes de dar información'
+    ];
+
+    const SCORES = { 'Cumple': 100, 'Parcial': 50, 'No cumple': 0 };
+
+    const SCALE_LABELS = {
+      0: 'No cumple', 1: 'Deficiente', 2: 'Insuficiente',
+      3: 'Aceptable', 4: 'Bueno', 5: 'Excelente'
+    };
+
+    const ADMIN_PASS = 'tmlf2025';
+    let adminAuthenticated = false;
+
+    let qualityStore = [];
+    let empathyStore = [];
+    let currentUser = null;
+    let adminView = 'quality';
+    let dataLoaded = false;
+
+    /* ═══ APPS SCRIPT CONNECTION ═══ */
+    // URL pública del Web App de Apps Script
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzfODcdvVx_vOE-BlXi9fBZffjuIu-syfQObjJeb4LiAR2TSmH3dQCDLwlWhE_KVz1K/exec';
+
+    function syncEnabled() { return APPS_SCRIPT_URL.length > 0; }
+
+    // ── POST no-cors para escritura silenciosa ──
+    function saveToServer(type, data, statusEl) {
+      if (!syncEnabled()) return;
+      var clean = JSON.parse(JSON.stringify(data));
+      fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ type: type, data: clean })
+      })
+      .then(function() {
+        console.log('✅ Enviado:', type);
+      })
+      .catch(function(err) {
+        console.warn('Error enviando:', err);
+        if (statusEl) { statusEl.className = 'status-box error'; statusEl.textContent = '⚠️ Error de conexión al guardar.'; }
+      });
+    }
+
+    // ── JSONP para lectura ──
+    function loadFromServer(cb) {
+      if (!syncEnabled()) { if (cb) cb(); return; }
+      var callbackName = 'tmlf_cb_' + Math.random().toString(36).slice(2);
+      var done = false;
+
+      window[callbackName] = function(response) {
+        if (done) return; done = true; cleanup();
+        if (response && response.success) {
+          qualityStore = (response.quality || []).reverse();
+          empathyStore = (response.empathy || []).reverse();
+          dataLoaded = true;
+          console.log('✅ Datos cargados: ' + qualityStore.length + ' calidad, ' + empathyStore.length + ' empatía');
+        }
+        if (cb) cb();
+      };
+
+      function cleanup() {
+        try { delete window[callbackName]; } catch(e) {}
+        var el = document.getElementById('jscr_' + callbackName);
+        if (el) el.remove();
+      }
+
+      var script = document.createElement('script');
+      script.id = 'jscr_' + callbackName;
+      script.src = APPS_SCRIPT_URL + '?action=read&callback=' + callbackName + '&_=' + Date.now();
+      script.onerror = function() {
+        if (done) return; done = true; cleanup();
+        console.warn('JSONP: error de conexión');
+        if (cb) cb();
+      };
+      setTimeout(function() {
+        if (done) return; done = true; cleanup();
+        console.warn('JSONP: timeout');
+        if (cb) cb();
+      }, 10000);
+      document.body.appendChild(script);
+    }
+
+    function refreshFromServer(cb) {
+      if (syncEnabled()) loadFromServer(cb);
+      else if (cb) cb();
+    }
+
+    function initData() {
+      if (syncEnabled()) {
+        loadFromServer(function() { renderAdminTable(); buildCriteriaForm(); });
+      } else {
+        buildCriteriaForm(); renderAdminTable();
+      }
+    }
+
+    /* ═══ NAVIGATION ═══ */
+    function showPanel(panelId, btn) {
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+      document.getElementById(panelId).classList.add('active');
+      btn.classList.add('active');
+      if (panelId === 'adminPanel') {
+        if (adminAuthenticated) {
+          document.getElementById('adminGate').classList.add('hidden');
+          document.getElementById('adminContent').classList.remove('hidden');
+          refreshFromServer(function() { renderAdminTable(); });
+        } else {
+          document.getElementById('adminGate').classList.remove('hidden');
+          document.getElementById('adminContent').classList.add('hidden');
+        }
+      }
+    }
+
+    // Reusable server refresh — reloads data then runs callback
+    function refreshFromServer(cb) {
+      if (syncEnabled()) loadFromServer(cb);
+      else if (cb) cb();
+    }
+
+    function adminLogin() {
+      const pass = document.getElementById('adminPass').value;
+      const status = document.getElementById('adminGateStatus');
+      if (pass === ADMIN_PASS) {
+        adminAuthenticated = true;
+        document.getElementById('adminGate').classList.add('hidden');
+        document.getElementById('adminContent').classList.remove('hidden');
+        refreshFromServer(function() { renderAdminTable(); });
+      } else {
+        status.className = 'status-box error';
+        status.textContent = 'Contraseña incorrecta.';
+      }
+    }
+
+    function showSubPanel(panelId, btn) {
+      document.querySelectorAll('.sub-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(panelId).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    function switchAdminView(view, btn) {
+      adminView = view;
+      document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('adminQualityView').classList.toggle('hidden', view !== 'quality');
+      document.getElementById('adminEmpathyView').classList.toggle('hidden', view !== 'empathy');
+      document.getElementById('adminConsolidatedView').classList.toggle('hidden', view !== 'consolidated');
+      refreshFromServer(function() {
+        if (view === 'consolidated') renderConsolidatedView();
+        else renderAdminTable();
+      });
+    }
+
+    /* ═══ BUILD FORMS ═══ */
+    function buildCriteriaForm() {
+      const container = document.getElementById('criteriaContainer');
+      container.innerHTML = '';
+      const shortLabels = ['NC','DEF','INS','ACE','BUE','EXC'];
+      criteria.forEach((c, i) => {
+        const block = document.createElement('div');
+        block.className = 'criterion';
+        const btns = [0,1,2,3,4,5].map(n =>
+          `<div class="score-btn" data-index="${i}" data-value="${n}" onclick="selectScore(this)">
+            ${n}<span class="score-label">${shortLabels[n]}</span>
+          </div>`
+        ).join('');
+        block.innerHTML = `
+          <div class="criterion-number">Criterio ${i + 1}</div>
+          <div class="criterion-title">${c}</div>
+          <div class="criterion-fields">
+            <div class="field">
+              <label>Calificación (0-5)</label>
+              <input type="hidden" id="score_${i}" value="" />
+              <div class="score-btn-group">${btns}</div>
+            </div>
+            <div class="field">
+              <label for="comment_${i}">Observación</label>
+              <textarea id="comment_${i}" placeholder="Hallazgos o mejora requerida."></textarea>
+            </div>
+          </div>`;
+        container.appendChild(block);
+      });
+    }
+
+    function selectScore(el) {
+      const idx = el.dataset.index;
+      const val = el.dataset.value;
+      const inputId = idx.startsWith('emp_') ? `emp_score_${idx.slice(4)}` : `score_${idx}`;
+      document.getElementById(inputId).value = val;
+      el.closest('.score-btn-group').querySelectorAll('.score-btn').forEach(b => b.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+
+    function buildEmotionsGroup() {
+      const container = document.getElementById('emotionsGroup');
+      container.innerHTML = '';
+      EMOTIONS.forEach((em, i) => {
+        const chip = document.createElement('label');
+        chip.className = 'check-chip';
+        chip.innerHTML = `<input type="checkbox" value="${em}" /><span class="chip-dot"></span>${em}`;
+        chip.addEventListener('click', function() {
+          setTimeout(() => {
+            const cb = this.querySelector('input');
+            this.classList.toggle('selected', cb.checked);
+          }, 0);
+        });
+        container.appendChild(chip);
+      });
+    }
+
+    function buildEmpathyCriteria() {
+      const container = document.getElementById('empathyCriteria');
+      container.innerHTML = '';
+      const shortLabels = ['NC','DEF','INS','ACE','BUE','EXC'];
+      EMPATHY_CRITERIA.forEach((c, i) => {
+        const block = document.createElement('div');
+        block.style.cssText = 'padding:14px; background:var(--cream); border:1px solid var(--border-light); border-radius:10px;';
+        const btns = [0,1,2,3,4,5].map(n =>
+          `<div class="score-btn" data-index="emp_${i}" data-value="${n}" onclick="selectScore(this)">
+            ${n}<span class="score-label">${shortLabels[n]}</span>
+          </div>`
+        ).join('');
+        block.innerHTML = `
+          <div style="font-family:var(--font-display); font-size:18px; color:var(--navy); font-weight:600; margin-bottom:10px;">${c}</div>
+          <div class="field" style="margin-bottom:8px;">
+            <label>Calificación (0-5)</label>
+            <input type="hidden" id="emp_score_${i}" value="" />
+            <div class="score-btn-group">${btns}</div>
+          </div>
+          <textarea id="emp_comment_${i}" placeholder="Observación breve." style="min-height:50px; width:100%; font-family:var(--font-body); font-size:14px; padding:10px 14px; border:1px solid var(--border); border-radius:8px; background:var(--white); color:var(--text); resize:vertical;"></textarea>`;
+        container.appendChild(block);
+      });
+    }
+
+    /* ═══ LOGIN ═══ */
+    function startActivity() {
+      const name = document.getElementById('employeeName').value.trim();
+      const area = document.getElementById('employeeArea').value.trim();
+      const evaluated = document.getElementById('evaluatedName').value.trim();
+      const callId = document.getElementById('callId').value.trim();
+      const status = document.getElementById('loginStatus');
+
+      if (!name || !area || !evaluated || !callId) {
+        status.className = 'status-box error';
+        status.textContent = 'Completa todos los campos: evaluador, área, evaluado y referencia de llamada.';
+        return;
+      }
+
+      currentUser = { name, area, evaluated, callId };
+      status.className = 'status-box success';
+      status.textContent = 'Ingreso correcto. Selecciona una actividad para comenzar.';
+
+      document.getElementById('activityIntro').classList.remove('hidden');
+      document.getElementById('activityTabs').classList.remove('hidden');
+      document.getElementById('welcomeUser').textContent = `Evaluador: ${name}`;
+      document.getElementById('welcomeEvaluated').textContent = `Colaborador evaluado: ${evaluated} · Llamada: ${callId}`;
+      document.getElementById('feedbackTargetName').textContent = evaluated;
+
+      buildCriteriaForm();
+      buildEmotionsGroup();
+      buildEmpathyCriteria();
+    }
+
+    /* ═══ QUALITY FORM SUBMIT ═══ */
+    function calculateQualityScore(results) {
+      const total = results.reduce((acc, r) => acc + r.score, 0);
+      const max = results.length * 5;
+      return { total, max, percent: Math.round((total / max) * 100) };
+    }
+
+    document.getElementById('evaluationForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const status = document.getElementById('formStatus');
+      if (!currentUser) { status.className = 'status-box error'; status.textContent = 'Registra al colaborador primero.'; return; }
+
+      const results = [];
+      for (let i = 0; i < criteria.length; i++) {
+        const val = document.getElementById(`score_${i}`).value;
+        if (val === '') { status.className = 'status-box error'; status.textContent = 'Califica todos los criterios.'; return; }
+        const score = parseInt(val);
+        results.push({ criterion: criteria[i], score, label: SCALE_LABELS[score], observation: document.getElementById(`comment_${i}`).value.trim() });
+      }
+
+      const scoring = calculateQualityScore(results);
+
+      const payload = {
+        id: Date.now(), date: new Date().toLocaleString('es-MX'),
+        evaluator: currentUser.name, area: currentUser.area,
+        evaluated: currentUser.evaluated, callId: currentUser.callId,
+        callLink: document.getElementById('callLink').value.trim(),
+        results, generalComments: document.getElementById('generalComments').value.trim(),
+        totalScore: scoring.total, maxScore: scoring.max, completionPercent: scoring.percent
+      };
+      qualityStore.unshift(payload);
+      saveToServer('quality', payload, status);
+
+      status.className = 'status-box success';
+      status.textContent = syncEnabled() ? '✅ Evaluación guardada. Sincronizando con el servidor...' : '✅ Evaluación guardada correctamente.';
+      this.reset(); buildCriteriaForm();
+
+      // Reload from server after brief delay to confirm persistence
+      if (syncEnabled()) {
+        setTimeout(function() {
+          refreshFromServer(function() {
+            status.textContent = '✅ Evaluación guardada y sincronizada. Visible para todos en tiempo real.';
+          });
+        }, 1500);
+      }
+    });
+
+    /* ═══ EMPATHY FORM SUBMIT ═══ */
+    document.getElementById('empathyForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const status = document.getElementById('empathyStatus');
+      if (!currentUser) { status.className = 'status-box error'; status.textContent = 'Registra al colaborador primero.'; return; }
+
+      const emotions = [...document.querySelectorAll('#emotionsGroup input:checked')].map(cb => cb.value);
+      const empResults = [];
+      for (let i = 0; i < EMPATHY_CRITERIA.length; i++) {
+        const val = document.getElementById(`emp_score_${i}`).value;
+        if (val === '') { status.className = 'status-box error'; status.textContent = 'Califica todos los criterios de empatía.'; return; }
+        const score = parseInt(val);
+        empResults.push({ criterion: EMPATHY_CRITERIA[i], score, label: SCALE_LABELS[score], observation: document.getElementById(`emp_comment_${i}`).value.trim() });
+      }
+
+      const empScoring = calculateQualityScore(empResults);
+
+      const empPayload = {
+        id: Date.now(), date: new Date().toLocaleString('es-MX'),
+        evaluator: currentUser.name, area: currentUser.area,
+        evaluated: currentUser.evaluated, callId: currentUser.callId,
+        emotions, emotionsDetail: document.getElementById('emotionsDetail').value.trim(),
+        empathyResults: empResults,
+        empathyTotal: empScoring.total, empathyMax: empScoring.max, empathyPercent: empScoring.percent,
+        feedbackStrengths: document.getElementById('feedbackStrengths').value.trim(),
+        feedbackImprove: document.getElementById('feedbackImprove').value.trim(),
+        feedbackRecommendations: document.getElementById('feedbackRecommendations').value.trim()
+      };
+      empathyStore.unshift(empPayload);
+      saveToServer('empathy', empPayload, status);
+
+      status.className = 'status-box success';
+      status.textContent = syncEnabled() ? '✅ Evaluación guardada. Sincronizando con el servidor...' : '✅ Evaluación de empatía guardada correctamente.';
+      this.reset(); buildEmotionsGroup(); buildEmpathyCriteria();
+      document.querySelectorAll('.check-chip').forEach(c => c.classList.remove('selected'));
+
+      if (syncEnabled()) {
+        setTimeout(function() {
+          refreshFromServer(function() {
+            status.textContent = '✅ Evaluación guardada y sincronizada. Visible para todos en tiempo real.';
+          });
+        }, 1500);
+      }
+    });
+
+    /* ═══ FEEDBACK PREVIEW ═══ */
+    function previewFeedback() {
+      if (!currentUser) return;
+      const preview = document.getElementById('feedbackPreview');
+      const strengths = document.getElementById('feedbackStrengths').value.trim();
+      const improve = document.getElementById('feedbackImprove').value.trim();
+      const recs = document.getElementById('feedbackRecommendations').value.trim();
+      const emotions = [...document.querySelectorAll('#emotionsGroup input:checked')].map(cb => cb.value);
+
+      if (!strengths && !improve && !recs) {
+        preview.classList.add('hidden');
+        return;
+      }
+
+      document.getElementById('previewName').textContent = currentUser.evaluated;
+      let html = '';
+      if (emotions.length) html += `<div class="feedback-item"><div class="feedback-item-label">Emociones detectadas en el cliente</div><div class="feedback-item-value">${emotions.join(', ')}</div></div>`;
+      if (strengths) html += `<div class="feedback-item"><div class="feedback-item-label">Fortalezas observadas</div><div class="feedback-item-value">${esc(strengths)}</div></div>`;
+      if (improve) html += `<div class="feedback-item"><div class="feedback-item-label">Áreas de mejora</div><div class="feedback-item-value">${esc(improve)}</div></div>`;
+      if (recs) html += `<div class="feedback-item"><div class="feedback-item-label">Recomendaciones</div><div class="feedback-item-value">${esc(recs)}</div></div>`;
+
+      document.getElementById('previewContent').innerHTML = html;
+      preview.classList.remove('hidden');
+      preview.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    /* ═══ ADMIN ═══ */
+    function renderAdminTable() {
+      const fName = document.getElementById('filterName').value.trim().toLowerCase();
+      const fEval = document.getElementById('filterEvaluated').value.trim().toLowerCase();
+      updateMetrics();
+
+      if (adminView === 'quality') renderQualityTable(fName, fEval);
+      else renderEmpathyTable(fName, fEval);
+    }
+
+    function renderQualityTable(fName, fEval) {
+      const body = document.getElementById('adminQualityBody');
+      const filtered = qualityStore.filter(i =>
+        (!fName || i.evaluator.toLowerCase().includes(fName)) &&
+        (!fEval || i.evaluated.toLowerCase().includes(fEval))
+      );
+      if (!filtered.length) { body.innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:24px;">No se encontraron registros.</td></tr>'; return; }
+
+      body.innerHTML = filtered.map(item => {
+        const detail = buildInlineSemaphore(item.results);
+        return `<tr>
+          <td style="white-space:nowrap;">${item.date}</td>
+          <td><strong style="color:var(--navy);">${esc(item.evaluator)}</strong></td>
+          <td>${esc(item.evaluated)}</td>
+          <td>${esc(item.callId)}</td>
+          <td><strong style="color:var(--navy);font-size:15px;">${item.completionPercent}%</strong><div style="font-size:11px;color:var(--text-muted);margin-top:2px;">${item.totalScore}/${item.maxScore} pts</div></td>
+          <td style="padding:8px;">${detail}</td>
+          <td style="font-size:12px;">${item.generalComments ? esc(item.generalComments) : '<span style="color:var(--text-muted);">—</span>'}</td>
+          <td><button class="btn-gold" style="padding:8px 14px; font-size:11px; white-space:nowrap;" onclick="openFeedbackModal('quality',${item.id})">📄 Enviar Feedback</button></td>
+        </tr>`;
+      }).join('');
+    }
+
+    function buildInlineSemaphore(results) {
+      const levels = [
+        { s: 5, label: 'Excelente',    icon: '✅', bg: '#e8f5ee', border: '#b8dcc6', color: '#14532d' },
+        { s: 4, label: 'Bueno',        icon: '👍', bg: '#eef7f2', border: '#c2e0cc', color: '#1a5c38' },
+        { s: 3, label: 'Aceptable',    icon: '⚠️', bg: '#fef8e7', border: '#ecdba3', color: '#6b4f00' },
+        { s: 2, label: 'Insuficiente', icon: '⚡', bg: '#fef0e0', border: '#e8c9a0', color: '#7a3f00' },
+        { s: 1, label: 'Deficiente',   icon: '🔻', bg: '#fde8e8', border: '#e8b4b4', color: '#7f1d1d' },
+        { s: 0, label: 'No cumple',    icon: '❌', bg: '#fbe0e0', border: '#dba0a0', color: '#5c1414' },
+      ];
+      let html = '<div style="border-radius:8px; overflow:hidden; border:1px solid var(--border-light); font-size:12px;">';
+      levels.forEach(lv => {
+        const items = results.filter(r => r.score === lv.s);
+        if (!items.length) return;
+        html += `<div style="background:${lv.bg}; color:${lv.color}; padding:6px 10px; font-family:var(--font-label); font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid ${lv.border};">
+          ${lv.icon} ${lv.label} (${lv.s}/5) · ${items.length}
+        </div>`;
+        items.forEach(r => {
+          html += `<div style="padding:5px 10px 5px 28px; background:${lv.bg}88; border-bottom:1px solid ${lv.border}40; color:var(--text-mid);">
+            ${r.criterion}${r.observation ? `<div style="color:var(--text-muted); font-size:11px; margin-top:1px;">↳ ${esc(r.observation)}</div>` : ''}
+          </div>`;
+        });
+      });
+      html += '</div>';
+      return html;
+    }
+
+    function renderEmpathyTable(fName, fEval) {
+      const body = document.getElementById('adminEmpathyBody');
+      const filtered = empathyStore.filter(i =>
+        (!fName || i.evaluator.toLowerCase().includes(fName)) &&
+        (!fEval || i.evaluated.toLowerCase().includes(fEval))
+      );
+      if (!filtered.length) { body.innerHTML = '<tr><td colspan="9" style="text-align:center; color:var(--text-muted); padding:24px;">No se encontraron registros.</td></tr>'; return; }
+
+      body.innerHTML = filtered.map(item => {
+        const empDetail = buildInlineSemaphore(item.empathyResults);
+        return `<tr>
+          <td style="white-space:nowrap;">${item.date}</td>
+          <td><strong style="color:var(--navy);">${esc(item.evaluator)}</strong></td>
+          <td>${esc(item.evaluated)}</td>
+          <td>${esc(item.callId)}</td>
+          <td>${item.emotions.map(e => `<span class="badge emp" style="margin:2px;">${e}</span>`).join(' ') || '—'}</td>
+          <td style="padding:8px;">${empDetail}<div style="margin-top:6px;"><strong style="font-size:13px; color:var(--navy);">${item.empathyPercent}%</strong> <span style="font-size:11px;color:var(--text-muted);">${item.empathyTotal}/${item.empathyMax} pts</span></div></td>
+          <td style="font-size:12px;">${item.feedbackStrengths ? esc(item.feedbackStrengths) : '—'}</td>
+          <td style="font-size:12px;">${item.feedbackImprove ? esc(item.feedbackImprove) : '—'}</td>
+          <td><button class="btn-gold" style="padding:8px 14px; font-size:11px; white-space:nowrap;" onclick="openFeedbackModal('empathy',${item.id})">📄 Enviar Feedback</button></td>
+        </tr>`;
+      }).join('');
+    }
+
+    function updateMetrics() {
+      document.getElementById('metricQuality').textContent = qualityStore.length;
+      document.getElementById('metricEmpathy').textContent = empathyStore.length;
+      const avg = qualityStore.length
+        ? Math.round(qualityStore.reduce((a, i) => a + i.completionPercent, 0) / qualityStore.length)
+        : 0;
+      document.getElementById('metricAvg').textContent = `${avg}%`;
+      const lastQ = qualityStore.length ? qualityStore[0].date : null;
+      const lastE = empathyStore.length ? empathyStore[0].date : null;
+      document.getElementById('metricLast').textContent = lastQ || lastE || '—';
+    }
+
+    /* ═══ CSV EXPORT ═══ */
+    function exportCSV() {
+      if (adminView === 'quality') exportQualityCSV();
+      else exportEmpathyCSV();
+    }
+
+    function exportQualityCSV() {
+      if (!qualityStore.length) { alert('No hay datos de calidad.'); return; }
+      const rows = [['Fecha','Evaluador','Área','Evaluado','Llamada','Link','Puntos','Máximo','%','Comentarios',
+        ...criteria.flatMap(c => [`${c} - Puntaje`, `${c} - Nivel`, `${c} - Obs`])]];
+      qualityStore.forEach(item => {
+        const row = [item.date, item.evaluator, item.area, item.evaluated, item.callId, item.callLink||'', item.totalScore, item.maxScore, item.completionPercent, item.generalComments||''];
+        criteria.forEach(c => { const f = item.results.find(r => r.criterion === c) || {}; row.push(f.score ?? '', f.label||'', f.observation||''); });
+        rows.push(row);
+      });
+      downloadCSV(rows, 'evaluacion_calidad.csv');
+    }
+
+    function exportEmpathyCSV() {
+      if (!empathyStore.length) { alert('No hay datos de empatía.'); return; }
+      const rows = [['Fecha','Evaluador','Evaluado','Llamada','Emociones','Detalle Emociones',
+        ...EMPATHY_CRITERIA.flatMap(c => [`${c} - Puntaje`, `${c} - Nivel`, `${c} - Obs`]),
+        'Puntos Empatía','Máximo','% Empatía','Fortalezas','Mejora','Recomendaciones']];
+      empathyStore.forEach(item => {
+        const row = [item.date, item.evaluator, item.evaluated, item.callId, item.emotions.join('; '), item.emotionsDetail||''];
+        EMPATHY_CRITERIA.forEach((c,i) => { const r = item.empathyResults[i] || {}; row.push(r.score ?? '', r.label||'', r.observation||''); });
+        row.push(item.empathyTotal, item.empathyMax, item.empathyPercent, item.feedbackStrengths||'', item.feedbackImprove||'', item.feedbackRecommendations||'');
+        rows.push(row);
+      });
+      downloadCSV(rows, 'evaluacion_empatia.csv');
+    }
+
+    function downloadCSV(rows, filename) {
+      const csv = rows.map(r => r.map(cell => `"${String(cell).replace(/"/g,'""')}"`).join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function clearAllData() {
+      if (!confirm('¿Eliminar todos los registros de ambas actividades?')) return;
+      qualityStore = []; empathyStore = [];
+      renderAdminTable();
+    }
+
+    function reloadData() {
+      if (!syncEnabled()) { alert('No hay conexión a Apps Script configurada. Los datos solo existen en memoria.'); return; }
+      loadFromServer(function() {
+        renderAdminTable();
+        alert('Datos recargados del servidor.');
+      });
+    }
+
+    /* ═══ MIS RESULTADOS ═══ */
+    function searchMyResults() {
+      const name = document.getElementById('myResultsName').value.trim();
+      const status = document.getElementById('myResultsStatus');
+      const content = document.getElementById('myResultsContent');
+
+      if (!name) {
+        status.className = 'status-box error';
+        status.textContent = 'Ingresa tu nombre completo para buscar.';
+        content.classList.add('hidden');
+        return;
+      }
+
+      status.className = 'status-box';
+      status.style.display = 'block';
+      status.style.background = 'var(--gold-glow)';
+      status.style.color = 'var(--navy)';
+      status.style.border = '1px solid var(--gold)';
+      status.textContent = syncEnabled() ? 'Cargando datos del servidor...' : 'Buscando...';
+
+      const doSearch = function() {
+        const qItems = qualityStore.filter(i => i.evaluated.toLowerCase() === name.toLowerCase());
+        const eItems = empathyStore.filter(i => i.evaluated.toLowerCase() === name.toLowerCase());
+
+        if (!qItems.length && !eItems.length) {
+          status.className = 'status-box error';
+          status.textContent = 'No se encontraron evaluaciones para ese nombre. Verifica que esté escrito exactamente como fue registrado.';
+          content.classList.add('hidden');
+          return;
+        }
+
+        status.className = 'status-box success';
+        status.textContent = `Se encontraron ${qItems.length + eItems.length} evaluación(es).`;
+        content.classList.remove('hidden');
+        renderMyResults(name, qItems, eItems);
+      };
+
+      if (syncEnabled()) loadFromServer(doSearch);
+      else doSearch();
+    }
+
+    function renderMyResults(name, qItems, eItems) {
+
+      const calls = [...new Set([...qItems.map(q=>q.callId), ...eItems.map(e=>e.callId)])];
+      const total = qItems.length + eItems.length;
+      const avgQ = qItems.length ? Math.round(qItems.reduce((a,i) => a + i.completionPercent, 0) / qItems.length) : null;
+      const avgE = eItems.length ? Math.round(eItems.reduce((a,i) => a + i.empathyPercent, 0) / eItems.length) : null;
+
+      // Header
+      const cQ = avgQ !== null ? (avgQ >= 80 ? 'var(--success)' : avgQ >= 60 ? 'var(--warning)' : 'var(--danger)') : '';
+      const cE = avgE !== null ? (avgE >= 80 ? 'var(--success)' : avgE >= 60 ? 'var(--warning)' : 'var(--danger)') : '';
+
+      document.getElementById('myResultsHeader').innerHTML = `
+        <div style="display:flex; align-items:center; gap:16px; margin-bottom:18px;">
+          <div style="width:52px; height:52px; border-radius:50%; background:var(--navy); color:var(--gold); display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-size:24px; font-weight:700;">${name.charAt(0).toUpperCase()}</div>
+          <div>
+            <div style="font-family:var(--font-display); font-size:24px; font-weight:600; color:var(--navy);">${esc(name)}</div>
+            <div style="font-size:13px; color:var(--text-muted);">${total} evaluación${total>1?'es':''} · ${calls.length} llamada${calls.length>1?'s':''} evaluada${calls.length>1?'s':''}</div>
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:${avgQ!==null&&avgE!==null?'1fr 1fr':'1fr'}; gap:14px;">
+          ${avgQ!==null?`<div style="background:var(--cream); border:1px solid var(--border-light); border-radius:var(--radius); padding:16px; text-align:center;">
+            <div style="font-family:var(--font-label); font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.8px; color:var(--text-muted); margin-bottom:6px;">Calidad Promedio</div>
+            <div style="font-family:var(--font-display); font-size:38px; font-weight:700; color:${cQ};">${avgQ}%</div>
+            <div style="font-size:12px; color:var(--text-muted);">${qItems.length} evaluación${qItems.length>1?'es':''}</div>
+            <div style="height:6px; border-radius:3px; background:var(--border); margin-top:8px; overflow:hidden;"><div style="height:100%; border-radius:3px; background:${cQ}; width:${avgQ}%;"></div></div>
+          </div>`:''}
+          ${avgE!==null?`<div style="background:var(--cream); border:1px solid var(--border-light); border-radius:var(--radius); padding:16px; text-align:center;">
+            <div style="font-family:var(--font-label); font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.8px; color:var(--text-muted); margin-bottom:6px;">Empatía Promedio</div>
+            <div style="font-family:var(--font-display); font-size:38px; font-weight:700; color:${cE};">${avgE}%</div>
+            <div style="font-size:12px; color:var(--text-muted);">${eItems.length} evaluación${eItems.length>1?'es':''}</div>
+            <div style="height:6px; border-radius:3px; background:var(--border); margin-top:8px; overflow:hidden;"><div style="height:100%; border-radius:3px; background:${cE}; width:${avgE}%;"></div></div>
+          </div>`:''}
+        </div>`;
+
+      // Quality detail
+      const qSection = document.getElementById('myQualityResults');
+      if (qItems.length) {
+        qSection.classList.remove('hidden');
+        const avgResults = criteria.map(c => {
+          const scores = qItems.map(q => q.results.find(r => r.criterion === c)).filter(Boolean).map(r => r.score);
+          const avg = scores.length ? scores.reduce((a,s)=>a+s,0)/scores.length : 0;
+          const rounded = Math.round(avg);
+          return { criterion: c, score: rounded, label: SCALE_LABELS[rounded] };
+        });
+        document.getElementById('myQualitySemaphore').innerHTML = buildMyResultsSemaphore(avgResults);
+
+        // Per-call breakdown
+        const comments = qItems.filter(q => q.generalComments);
+        let commHtml = '';
+        if (qItems.length > 1) {
+          commHtml += `<div style="font-family:var(--font-label); font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.6px; color:var(--gold); margin-bottom:10px;">Historial por llamada</div>`;
+          qItems.forEach(q => {
+            const c = q.completionPercent >= 80 ? 'var(--success)' : q.completionPercent >= 60 ? 'var(--warning)' : 'var(--danger)';
+            commHtml += `<div style="display:flex; align-items:center; gap:10px; padding:8px 12px; background:var(--white); border:1px solid var(--border-light); border-radius:8px; margin-bottom:6px;">
+              <strong style="font-family:var(--font-display); font-size:18px; color:${c};">${q.completionPercent}%</strong>
+              <div style="flex:1; font-size:12px; color:var(--text-mid);">${esc(q.callId)}</div>
+              <div style="font-size:11px; color:var(--text-muted);">${q.date}</div>
+            </div>`;
+          });
+        }
+        if (comments.length) {
+          commHtml += `<div style="font-family:var(--font-label); font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.6px; color:var(--gold); margin:14px 0 8px;">Observaciones generales</div>`;
+          comments.forEach(q => {
+            commHtml += `<div style="padding:10px 14px; background:var(--white); border:1px solid var(--border-light); border-radius:8px; margin-bottom:6px; font-size:13px; color:var(--text-mid); border-left:3px solid var(--gold);">
+              <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">${esc(q.callId)} · ${q.date}</div>
+              ${esc(q.generalComments)}
+            </div>`;
+          });
+        }
+        document.getElementById('myQualityComments').innerHTML = commHtml;
+      } else {
+        qSection.classList.add('hidden');
+      }
+
+      // Empathy detail
+      const eSection = document.getElementById('myEmpathyResults');
+      if (eItems.length) {
+        eSection.classList.remove('hidden');
+        const avgEmp = EMPATHY_CRITERIA.map(c => {
+          const scores = eItems.map(e => e.empathyResults.find(r => r.criterion === c)).filter(Boolean).map(r => r.score);
+          const avg = scores.length ? scores.reduce((a,s)=>a+s,0)/scores.length : 0;
+          const rounded = Math.round(avg);
+          return { criterion: c, score: rounded, label: SCALE_LABELS[rounded] };
+        });
+        document.getElementById('myEmpathySemaphore').innerHTML = buildMyResultsSemaphore(avgEmp);
+
+        // Feedback cards
+        const allStr = eItems.map(e=>e.feedbackStrengths).filter(Boolean);
+        const allImp = eItems.map(e=>e.feedbackImprove).filter(Boolean);
+        const allRec = eItems.map(e=>e.feedbackRecommendations).filter(Boolean);
+
+        let fbHtml = '<div style="display:grid; grid-template-columns:1fr; gap:12px;">';
+        if (allStr.length) {
+          fbHtml += `<div style="background:var(--success-bg); border:1px solid var(--success-border); border-radius:var(--radius); padding:16px;">
+            <div style="font-family:var(--font-label); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; color:var(--success); margin-bottom:8px;">🌟 Fortalezas observadas</div>
+            ${allStr.map(s => `<div style="font-size:13px; color:var(--text-mid); margin-bottom:6px; padding-left:10px; border-left:3px solid var(--success-border);">${esc(s)}</div>`).join('')}
+          </div>`;
+        }
+        if (allImp.length) {
+          fbHtml += `<div style="background:var(--warning-bg); border:1px solid var(--warning-border); border-radius:var(--radius); padding:16px;">
+            <div style="font-family:var(--font-label); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; color:var(--warning); margin-bottom:8px;">📈 Áreas de mejora</div>
+            ${allImp.map(s => `<div style="font-size:13px; color:var(--text-mid); margin-bottom:6px; padding-left:10px; border-left:3px solid var(--warning-border);">${esc(s)}</div>`).join('')}
+          </div>`;
+        }
+        if (allRec.length) {
+          fbHtml += `<div style="background:var(--gold-glow); border:1px solid var(--gold); border-radius:var(--radius); padding:16px;">
+            <div style="font-family:var(--font-label); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; color:var(--navy); margin-bottom:8px;">💡 Recomendaciones</div>
+            ${allRec.map(s => `<div style="font-size:13px; color:var(--text-mid); margin-bottom:6px; padding-left:10px; border-left:3px solid var(--gold);">${esc(s)}</div>`).join('')}
+          </div>`;
+        }
+        fbHtml += '</div>';
+        document.getElementById('myEmpathyFeedback').innerHTML = fbHtml;
+      } else {
+        eSection.classList.add('hidden');
+      }
+    }
+
+    function buildMyResultsSemaphore(results) {
+      const levels = [
+        { s: 5, label: 'Excelente',    icon: '✅', bg: '#e8f5ee', border: '#b8dcc6', color: '#14532d' },
+        { s: 4, label: 'Bueno',        icon: '👍', bg: '#eef7f2', border: '#c2e0cc', color: '#1a5c38' },
+        { s: 3, label: 'Aceptable',    icon: '⚠️', bg: '#fef8e7', border: '#ecdba3', color: '#6b4f00' },
+        { s: 2, label: 'Insuficiente', icon: '⚡', bg: '#fef0e0', border: '#e8c9a0', color: '#7a3f00' },
+        { s: 1, label: 'Deficiente',   icon: '🔻', bg: '#fde8e8', border: '#e8b4b4', color: '#7f1d1d' },
+        { s: 0, label: 'No cumple',    icon: '❌', bg: '#fbe0e0', border: '#dba0a0', color: '#5c1414' },
+      ];
+      let html = '';
+      levels.forEach(lv => {
+        const items = results.filter(r => r.score === lv.s);
+        if (!items.length) return;
+        html += `<div style="margin-bottom:10px; border-radius:10px; overflow:hidden; border:1px solid ${lv.border};">
+          <div style="background:${lv.bg}; color:${lv.color}; padding:8px 14px; font-family:var(--font-label); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; display:flex; justify-content:space-between;">
+            <span>${lv.icon} ${lv.label} (${lv.s}/5)</span>
+            <span style="opacity:0.7;">${items.length} criterio${items.length>1?'s':''}</span>
+          </div>`;
+        items.forEach(r => {
+          html += `<div style="padding:7px 14px 7px 32px; background:${lv.bg}66; border-top:1px solid ${lv.border}40; font-size:13px; color:var(--text-mid);">${r.criterion}</div>`;
+        });
+        html += `</div>`;
+      });
+      return html;
+    }
+
+    /* ═══ CONSOLIDATED VIEW ═══ */
+    function renderConsolidatedView() {
+      const container = document.getElementById('consolidatedCards');
+      const people = {};
+      qualityStore.forEach(q => {
+        const key = q.evaluated.toLowerCase();
+        if (!people[key]) people[key] = { name: q.evaluated, quality: [], empathy: [] };
+        people[key].quality.push(q);
+      });
+      empathyStore.forEach(e => {
+        const key = e.evaluated.toLowerCase();
+        if (!people[key]) people[key] = { name: e.evaluated, quality: [], empathy: [] };
+        people[key].empathy.push(e);
+      });
+      const entries = Object.values(people);
+      if (!entries.length) { container.innerHTML = '<div style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:30px;">No hay evaluaciones registradas.</div>'; return; }
+
+      container.innerHTML = entries.map(p => {
+        const qC = p.quality.length, eC = p.empathy.length, total = qC + eC;
+        const avgQ = qC ? Math.round(p.quality.reduce((a,i) => a + i.completionPercent, 0) / qC) : null;
+        const avgE = eC ? Math.round(p.empathy.reduce((a,i) => a + i.empathyPercent, 0) / eC) : null;
+        const calls = [...new Set([...p.quality.map(q=>q.callId), ...p.empathy.map(e=>e.callId)])];
+        const cQ = avgQ >= 80 ? 'var(--success)' : avgQ >= 60 ? 'var(--warning)' : 'var(--danger)';
+        const cE = avgE >= 80 ? 'var(--success)' : avgE >= 60 ? 'var(--warning)' : 'var(--danger)';
+        return `<div style="background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow-sm);">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+            <div style="width:42px; height:42px; border-radius:50%; background:var(--navy); color:var(--gold); display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-size:20px; font-weight:700;">${p.name.charAt(0).toUpperCase()}</div>
+            <div>
+              <div style="font-family:var(--font-display); font-size:19px; font-weight:600; color:var(--navy);">${esc(p.name)}</div>
+              <div style="font-size:12px; color:var(--text-muted);">${total} evaluación${total>1?'es':''} · ${calls.length} llamada${calls.length>1?'s':''}</div>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;">
+            ${avgQ!==null?`<div style="background:var(--cream); border:1px solid var(--border-light); border-radius:8px; padding:10px; text-align:center;">
+              <div style="font-family:var(--font-label); font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.6px; color:var(--text-muted); margin-bottom:4px;">Calidad</div>
+              <div style="font-family:var(--font-display); font-size:26px; font-weight:700; color:${cQ};">${avgQ}%</div>
+              <div style="font-size:11px; color:var(--text-muted);">${qC} eval.</div>
+            </div>`:''}
+            ${avgE!==null?`<div style="background:var(--cream); border:1px solid var(--border-light); border-radius:8px; padding:10px; text-align:center;">
+              <div style="font-family:var(--font-label); font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.6px; color:var(--text-muted); margin-bottom:4px;">Empatía</div>
+              <div style="font-family:var(--font-display); font-size:26px; font-weight:700; color:${cE};">${avgE}%</div>
+              <div style="font-size:11px; color:var(--text-muted);">${eC} eval.</div>
+            </div>`:''}
+          </div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="btn-gold" style="padding:8px 14px; font-size:11px; flex:1;" onclick="openConsolidatedModal('${p.name.replace(/'/g,"\\'")}')">📊 Feedback Consolidado</button>
+            ${qC?`<button class="btn-secondary" style="padding:8px 12px; font-size:11px;" onclick="openFeedbackModal('quality',${p.quality[0].id})">📋 Último individual</button>`:''}
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function openConsolidatedModal(name) {
+      const qItems = qualityStore.filter(i => i.evaluated.toLowerCase() === name.toLowerCase());
+      const eItems = empathyStore.filter(i => i.evaluated.toLowerCase() === name.toLowerCase());
+      const totalEvals = qItems.length + eItems.length;
+      const calls = [...new Set([...qItems.map(q=>q.callId), ...eItems.map(e=>e.callId)])];
+
+      currentModalData = { type: 'consolidated', name, qItems, eItems };
+      document.getElementById('modalTitle').textContent = `Feedback Consolidado — ${name}`;
+
+      let html = `<div class="modal-meta">
+        <div class="modal-meta-item"><div class="mm-label">Colaborador</div><div class="mm-value">${esc(name)}</div></div>
+        <div class="modal-meta-item"><div class="mm-label">Evaluaciones</div><div class="mm-value">${totalEvals} en total</div></div>
+        <div class="modal-meta-item"><div class="mm-label">Llamadas evaluadas</div><div class="mm-value">${esc(calls.join(', '))}</div></div>
+        <div class="modal-meta-item"><div class="mm-label">Tipo</div><div class="mm-value">Consolidado</div></div>
+      </div>`;
+
+      if (qItems.length) {
+        const avgQ = Math.round(qItems.reduce((a,i) => a + i.completionPercent, 0) / qItems.length);
+        const cQ = avgQ >= 80 ? 'var(--success)' : avgQ >= 60 ? 'var(--warning)' : 'var(--danger)';
+        html += `<div class="modal-score-bar">
+          <div class="modal-score-num" style="color:${cQ};">${avgQ}%</div>
+          <div class="modal-score-detail">
+            <div class="modal-score-pct">Calidad Promedio</div>
+            <div class="modal-score-pts">Basado en ${qItems.length} evaluación${qItems.length>1?'es':''}</div>
+            <div class="modal-score-fill"><div class="modal-score-fill-inner" style="width:${avgQ}%; background:${cQ};"></div></div>
+          </div>
+        </div>`;
+        const avgResults = criteria.map(c => {
+          const scores = qItems.map(q => q.results.find(r => r.criterion === c)).filter(Boolean).map(r => r.score);
+          const avg = scores.length ? scores.reduce((a,s) => a+s, 0) / scores.length : 0;
+          const rounded = Math.round(avg);
+          return { criterion: c, score: rounded, label: SCALE_LABELS[rounded] };
+        });
+        html += buildSemaphoreView(avgResults);
+      }
+
+      if (eItems.length) {
+        const avgE = Math.round(eItems.reduce((a,i) => a + i.empathyPercent, 0) / eItems.length);
+        const cE = avgE >= 80 ? 'var(--success)' : avgE >= 60 ? 'var(--warning)' : 'var(--danger)';
+        html += `<div class="modal-score-bar" style="margin-top:16px;">
+          <div class="modal-score-num" style="color:${cE};">${avgE}%</div>
+          <div class="modal-score-detail">
+            <div class="modal-score-pct">Empatía Promedio</div>
+            <div class="modal-score-pts">Basado en ${eItems.length} evaluación${eItems.length>1?'es':''}</div>
+            <div class="modal-score-fill"><div class="modal-score-fill-inner" style="width:${avgE}%; background:${cE};"></div></div>
+          </div>
+        </div>`;
+        const avgEmp = EMPATHY_CRITERIA.map(c => {
+          const scores = eItems.map(e => e.empathyResults.find(r => r.criterion === c)).filter(Boolean).map(r => r.score);
+          const avg = scores.length ? scores.reduce((a,s) => a+s, 0) / scores.length : 0;
+          const rounded = Math.round(avg);
+          return { criterion: c, score: rounded, label: SCALE_LABELS[rounded] };
+        });
+        html += buildSemaphoreView(avgEmp);
+
+        const allStr = eItems.map(e=>e.feedbackStrengths).filter(Boolean);
+        const allImp = eItems.map(e=>e.feedbackImprove).filter(Boolean);
+        const allRec = eItems.map(e=>e.feedbackRecommendations).filter(Boolean);
+        if (allStr.length) html += `<div class="modal-section"><div class="modal-section-title">🌟 Fortalezas Observadas</div><div class="modal-section-content">${allStr.map(s=>`<div style="margin-bottom:6px; padding-left:12px; border-left:3px solid var(--success-border);">${esc(s)}</div>`).join('')}</div></div>`;
+        if (allImp.length) html += `<div class="modal-section"><div class="modal-section-title">📈 Áreas de Mejora</div><div class="modal-section-content">${allImp.map(s=>`<div style="margin-bottom:6px; padding-left:12px; border-left:3px solid var(--warning-border);">${esc(s)}</div>`).join('')}</div></div>`;
+        if (allRec.length) html += `<div class="modal-section"><div class="modal-section-title">💡 Recomendaciones</div><div class="modal-section-content">${allRec.map(s=>`<div style="margin-bottom:6px; padding-left:12px; border-left:3px solid var(--gold);">${esc(s)}</div>`).join('')}</div></div>`;
+      }
+
+      document.getElementById('modalBody').innerHTML = html;
+      document.getElementById('feedbackModal').classList.add('open');
+    }
+
+    /* ═══ RESETS ═══ */
+    function resetQualityForm() {
+      document.getElementById('evaluationForm').reset();
+      buildCriteriaForm();
+      document.getElementById('formStatus').className = 'status-box';
+    }
+
+    function resetEmpathyForm() {
+      document.getElementById('empathyForm').reset();
+      buildEmotionsGroup(); buildEmpathyCriteria();
+      document.querySelectorAll('.check-chip').forEach(c => c.classList.remove('selected'));
+      document.getElementById('empathyStatus').className = 'status-box';
+      document.getElementById('feedbackPreview').classList.add('hidden');
+    }
+
+    /* ═══ FEEDBACK MODAL ═══ */
+    let currentModalData = null;
+
+    const SEMAPHORE_LEVELS = [
+      { scores: [5], label: 'Excelente', icon: '✅', dot: '#1b7a42', bg: '#e8f5ee', text: '#14532d' },
+      { scores: [4], label: 'Bueno', icon: '👍', dot: '#3a8a5c', bg: '#eef7f2', text: '#1a5c38' },
+      { scores: [3], label: 'Aceptable', icon: '⚠️', dot: '#b8860b', bg: '#fef8e7', text: '#6b4f00' },
+      { scores: [2], label: 'Insuficiente', icon: '⚡', dot: '#c46a1a', bg: '#fef0e0', text: '#7a3f00' },
+      { scores: [1], label: 'Deficiente', icon: '🔻', dot: '#b83232', bg: '#fde8e8', text: '#7f1d1d' },
+      { scores: [0], label: 'No cumple', icon: '❌', dot: '#7a2020', bg: '#fbe0e0', text: '#5c1414' },
+    ];
+
+    function buildSemaphoreView(results) {
+      let html = `<div class="modal-section"><div class="modal-section-title">Detalle por Criterio</div>`;
+      SEMAPHORE_LEVELS.forEach(level => {
+        const items = results.filter(r => level.scores.includes(r.score));
+        if (!items.length) return;
+        html += `<div class="semaphore-group">
+          <div class="semaphore-header" style="background:${level.bg}; color:${level.text};">
+            <span class="sem-dot" style="background:${level.dot};"></span>
+            ${level.label} (${level.scores[0]}/5)
+            <span class="sem-count">${items.length} criterio${items.length > 1 ? 's' : ''}</span>
+          </div>`;
+        items.forEach(r => {
+          html += `<div class="semaphore-row">
+            <span class="sem-check">${level.icon}</span>
+            <span class="sem-name">${r.criterion}</span>
+          </div>`;
+          if (r.observation) html += `<div class="semaphore-obs">↳ ${esc(r.observation)}</div>`;
+        });
+        html += `</div>`;
+      });
+      html += `</div>`;
+      return html;
+    }
+
+    function openFeedbackModal(type, id) {
+      const item = type === 'quality'
+        ? qualityStore.find(i => i.id === id)
+        : empathyStore.find(i => i.id === id);
+      if (!item) return;
+      currentModalData = { type, item };
+
+      document.getElementById('modalTitle').textContent = `Feedback para ${item.evaluated}`;
+
+      let html = '';
+
+      // Meta info (evaluator hidden - feedback is anonymous)
+      html += `<div class="modal-meta">
+        <div class="modal-meta-item"><div class="mm-label">Colaborador evaluado</div><div class="mm-value">${esc(item.evaluated)}</div></div>
+        <div class="modal-meta-item"><div class="mm-label">Llamada / Referencia</div><div class="mm-value">${esc(item.callId)}</div></div>
+        <div class="modal-meta-item"><div class="mm-label">Fecha de evaluación</div><div class="mm-value">${item.date}</div></div>
+        <div class="modal-meta-item"><div class="mm-label">Tipo</div><div class="mm-value">Evaluación individual</div></div>
+      </div>`;
+
+      if (type === 'quality') {
+        // Score bar
+        const pct = item.completionPercent;
+        const color = pct >= 80 ? 'var(--success)' : pct >= 60 ? 'var(--warning)' : 'var(--danger)';
+        html += `<div class="modal-score-bar">
+          <div class="modal-score-num" style="color:${color};">${pct}%</div>
+          <div class="modal-score-detail">
+            <div class="modal-score-pct">Calificación General</div>
+            <div class="modal-score-pts">${item.totalScore} de ${item.maxScore} puntos posibles</div>
+            <div class="modal-score-fill"><div class="modal-score-fill-inner" style="width:${pct}%; background:${color};"></div></div>
+          </div>
+        </div>`;
+
+        // Criteria detail - grouped by score (semaphore: best first)
+        html += buildSemaphoreView(item.results);
+
+        if (item.generalComments) {
+          html += `<div class="modal-section"><div class="modal-section-title">Comentarios Generales</div>
+            <div class="modal-section-content">${esc(item.generalComments)}</div></div>`;
+        }
+
+      } else {
+        // Empathy type
+        const pct = item.empathyPercent;
+        const color = pct >= 80 ? 'var(--success)' : pct >= 60 ? 'var(--warning)' : 'var(--danger)';
+        html += `<div class="modal-score-bar">
+          <div class="modal-score-num" style="color:${color};">${pct}%</div>
+          <div class="modal-score-detail">
+            <div class="modal-score-pct">Calificación de Empatía</div>
+            <div class="modal-score-pts">${item.empathyTotal} de ${item.empathyMax} puntos posibles</div>
+            <div class="modal-score-fill"><div class="modal-score-fill-inner" style="width:${pct}%; background:${color};"></div></div>
+          </div>
+        </div>`;
+
+        if (item.emotions.length) {
+          html += `<div class="modal-section"><div class="modal-section-title">Emociones Detectadas en el Cliente</div>
+            <div class="modal-section-content">${item.emotions.map(e => `<span class="badge emp" style="margin:2px 4px 2px 0;">${e}</span>`).join('')}</div></div>`;
+        }
+
+        // Empathy criteria - grouped by score (semaphore)
+        html += buildSemaphoreView(item.empathyResults);
+
+        if (item.feedbackStrengths) {
+          html += `<div class="modal-section"><div class="modal-section-title">🌟 Fortalezas Observadas</div>
+            <div class="modal-section-content">${esc(item.feedbackStrengths)}</div></div>`;
+        }
+        if (item.feedbackImprove) {
+          html += `<div class="modal-section"><div class="modal-section-title">📈 Áreas de Mejora</div>
+            <div class="modal-section-content">${esc(item.feedbackImprove)}</div></div>`;
+        }
+        if (item.feedbackRecommendations) {
+          html += `<div class="modal-section"><div class="modal-section-title">💡 Recomendaciones</div>
+            <div class="modal-section-content">${esc(item.feedbackRecommendations)}</div></div>`;
+        }
+      }
+
+      document.getElementById('modalBody').innerHTML = html;
+      document.getElementById('feedbackModal').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('feedbackModal').classList.remove('open');
+      currentModalData = null;
+    }
+
+    function buildPlainText() {
+      if (!currentModalData) return '';
+      const { type } = currentModalData;
+
+      if (type === 'consolidated') {
+        const { name, qItems, eItems } = currentModalData;
+        const calls = [...new Set([...qItems.map(q=>q.callId), ...eItems.map(e=>e.callId)])];
+        let txt = `TMLF Academy — Feedback Consolidado\n${'═'.repeat(40)}\n\n`;
+        txt += `Colaborador: ${name}\nLlamadas: ${calls.join(', ')}\nEvaluaciones: ${qItems.length + eItems.length}\n\n`;
+
+        if (qItems.length) {
+          const avgQ = Math.round(qItems.reduce((a,i)=>a+i.completionPercent,0)/qItems.length);
+          txt += `CALIDAD PROMEDIO: ${avgQ}%\n`;
+          const avgR = criteria.map(c => {
+            const sc = qItems.map(q=>q.results.find(r=>r.criterion===c)).filter(Boolean).map(r=>r.score);
+            const avg = sc.length ? Math.round(sc.reduce((a,s)=>a+s,0)/sc.length) : 0;
+            return { criterion: c, score: avg, label: SCALE_LABELS[avg] };
+          });
+          function grouped(results) {
+            let o = '';
+            SEMAPHORE_LEVELS.forEach(lv => {
+              const items = results.filter(r => lv.scores.includes(r.score));
+              if (!items.length) return;
+              o += `\n${lv.icon} ${lv.label.toUpperCase()} (${lv.scores[0]}/5) — ${items.length} criterio${items.length>1?'s':''}:\n`;
+              items.forEach(r => { o += `  • ${r.criterion}\n`; });
+            });
+            return o;
+          }
+          txt += grouped(avgR);
+        }
+
+        if (eItems.length) {
+          const avgE = Math.round(eItems.reduce((a,i)=>a+i.empathyPercent,0)/eItems.length);
+          txt += `\nEMPATÍA PROMEDIO: ${avgE}%\n`;
+          const allStr = eItems.map(e=>e.feedbackStrengths).filter(Boolean);
+          const allImp = eItems.map(e=>e.feedbackImprove).filter(Boolean);
+          const allRec = eItems.map(e=>e.feedbackRecommendations).filter(Boolean);
+          if (allStr.length) { txt += `\n🌟 FORTALEZAS:\n`; allStr.forEach(s => { txt += `  • ${s}\n`; }); }
+          if (allImp.length) { txt += `\n📈 ÁREAS DE MEJORA:\n`; allImp.forEach(s => { txt += `  • ${s}\n`; }); }
+          if (allRec.length) { txt += `\n💡 RECOMENDACIONES:\n`; allRec.forEach(s => { txt += `  • ${s}\n`; }); }
+        }
+        return txt;
+      }
+
+      // Individual feedback (no evaluator name)
+      const { item } = currentModalData;
+      let txt = `TMLF Academy — Feedback de Evaluación\n${'═'.repeat(40)}\n\n`;
+      txt += `Colaborador: ${item.evaluated}\nLlamada: ${item.callId}\nFecha: ${item.date}\n\n`;
+
+      function groupedCriteria(results) {
+        let out = '';
+        SEMAPHORE_LEVELS.forEach(level => {
+          const items = results.filter(r => level.scores.includes(r.score));
+          if (!items.length) return;
+          out += `\n${level.icon} ${level.label.toUpperCase()} (${level.scores[0]}/5) — ${items.length} criterio${items.length > 1 ? 's' : ''}:\n`;
+          items.forEach(r => { out += `  • ${r.criterion}${r.observation ? ` — ${r.observation}` : ''}\n`; });
+        });
+        return out;
+      }
+
+      if (type === 'quality') {
+        txt += `CALIFICACIÓN: ${item.completionPercent}% (${item.totalScore}/${item.maxScore} pts)\n`;
+        txt += groupedCriteria(item.results);
+        if (item.generalComments) txt += `\nCOMENTARIOS GENERALES:\n${item.generalComments}\n`;
+      } else {
+        txt += `CALIFICACIÓN EMPATÍA: ${item.empathyPercent}% (${item.empathyTotal}/${item.empathyMax} pts)\n\n`;
+        if (item.emotions.length) txt += `EMOCIONES DETECTADAS: ${item.emotions.join(', ')}\n`;
+        txt += groupedCriteria(item.empathyResults);
+        if (item.feedbackStrengths) txt += `\n🌟 FORTALEZAS:\n${item.feedbackStrengths}\n`;
+        if (item.feedbackImprove) txt += `\n📈 ÁREAS DE MEJORA:\n${item.feedbackImprove}\n`;
+        if (item.feedbackRecommendations) txt += `\n💡 RECOMENDACIONES:\n${item.feedbackRecommendations}\n`;
+      }
+      return txt;
+    }
+
+    function printFeedback() { window.print(); }
+
+    function copyFeedback() {
+      const txt = buildPlainText();
+      navigator.clipboard.writeText(txt).then(() => {
+        alert('Feedback copiado al portapapeles. Puedes pegarlo en un correo, chat o documento.');
+      }).catch(() => {
+        const ta = document.createElement('textarea');
+        ta.value = txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+        document.body.removeChild(ta);
+        alert('Feedback copiado al portapapeles.');
+      });
+    }
+
+    function emailFeedback() {
+      if (!currentModalData) return;
+      const { type } = currentModalData;
+      const name = type === 'consolidated' ? currentModalData.name : currentModalData.item.evaluated;
+      const callRef = type === 'consolidated'
+        ? [...new Set([...currentModalData.qItems.map(q=>q.callId), ...currentModalData.eItems.map(e=>e.callId)])].join(', ')
+        : currentModalData.item.callId;
+      const subject = encodeURIComponent(`TMLF Academy — Feedback ${type === 'consolidated' ? 'Consolidado' : 'de tu llamada'}: ${callRef}`);
+      const body = encodeURIComponent(buildPlainText());
+      window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
+    }
+
+    /* ═══ UTILS ═══ */
+    function esc(text) { const d = document.createElement('div'); d.textContent = text; return d.innerHTML; }
+
+    /* ═══ INIT ═══ */
+    initData();
+  </script>
+</body>
+</html>
