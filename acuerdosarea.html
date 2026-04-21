@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TMLF · Panel de Acuerdos Training</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --teal:        #00616E;
+  --teal-dark:   #004A55;
+  --teal-light:  #E4F4F6;
+  --teal-mid:    #B0DCE3;
+  --amber:       #B5620A;
+  --amber-light: #FEF3E2;
+  --red:         #B02A20;
+  --red-light:   #FCECEA;
+  --green:       #1A7A45;
+  --green-light: #E6F5ED;
+  --ink:         #18272C;
+  --ink-mid:     #3D5560;
+  --ink-soft:    #637A84;
+  --border:      #D4E2E6;
+  --surface:     #F7FAFB;
+  --white:       #FFFFFF;
+  --page-bg:     #EFF5F7;
+  --radius:      10px;
+  --radius-lg:   16px;
+  --shadow:      0 2px 8px rgba(0,97,110,0.08);
+  --shadow-lg:   0 8px 32px rgba(0,97,110,0.13);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--page-bg);
+  color: var(--ink);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  background: var(--teal-dark);
+  padding: 0 2rem;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.topbar-brand {
+  font-family: 'DM Serif Display', serif;
+  font-size: 17px;
+  color: #fff;
+  letter-spacing: 0.02em;
+}
+.topbar-brand span { color: var(--teal-mid); }
+.topbar-actions { display: flex; gap: 10px; align-items: center; }
+.btn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  padding: 7px 16px;
+  border-radius: var(--radius);
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn-primary { background: var(--teal); color: #fff; }
+.btn-primary:hover { background: var(--teal-dark); }
+.btn-ghost { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); }
+.btn-ghost:hover { background: rgba(255,255,255,0.18); }
+.btn-danger { background: var(--red-light); color: var(--red); }
+.btn-danger:hover { background: #f8d5d2; }
+.btn-outline { background: var(--white); color: var(--ink); border: 1px solid var(--border); }
+.btn-outline:hover { background: var(--surface); }
+
+/* ── LAYOUT ── */
+.layout { display: flex; min-height: calc(100vh - 56px); }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--white);
+  border-right: 1px solid var(--border);
+  position: sticky;
+  top: 56px;
+  height: calc(100vh - 56px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.sidebar-section { padding: 16px 16px 8px; }
+.sidebar-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+}
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--ink-mid);
+  transition: all 0.12s;
+  justify-content: space-between;
+}
+.sidebar-item:hover { background: var(--surface); color: var(--ink); }
+.sidebar-item.active { background: var(--teal-light); color: var(--teal); font-weight: 500; }
+.sidebar-item-left { display: flex; align-items: center; gap: 8px; }
+.area-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.dot-alta   { background: var(--green); }
+.dot-buena  { background: #3AAF6E; }
+.dot-mod    { background: var(--amber); }
+.dot-baja   { background: #E07020; }
+.dot-crit   { background: var(--red); }
+.score-pill {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 20px;
+}
+.pill-alta   { background: var(--green-light); color: var(--green); }
+.pill-buena  { background: #DFFAEE; color: #1A7A45; }
+.pill-mod    { background: var(--amber-light); color: var(--amber); }
+.pill-baja   { background: #FEEBD8; color: #E07020; }
+.pill-crit   { background: var(--red-light); color: var(--red); }
+.sidebar-check { font-size: 13px; color: var(--green); flex-shrink: 0; }
+.sidebar-divider { height: 1px; background: var(--border); margin: 8px 16px; }
+
+/* ── MAIN ── */
+.main { flex: 1; padding: 28px 32px; min-width: 0; }
+
+/* ── HEADER CARD ── */
+.header-card {
+  background: linear-gradient(135deg, var(--teal-dark) 0%, var(--teal) 100%);
+  border-radius: var(--radius-lg);
+  padding: 28px 32px;
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+.header-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 26px;
+  color: #fff;
+  line-height: 1.2;
+}
+.header-sub { font-size: 13px; color: var(--teal-mid); margin-top: 4px; }
+.kpi-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.kpi-box {
+  background: rgba(255,255,255,0.12);
+  border-radius: var(--radius);
+  padding: 12px 18px;
+  text-align: center;
+  min-width: 90px;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+.kpi-val { font-size: 22px; font-weight: 600; color: #fff; }
+.kpi-lbl { font-size: 10px; color: var(--teal-mid); margin-top: 2px; line-height: 1.3; }
+
+/* ── FILTER BAR ── */
+.filter-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.filter-lbl { font-size: 12px; color: var(--ink-soft); margin-right: 4px; }
+.fpill {
+  font-size: 12px;
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--white);
+  color: var(--ink-mid);
+  cursor: pointer;
+  transition: all 0.12s;
+  font-family: 'DM Sans', sans-serif;
+}
+.fpill:hover { border-color: var(--teal); color: var(--teal); }
+.fpill.on { background: var(--teal); color: #fff; border-color: var(--teal); }
+
+/* ── AREA CARD ── */
+.area-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.15s;
+}
+.area-card:hover { box-shadow: var(--shadow-lg); }
+.area-card.has-acuerdo { border-left: 3px solid var(--green); }
+
+.area-header {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  cursor: pointer;
+  gap: 14px;
+  user-select: none;
+  transition: background 0.12s;
+}
+.area-header:hover { background: var(--surface); }
+
+.area-color-bar { width: 4px; height: 36px; border-radius: 2px; flex-shrink: 0; }
+.bar-alta  { background: var(--green); }
+.bar-buena { background: #3AAF6E; }
+.bar-mod   { background: var(--amber); }
+.bar-baja  { background: #E07020; }
+.bar-crit  { background: var(--red); }
+
+.area-info { flex: 1; min-width: 0; }
+.area-name { font-size: 15px; font-weight: 600; color: var(--ink); }
+.area-meta { font-size: 12px; color: var(--ink-soft); margin-top: 1px; }
+
+.area-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.score-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.score-num-big { font-size: 20px; font-weight: 600; }
+.score-max { font-size: 12px; color: var(--ink-soft); }
+.nivel-badge {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+.badge-alta  { background: var(--green-light); color: var(--green); }
+.badge-buena { background: #DFFAEE; color: #1A7A45; }
+.badge-mod   { background: var(--amber-light); color: var(--amber); }
+.badge-baja  { background: #FEEBD8; color: #E07020; }
+.badge-crit  { background: var(--red-light); color: var(--red); }
+
+.saved-badge-header {
+  font-size: 11px;
+  color: var(--green);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--green-light);
+  padding: 3px 8px;
+  border-radius: 20px;
+}
+.chevron-icon { color: var(--ink-soft); transition: transform 0.2s; font-size: 12px; }
+.open .chevron-icon { transform: rotate(180deg); }
+
+/* ── TABS ── */
+.area-body { display: none; border-top: 1px solid var(--border); }
+.area-body.open { display: block; }
+
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  padding: 0 20px;
+  gap: 0;
+}
+.tab {
+  font-size: 13px;
+  padding: 12px 16px;
+  cursor: pointer;
+  color: var(--ink-soft);
+  border-bottom: 2px solid transparent;
+  transition: all 0.12s;
+  white-space: nowrap;
+  font-family: 'DM Sans', sans-serif;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+.tab:hover { color: var(--ink); }
+.tab.active { color: var(--teal); border-bottom-color: var(--teal); font-weight: 500; }
+
+.pane { display: none; padding: 20px; }
+.pane.active { display: block; }
+
+/* ── SCORE GRID ── */
+.score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 18px; }
+.score-row { display: flex; align-items: center; gap: 8px; }
+.score-label { font-size: 12px; color: var(--ink-mid); flex: 1.5; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.score-bar-bg { flex: 1; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 3px; }
+.score-val { font-size: 12px; font-weight: 600; min-width: 28px; text-align: right; }
+
+.tags-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
+.tag {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: var(--teal-light);
+  color: var(--teal);
+  border: 1px solid var(--teal-mid);
+}
+
+/* ── COMMENTS ── */
+.section-title { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 10px; margin-top: 16px; }
+.comment-list { display: flex; flex-direction: column; gap: 6px; }
+.comment-item {
+  font-size: 13px;
+  color: var(--ink-mid);
+  padding: 9px 12px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border-left: 3px solid var(--teal);
+  line-height: 1.5;
+}
+.comment-item.warn { border-left-color: var(--amber); }
+
+/* ── PROPOSALS ── */
+.prop-list { display: flex; flex-direction: column; gap: 10px; }
+.prop-item {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  background: var(--white);
+}
+.prop-top { display: flex; align-items: flex-start; gap: 10px; }
+.prop-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.prop-content { flex: 1; }
+.prop-title { font-size: 13px; font-weight: 500; color: var(--ink); }
+.prop-desc { font-size: 12px; color: var(--ink-soft); margin-top: 3px; line-height: 1.5; }
+.urgency-badge { font-size: 10px; padding: 3px 9px; border-radius: 20px; font-weight: 500; white-space: nowrap; flex-shrink: 0; }
+.urg-inm  { background: var(--red-light); color: var(--red); }
+.urg-med  { background: var(--amber-light); color: var(--amber); }
+.urg-cont { background: var(--green-light); color: var(--green); }
+
+/* ── CHECKLIST ── */
+.check-list { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+.check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.check-item:hover { background: var(--surface); }
+.check-item.done { background: var(--green-light); border-color: var(--green); }
+.check-item.done .check-text { text-decoration: line-through; color: var(--ink-soft); }
+.check-box {
+  width: 18px; height: 18px; border-radius: 5px; border: 2px solid var(--border);
+  flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center;
+  transition: all 0.12s; cursor: pointer;
+}
+.check-item.done .check-box { background: var(--green); border-color: var(--green); }
+.check-tick { color: #fff; font-size: 11px; display: none; }
+.check-item.done .check-tick { display: block; }
+.check-text { font-size: 13px; color: var(--ink-mid); line-height: 1.4; }
+
+/* ── ACUERDO FORM ── */
+.acuerdo-pane { }
+.form-section {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 18px;
+  margin-bottom: 14px;
+}
+.form-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--teal);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.form-field { display: flex; flex-direction: column; gap: 4px; }
+.form-label { font-size: 11px; font-weight: 500; color: var(--ink-mid); }
+.form-input, .form-select {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--white);
+  color: var(--ink);
+  width: 100%;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.form-input:focus, .form-select:focus {
+  outline: none;
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(0,97,110,0.12);
+}
+.form-textarea {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--white);
+  color: var(--ink);
+  width: 100%;
+  min-height: 90px;
+  resize: vertical;
+  line-height: 1.5;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(0,97,110,0.12);
+}
+
+/* acuerdos adicionales */
+.acuerdo-list { display: flex; flex-direction: column; gap: 10px; }
+.acuerdo-entry {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--white);
+  overflow: hidden;
+}
+.acuerdo-entry-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  font-size: 13px; font-weight: 500; color: var(--ink);
+}
+.acuerdo-entry-body { padding: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.entry-field { font-size: 12px; }
+.entry-lbl { color: var(--ink-soft); margin-bottom: 3px; font-size: 11px; }
+.entry-val { color: var(--ink); line-height: 1.5; }
+.del-btn { font-size: 11px; color: var(--red); background: none; border: none; cursor: pointer; padding: 2px 6px; border-radius: 4px; }
+.del-btn:hover { background: var(--red-light); }
+
+.add-acuerdo-btn {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; color: var(--teal); cursor: pointer;
+  padding: 8px 12px; border-radius: var(--radius);
+  border: 1px dashed var(--teal-mid); background: var(--teal-light);
+  width: 100%; justify-content: center;
+  font-family: 'DM Sans', sans-serif;
+  transition: all 0.12s;
+}
+.add-acuerdo-btn:hover { background: var(--teal-mid); color: var(--teal-dark); }
+
+/* mini form for new acuerdo */
+.mini-form {
+  border: 1px solid var(--teal);
+  border-radius: var(--radius);
+  padding: 14px;
+  background: var(--teal-light);
+  margin-top: 10px;
+}
+.mini-form-title { font-size: 12px; font-weight: 600; color: var(--teal); margin-bottom: 10px; }
+.mini-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+.mini-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+
+/* form footer */
+.form-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.toast {
+  font-size: 12px;
+  color: var(--green);
+  background: var(--green-light);
+  border: 1px solid #a8dfc0;
+  padding: 6px 14px;
+  border-radius: var(--radius);
+  display: none;
+  align-items: center;
+  gap: 6px;
+}
+.toast.show { display: flex; }
+
+/* ── REGISTROS VIEW ── */
+.registros-view { padding: 0; }
+.registro-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 14px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.registro-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex-wrap: wrap; gap: 10px;
+}
+.registro-title { font-size: 15px; font-weight: 600; color: var(--ink); }
+.registro-meta { font-size: 12px; color: var(--ink-soft); }
+.registro-body { padding: 16px 20px; }
+.registro-section { margin-bottom: 14px; }
+.registro-section:last-child { margin-bottom: 0; }
+.reg-lbl { font-size: 10px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 6px; }
+.reg-val { font-size: 13px; color: var(--ink); line-height: 1.5; }
+.reg-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 14px; }
+.reg-info { background: var(--surface); border-radius: var(--radius); padding: 10px 12px; }
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  text-align: center;
+  padding: 60px 40px;
+  color: var(--ink-soft);
+}
+.empty-icon { font-size: 48px; margin-bottom: 14px; }
+.empty-title { font-size: 16px; font-weight: 500; color: var(--ink-mid); margin-bottom: 6px; }
+.empty-desc { font-size: 13px; color: var(--ink-soft); }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--teal-mid); }
+
+/* ── PRINT ── */
+@media print {
+  .topbar, .sidebar, .filter-bar, .form-footer, .btn, .tabs, .fpill { display: none !important; }
+  .main { padding: 0; }
+  .area-body { display: block !important; }
+  .pane { display: block !important; }
+}
+
+/* ── TRAINER ASSIGNMENT PANE ── */
+.trainer-assign-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.trainer-card {
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--white);
+  user-select: none;
+}
+.trainer-card:hover { border-color: var(--teal); background: var(--teal-light); }
+.trainer-card.selected {
+  border-color: var(--teal);
+  background: var(--teal-light);
+  box-shadow: 0 0 0 2px rgba(0,97,110,0.15);
+}
+.trainer-card.selected-todos {
+  border-color: var(--teal-dark);
+  background: var(--teal-dark);
+}
+.trainer-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  letter-spacing: 0.03em;
+}
+.trainer-info { flex: 1; min-width: 0; }
+.trainer-name { font-size: 13px; font-weight: 500; color: var(--ink); }
+.trainer-role { font-size: 11px; color: var(--ink-soft); margin-top: 1px; }
+.trainer-card.selected .trainer-name { color: var(--teal-dark); }
+.trainer-card.selected-todos .trainer-name,
+.trainer-card.selected-todos .trainer-role { color: #fff; }
+.trainer-check-icon { font-size: 14px; color: var(--teal); flex-shrink: 0; display: none; }
+.trainer-card.selected .trainer-check-icon { display: block; }
+.trainer-card.selected-todos .trainer-check-icon { display: block; color: #fff; }
+
+.todos-card {
+  grid-column: 1 / -1;
+  border: 1.5px dashed var(--teal-mid);
+  background: var(--surface);
+}
+.todos-card:hover { border-color: var(--teal-dark); background: var(--teal-light); }
+.todos-card.selected-todos { border-style: solid; }
+
+.assigned-summary {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+.assigned-summary-title { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 10px; }
+.assigned-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.assigned-chip {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 10px 4px 5px;
+  border-radius: 20px;
+  font-size: 12px; font-weight: 500;
+  color: #fff;
+}
+.chip-avatar {
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 700; color: #fff;
+  background: rgba(255,255,255,0.25);
+}
+.no-assigned { font-size: 13px; color: var(--ink-soft); font-style: italic; }
+
+.trainer-save-row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 4px;
+}
+.trainer-toast { font-size: 12px; color: var(--green); display: none; align-items: center; gap: 5px;
+  background: var(--green-light); border: 1px solid #a8dfc0; padding: 5px 12px; border-radius: var(--radius); }
+.trainer-toast.show { display: flex; }
+
+.sidebar-trainers { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; padding: 0 10px 6px; }
+.sidebar-trainer-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  title: '';
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-brand">TMLF <span>· Training Ops</span></div>
+  <div class="topbar-actions">
+    <button class="btn btn-ghost" onclick="showView('areas')">Áreas</button>
+    <button class="btn btn-ghost" onclick="showView('registros')">Registros</button>
+    <button class="btn btn-primary" onclick="exportarTodo()">Exportar</button>
+  </div>
+</div>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-label">Áreas por nivel</div>
+  </div>
+  <div id="sidebar-items"></div>
+  <div class="sidebar-divider"></div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Resumen</div>
+    <div style="font-size:12px;color:var(--ink-soft);padding:4px 10px;" id="sidebar-stats">Sin acuerdos aún</div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main" id="main-content">
+
+  <!-- VISTA ÁREAS -->
+  <div id="view-areas">
+    <div class="header-card">
+      <div>
+        <div class="header-title">Panel de acuerdos<br><em style="font-style:italic;font-size:22px;">por área</em></div>
+        <div class="header-sub">Encuesta de satisfacción · Marzo 2026 · 192 respuestas · 14 áreas</div>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi-box"><div class="kpi-val">3.62</div><div class="kpi-lbl">Score general</div></div>
+        <div class="kpi-box"><div class="kpi-val" id="kpi-doc">0/13</div><div class="kpi-lbl">Áreas documentadas</div></div>
+        <div class="kpi-box"><div class="kpi-val" id="kpi-acc">0</div><div class="kpi-lbl">Acciones confirmadas</div></div>
+        <div class="kpi-box"><div class="kpi-val" id="kpi-reg">0</div><div class="kpi-lbl">Registros de reunión</div></div>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <span class="filter-lbl">Mostrar:</span>
+      <button class="fpill on" onclick="filtrar('todas',this)">Todas</button>
+      <button class="fpill" onclick="filtrar('critica',this)">Críticas</button>
+      <button class="fpill" onclick="filtrar('baja',this)">Bajas</button>
+      <button class="fpill" onclick="filtrar('moderada',this)">Moderadas</button>
+      <button class="fpill" onclick="filtrar('buena',this)">Buenas / Altas</button>
+      <button class="fpill" onclick="filtrar('pendiente',this)">Sin acuerdo</button>
+    </div>
+
+    <div id="cards-container"></div>
+  </div>
+
+  <!-- VISTA REGISTROS -->
+  <div id="view-registros" style="display:none;">
+    <div class="header-card" style="margin-bottom:24px;">
+      <div>
+        <div class="header-title">Registros de reunión</div>
+        <div class="header-sub">Historial de acuerdos documentados con los trainers</div>
+      </div>
+      <button class="btn btn-ghost" onclick="exportarTodo()">Exportar todo</button>
+    </div>
+    <div id="registros-container"></div>
+  </div>
+
+</main>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════════════
+const TRAINERS = ["Diego","Joham","Andrea","Nidia","Mariana","Sofia","Brenda","Karen (Coordinadora)"];
+const TRAINER_INITIALS = {"Diego":"DI","Joham":"JO","Andrea":"AN","Nidia":"NI","Mariana":"MA","Sofia":"SO","Brenda":"BR","Karen (Coordinadora)":"KR"};
+const TRAINER_COLORS   = {"Diego":"#3B82F6","Joham":"#8B5CF6","Andrea":"#EC4899","Nidia":"#F59E0B","Mariana":"#10B981","Sofia":"#EF4444","Brenda":"#06B6D4","Karen (Coordinadora)":"#005B6E"};
+
+const QLABELS = [
+  "Sé a quién acudir","Entiende mis retos reales","Ayuda a mi desempeño",
+  "Contenidos alineados","Ejemplos reflejan casos reales","Herramientas prácticas",
+  "Aplico lo aprendido","Colabora con líderes","Comunicación clara",
+  "Propone iniciativas","Duración adecuada","Equilibrio teoría-práctica","Formato facilita aprendizaje"
+];
+
+const AREAS = [
+  { id:"psychology", name:"Psychology", n:39, score:4.069, nivel:"alta",
+    q:[4.23,3.72,4.18,3.87,4.18,4.38,4.18,3.87,4.08,4.03,3.87,4.08,4.23],
+    temas:["Actualizaciones USCIS/ICE","Habilidades blandas — entrevistas","Técnicas para reducir tiempos","PEU y casos complejos Visa T","Primeros auxilios psicológicos","Clientes complicados y contención"],
+    perciben:["Buena disposición general del equipo","La calculadora de Visa T es muy valorada","Brenda Domínguez destacada nominalmente","Innovación con nuevas herramientas"],
+    piden:["Actualizar contenidos antes de impartirlos: a veces se capacita sobre procesos ya usados hace meses","Training se percibe cada vez más teórico — necesitan más práctica","Capacitaciones presenciales para temas críticos","Proactividad: acercarse semanalmente para preguntar si hay apoyo pendiente"],
+    props:[
+      {icon:"📅",t:"Reunión mensual con TL de Psychology",d:"Calendarizar revisión mensual para detectar cambios operativos antes de diseñar contenido.",urg:"inm"},
+      {icon:"🧪",t:"Simulaciones de entrevistas por caso real",d:"Diseñar al menos 1 simulación trimestral con casos reales de PEU, clientes difíciles y manejo de tiempos.",urg:"med"},
+      {icon:"📋",t:"Protocolo de validación de contenidos",d:"Antes de cada capacitación, validar con un WAE o TL de Psych que el material refleja el proceso vigente.",urg:"inm"},
+      {icon:"🔄",t:"Seguimiento post-capacitación a 15 días",d:"Asignar trainer responsable para dar seguimiento sobre aplicación de lo aprendido.",urg:"med"},
+    ]
+  },
+  { id:"callbacks", name:"Call Backs", n:9, score:3.855, nivel:"alta",
+    q:[3.89,3.22,3.67,3.89,3.67,3.89,3.89,4.56,3.89,4.11,3.44,3.89,4.11],
+    temas:["Visa U y visas no VAWA","NON VAWA y procesos consulares","Flujo completo de casos CB","Cómo aprovechar la IA","Organización del área CB"],
+    perciben:["Alta disposición del equipo","Se apegan a la operación","Colaboración con líderes muy valorada (4.56)"],
+    piden:["Seguimiento: en P+ los trainings no tuvieron seguimiento y causó enojo","Trainings pequeños periódicos sobre visas poco trabajadas","Incorporarse a piso para acercamiento menos teórico"],
+    props:[
+      {icon:"📌",t:"Protocolo de seguimiento post-training CB",d:"Formato de seguimiento específico para CB. Aplicar a 7 y 30 días.",urg:"inm"},
+      {icon:"🗂️",t:"Miniserie de visas no VAWA/T",d:"Trainings breves (30–45 min) sobre Visa U, procesos consulares y AOS regular.",urg:"med"},
+      {icon:"🏢",t:"Shadowing mensual en piso",d:"Un trainer por mes hace presencia en el área para observar la operación y detectar necesidades.",urg:"med"},
+    ]
+  },
+  { id:"compliance", name:"Compliance", n:20, score:3.854, nivel:"alta",
+    q:[3.50,3.80,4.00,3.80,3.80,4.00,4.00,3.90,3.70,4.00,3.50,4.00,4.10],
+    temas:["Rapsheets y lectura de cargos","Glosario legal y términos anglosajones","Actualizaciones USCIS constantes","Delitos comunes y cómo proceder","Nuevos procesos de la firma"],
+    perciben:["Presencia ante temas actuales muy valorada","Buena preparación de trainers","Apertura para desarrollar capacitaciones por necesidad"],
+    piden:["Retroalimentación periódica por casos del período","Más casos prácticos y menos teoría repetida","Retomar ongoings para reforzar lo aprendido"],
+    props:[
+      {icon:"📊",t:"Sesión bimestral de análisis de casos",d:"Revisar con el equipo casos del período para detectar patrones, errores y áreas de refuerzo.",urg:"inm"},
+      {icon:"📖",t:"Glosario legal colaborativo",d:"Construir glosario de términos legales co-creado con el área y mantenido en Moodle.",urg:"med"},
+      {icon:"🔁",t:"Retomar formato ongoing",d:"Reinstaurar sesiones cortas periódicas de refuerzo para actualizaciones USCIS y nuevos criterios.",urg:"inm"},
+    ]
+  },
+  { id:"pcr", name:"Pre Case Review", n:23, score:3.742, nivel:"buena",
+    q:[3.78,3.52,3.87,3.43,4.13,3.96,3.78,3.78,3.87,3.87,3.43,3.26,3.96],
+    temas:["NON VAWA: documentación y objeciones","Actualizaciones USCIS por criterio","Evidencias de visas humanitarias","Rapsheets","Ensamble y llenado de formas","Contención emocional de clientes"],
+    perciben:["Jeziel Pech destacado: usa ejemplos reales y hace sombra a trainees","Mariana Ferrusquia destacada nominalmente","Valoran disponibilidad para resolver dudas siempre"],
+    piden:["Seguimiento post-capacitación por equipo revisando dudas en operación","Material actualizado: los checklists cambian en días y training queda obsoleto","Capacitación directa con quien tiene el problema, no solo grupal"],
+    props:[
+      {icon:"🔧",t:"Canal de actualización exprés de material",d:"Canal donde TLs de PCR notifiquen cambios. Training actualiza material en 48h máx.",urg:"inm"},
+      {icon:"👥",t:"Sesiones de dudas específicas por subgrupo",d:"Segmentar por dudas: una sesión NON VAWA, otra rapsheets — más eficiente que grupal.",urg:"med"},
+      {icon:"🌟",t:"Replicar modelo Jeziel Pech",d:"Documentar prácticas de sombra y ejemplos reales como estándar del área de Training.",urg:"med"},
+    ]
+  },
+  { id:"pwc", name:"Pre Welcome Call", n:20, score:3.715, nivel:"buena",
+    q:[3.90,3.70,3.90,3.60,3.70,4.10,3.90,4.00,3.50,3.30,3.50,3.40,3.80],
+    temas:["CamScan — subida de documentos en PDF","Manejo de objeciones en llamada","Formas: constancia en los trainings","Caso completo de principio a fin por visado","REG AOS"],
+    perciben:["Mariana y Brenda mencionadas nominalmente por apertura y apoyo","Explican hasta que se entiende","Sesiones de ~2h son muy cortas para la cantidad de información"],
+    piden:["Calendarizar seguimiento sí o sí después de entregar nuevos colaboradores","Comunicar expectativa directamente al equipo, no solo al TL","Más ejercicios prácticos apegados a los procesos reales"],
+    props:[
+      {icon:"⏱️",t:"Rediseñar duración de sesiones por tema",d:"Mapear temas complejos y asignar bloques de 3–4h en lugar de sesiones de 2h.",urg:"inm"},
+      {icon:"📱",t:"Training de CamScan obligatorio en onboarding",d:"CamScan ausente del onboarding. Incluirlo como módulo obligatorio antes de la operación.",urg:"inm"},
+      {icon:"📢",t:"Protocolo de comunicación de cambios",d:"Cuando hay modificaciones, el trainer responsable comunica el cambio directamente al equipo.",urg:"med"},
+    ]
+  },
+  { id:"litigation", name:"Litigation", n:5, score:3.646, nivel:"buena",
+    q:[4.20,3.40,4.20,4.20,4.20,4.20,3.80,4.20,3.00,3.00,3.00,2.60,3.40],
+    temas:["Common Law, Ley INA, APA","Actualizaciones de impacto en casos activos","Formas","Writ of mandamus"],
+    perciben:["Disposición y paciencia del equipo valoradas","Intentan acercarse a la realidad, pero la operatividad es muy variada"],
+    piden:["Involucrarse en las tareas del día a día","Diseñar procesos prácticos, no solo teóricos","Actualizaciones periódicas de información"],
+    props:[
+      {icon:"🔍",t:"Diagnóstico operativo en Litigation",d:"El trainer asignado hace 2 sesiones de observación en el área antes de diseñar contenido.",urg:"inm"},
+      {icon:"📚",t:"Módulo básico de Common Law e INA",d:"Crear un módulo base de conceptos legales clave disponible en Moodle permanentemente.",urg:"med"},
+    ]
+  },
+  { id:"packets", name:"Packets", n:19, score:3.526, nivel:"moderada",
+    q:[3.21,3.21,3.84,3.42,3.84,3.63,3.95,3.32,3.42,3.42,3.53,3.21,3.84],
+    temas:["Armado de paquetes y uso de Acrobat","REG AOS y carga pública","Permanent Bar","Llenado de formas","Tiempos de procesamiento","Google Sheets"],
+    perciben:["Andrea Zendejas destacada nominalmente","La preparación de los trainers es valorada","No saben bien qué hace Training más allá del onboarding"],
+    piden:["Iniciativa: no esperar a que se solicite el training","Dar primero la teoría del caso y luego la práctica del llenado","Trainings más concretos porque tienen metas que cumplir al mismo tiempo"],
+    props:[
+      {icon:"🎯",t:"Rediseño pedagógico: teoría luego práctica",d:"Restructurar la secuencia: primero análisis del caso, luego llenado de la forma.",urg:"inm"},
+      {icon:"🗓️",t:"Calendario de training proactivo para Packets",d:"Training propone al menos 1 sesión mensual sin esperar solicitud.",urg:"inm"},
+      {icon:"⚡",t:"Micro-trainings de 45 min en horario de metas",d:"Diseñar sesiones de 30–45 min que se integren sin afectar el cumplimiento del día.",urg:"med"},
+    ]
+  },
+  { id:"cs", name:"Customer Service", n:7, score:3.462, nivel:"moderada",
+    q:[3.00,3.57,3.86,3.29,3.86,3.86,3.29,3.57,3.29,3.57,3.57,3.29,3.00],
+    temas:["Procesos de otras áreas para informar mejor","Proceso consular","Casos NON VAWA","Delitos","Actualizaciones rápidas de cambios en la firma"],
+    perciben:["Paciencia para aclarar dudas valorada","Necesitan más presencia del área"],
+    piden:["Sesiones semanales como mínimo","Actualizar cambios de la firma más rápido","Conocer qué hace el área antes de diseñar el training"],
+    props:[
+      {icon:"🤝",t:"Reunión de diagnóstico urgente con CS",d:"Programar en los próximos 15 días reunión con el TL para mapear qué training necesitan.",urg:"inm"},
+      {icon:"📡",t:"Sesión quincenal de actualización rápida",d:"30 min cada 2 semanas para compartir cambios recientes en la firma.",urg:"inm"},
+      {icon:"🗺️",t:"Mapa de procesos de otras áreas para CS",d:"Guía de referencia rápida de cada área de la firma para que CS pueda orientar clientes.",urg:"med"},
+    ]
+  },
+  { id:"waes", name:"WAE's", n:19, score:3.332, nivel:"baja",
+    q:[3.32,3.21,3.42,3.42,3.74,3.42,3.42,3.21,3.42,2.58,3.42,3.32,3.42],
+    temas:["Actualización y homologación de criterios","Training con attys para dictaminación","Regresos efectivos y estrategias CAD","Jerarquización de abusos en VAWA","TramCase — nunca fue enseñado formalmente"],
+    perciben:["Lucio y Lucía destacados: llevan al colaborador a su nivel","Nidia Nava destacada por explicar bien y ser paciente","Indicador 'propone iniciativas': 2.58 — el más bajo del área"],
+    piden:["El training de PB tenía errores graves de ejemplo — destruye credibilidad","No dar casos de producción activa sin conocer el outcome completo","Enfocar los cursos por área: del 100% del contenido solo aplica un 20% a WAEs"],
+    props:[
+      {icon:"🚨",t:"Auditoría inmediata de materiales WAE",d:"Revisar todos los materiales de WAEs para identificar errores y contenido desactualizado.",urg:"inm"},
+      {icon:"✅",t:"Casos curados por el trainer, no de producción",d:"Regla: los casos de training deben ser curados y conocidos por el trainer en su totalidad.",urg:"inm"},
+      {icon:"🎯",t:"Training específico de TramCase para WAEs",d:"TramCase nunca fue enseñado formalmente. Crear módulo obligatorio con flujo real.",urg:"inm"},
+      {icon:"📐",t:"Rediseñar contenidos exclusivos para WAEs",d:"Los WAEs reciben contenido genérico que solo aplica un 20%. Diseñar currícula propia.",urg:"med"},
+    ]
+  },
+  { id:"rfe", name:"RFE", n:18, score:3.145, nivel:"baja",
+    q:[2.89,2.78,3.33,2.56,3.33,3.00,3.33,3.56,3.22,3.11,3.11,3.00,3.67],
+    temas:["Análisis legal de casos RFE","Patrones de abuso en casos reales","Proceso real de RFE vs. proceso orgánico","Atenuantes y agravantes en declaraciones","Nuevos lineamientos USCIS"],
+    perciben:["Algunos trainers realmente conocen el área — muy valorados","Los manuales son demasiado básicos, no cubren la profundidad del área"],
+    piden:["Casos prácticos de operación, no teoría","Entender la operación real antes de dar training","Relacionarse más con el área — 'no todos los trainings deberían ser iguales'"],
+    props:[
+      {icon:"🔎",t:"Inmersión operativa urgente en RFE",d:"El trainer asignado debe pasar mínimo 2 días haciendo sombra en el área antes de diseñar material.",urg:"inm"},
+      {icon:"📋",t:"Guía del proceso real de RFE",d:"Documentar con el TL el proceso real (no el orgánico) de RFE: etapas, criterios, herramientas.",urg:"inm"},
+      {icon:"📈",t:"Upgrade de manuales RFE",d:"Crear versiones avanzadas con análisis legal profundo y criterios actualizados.",urg:"med"},
+    ]
+  },
+  { id:"opeff", name:"Operational Efficiency", n:4, score:3.000, nivel:"critica",
+    q:[2.50,2.00,3.50,4.00,4.00,2.50,3.50,3.00,3.00,2.50,2.00,3.00,3.50],
+    temas:["Seguridad empresarial","Documentación y diagramas de áreas/procesos","Google Sheets avanzado","IA responsable","Soft skills: comunicación, delegación"],
+    perciben:["La plataforma Moodle es lo más valorado","No perciben training relevante para sus funciones específicas"],
+    piden:["Notificación oportuna sobre reestructuraciones","Documentación estructurada: organigramas, flujos, jerarquías","Evaluaciones constantes y propuestas de mejora"],
+    props:[
+      {icon:"🗺️",t:"Diagnóstico urgente de necesidades",d:"Reunión urgente para definir alcance, necesidades y recursos de Training para esta área.",urg:"inm"},
+      {icon:"📊",t:"Módulo Google Workspace para la operación",d:"Crear training básico-avanzado de Google Sheets y Docs — solicitado explícitamente.",urg:"med"},
+    ]
+  },
+  { id:"pmo", name:"PMO", n:4, score:2.346, nivel:"critica",
+    q:[1.50,2.00,2.00,3.00,2.50,2.00,2.00,2.50,2.50,2.00,3.00,3.00,2.50],
+    temas:["End-to-End operacional de todas las áreas","Comunicación asertiva","Bases y conocimientos higiénicos de cada área"],
+    perciben:["El único training enfocado en PMO fue hace más de un año — señal crítica","Solo 4 colaboradores con funciones muy distintas a las operativas"],
+    piden:["Tener a alguien capacitado específicamente para dar training a PMO","Mayor seguimiento y acercamiento","Involucrarse activamente en el proceso orgánico de PMO"],
+    props:[
+      {icon:"🚨",t:"Asignar trainer dedicado a PMO — urgente",d:"PMO lleva más de un año sin training relevante. Asignar punto de contacto esta semana.",urg:"inm"},
+      {icon:"📦",t:"Sesión End-to-End operacional",d:"PMO necesita entender el flujo completo de la firma. Crear sesión con representantes de cada área.",urg:"inm"},
+    ]
+  },
+  { id:"people", name:"People", n:3, score:2.282, nivel:"critica",
+    q:[3.00,1.67,1.67,2.33,2.33,2.33,2.33,2.33,2.33,2.33,2.33,2.33,2.33],
+    temas:["Actualización de procesos de la firma","Inmersión en áreas operativas para mejorar evaluación de candidatos"],
+    perciben:["1 de 3 colaboradores no conoce los servicios ni ha tenido acercamiento con Training","'Entiende los retos de mi trabajo': 1.67 — el más bajo de toda la encuesta"],
+    piden:["Contemplar diversidad de necesidades — no solo contenido operativo","Fortalecer estructura y progresión lógica del onboarding","Inmersiones en áreas operativas para que People evalúe mejor a los candidatos"],
+    props:[
+      {icon:"🚨",t:"Contacto inmediato con el área de People",d:"1 de 3 personas no conoce Training. Reunión urgente esta semana para presentar servicios.",urg:"inm"},
+      {icon:"🔗",t:"Vincular onboarding de candidatos con Training",d:"Sesión donde People reciba información actualizada de cada área para evaluaciones más precisas.",urg:"med"},
+    ]
+  },
+];
+
+// ══════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════
+function loadState() {
+  try { return JSON.parse(localStorage.getItem('tmlf_acuerdos_v2') || '{}'); } catch(e) { return {}; }
+}
+function saveState() {
+  try { localStorage.setItem('tmlf_acuerdos_v2', JSON.stringify(STATE)); } catch(e) {}
+}
+var STATE = loadState();
+
+function getAreaState(id) {
+  if (!STATE[id]) STATE[id] = { checks:{}, acuerdos:[], reuniones:[], trainersAsignados:[] };
+  if (!STATE[id].trainersAsignados) STATE[id].trainersAsignados = [];
+  return STATE[id];
+}
+
+// ══════════════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════════════
+var currentFilter = 'todas';
+var openCards = {};
+
+function scoreColor(v) { return v>=3.7?'var(--green)':v>=3.3?'var(--amber)':v>=2.8?'#E07020':'var(--red)'; }
+function barColor(v)   { return v>=3.7?'#1A7A45':v>=3.3?'#EF9F27':v>=2.8?'#E07020':'#E24B4A'; }
+function nivelLabel(n) { return {alta:'Alta — 4.0+',buena:'Buena — 3.7+',moderada:'Moderada — 3.4+',baja:'Baja — 3.1+',critica:'Crítica — <3.1'}[n]||n; }
+
+// ══════════════════════════════════════════════════════════
+// TRAINER HELPERS — string concat only, no nested template literals
+// ══════════════════════════════════════════════════════════
+function trainerInitials(t) { return TRAINER_INITIALS[t] || t.slice(0,2).toUpperCase(); }
+function trainerColor(t)    { return TRAINER_COLORS[t]   || '#637A84'; }
+function trainerDisplay(t)  { return t === 'Karen (Coordinadora)' ? 'Karen' : t; }
+function trainerRole(t)     { return t === 'Karen (Coordinadora)' ? 'Coordinadora' : 'Trainer'; }
+function trainerKey(t)      { return t.replace(/[\s()]/g,'_'); }
+
+function chipHTML(t) {
+  return '<div class="assigned-chip" style="background:' + trainerColor(t) + ';">'
+       + '<div class="chip-avatar">' + trainerInitials(t) + '</div>'
+       + trainerDisplay(t) + '</div>';
+}
+function todosChipHTML() {
+  return '<div class="assigned-chip" style="background:var(--teal-dark);">'
+       + '<div class="chip-avatar">★</div>Todos los trainers</div>';
+}
+function noAssignedHTML() {
+  return '<span class="no-assigned">Ningún trainer asignado aún</span>';
+}
+function assignedChipsHTML(assigned) {
+  var isTodos = assigned.length===1 && assigned[0]==='__todos__';
+  if (isTodos) return todosChipHTML();
+  if (assigned.length > 0) return assigned.map(chipHTML).join('');
+  return noAssignedHTML();
+}
+
+// ══════════════════════════════════════════════════════════
+// RENDER SIDEBAR
+// ══════════════════════════════════════════════════════════
+function renderSidebar() {
+  var container = document.getElementById('sidebar-items');
+  container.innerHTML = '';
+  var sorted = AREAS.slice().sort(function(a,b){return b.score-a.score;});
+  sorted.forEach(function(a) {
+    var s = getAreaState(a.id);
+    var hasSaved = s.reuniones && s.reuniones.length > 0;
+    var assigned = s.trainersAsignados || [];
+    var isTodos  = assigned.length===1 && assigned[0]==='__todos__';
+    var dotsHTML = '';
+    if (isTodos) {
+      dotsHTML = '<div style="padding:3px 10px 6px;width:100%;">'
+               + '<span style="font-size:10px;color:var(--teal);font-weight:600;background:var(--teal-light);padding:1px 7px;border-radius:10px;">Todos</span>'
+               + '</div>';
+    } else if (assigned.length > 0) {
+      var dots = assigned.map(function(t) {
+        return '<div style="width:18px;height:18px;border-radius:50%;background:' + trainerColor(t)
+          + ';display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;" title="' + t + '">'
+          + trainerInitials(t) + '</div>';
+      }).join('');
+      dotsHTML = '<div style="display:flex;flex-wrap:wrap;gap:3px;padding:3px 10px 6px;width:100%;">' + dots + '</div>';
+    }
+    var el = document.createElement('div');
+    el.className = 'sidebar-item';
+    el.id = 'sidebar-' + a.id;
+    el.innerHTML = '<div class="sidebar-item-left">'
+      + '<div class="area-dot dot-' + a.nivel + '"></div>'
+      + '<span style="font-size:13px;">' + a.name + '</span>'
+      + '</div>'
+      + '<div style="display:flex;align-items:center;gap:4px;">'
+      + '<span class="score-pill pill-' + a.nivel + '">' + a.score.toFixed(2) + '</span>'
+      + (hasSaved ? '<span class="sidebar-check">✓</span>' : '')
+      + '</div>'
+      + dotsHTML;
+    el.onclick = function(){ scrollToCard(a.id); showView('areas'); };
+    container.appendChild(el);
+  });
+  updateStats();
+}
+
+function updateStats() {
+  var total=0, checks=0, regs=0;
+  AREAS.forEach(function(a) {
+    var s = getAreaState(a.id);
+    if (s.reuniones && s.reuniones.length>0) total++;
+    if (s.checks) checks += Object.values(s.checks).filter(function(v){return v;}).length;
+    if (s.reuniones) regs += s.reuniones.length;
+  });
+  document.getElementById('kpi-doc').textContent = total+'/'+AREAS.length;
+  document.getElementById('kpi-acc').textContent = checks;
+  document.getElementById('kpi-reg').textContent = regs;
+  document.getElementById('sidebar-stats').textContent =
+    total===0 ? 'Sin acuerdos aún' : total+' área(s) documentada(s) · '+regs+' registro(s)';
+}
+
+function scrollToCard(id) {
+  var card = document.getElementById('card-'+id);
+  if (card) { card.scrollIntoView({behavior:'smooth',block:'start'}); if (!openCards[id]) toggleCard(id); }
+}
+
+function showView(v) {
+  document.getElementById('view-areas').style.display     = v==='areas'     ? 'block':'none';
+  document.getElementById('view-registros').style.display = v==='registros' ? 'block':'none';
+  if (v==='registros') renderRegistros();
+}
+
+function filtrar(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.fpill').forEach(function(p){p.classList.remove('on');});
+  el.classList.add('on');
+  renderCards();
+}
+
+// ══════════════════════════════════════════════════════════
+// BUILD CARDS
+// ══════════════════════════════════════════════════════════
+function renderCards() {
+  var container = document.getElementById('cards-container');
+  container.innerHTML = '';
+  var filtered = AREAS.filter(function(a) {
+    if (currentFilter==='todas')    return true;
+    if (currentFilter==='critica')  return a.nivel==='critica';
+    if (currentFilter==='baja')     return a.nivel==='baja';
+    if (currentFilter==='moderada') return a.nivel==='moderada';
+    if (currentFilter==='buena')    return a.nivel==='alta'||a.nivel==='buena';
+    if (currentFilter==='pendiente') {
+      var s = getAreaState(a.id);
+      return !s.reuniones || s.reuniones.length===0;
+    }
+    return true;
+  });
+  filtered.forEach(function(a){ container.appendChild(buildAreaCard(a)); });
+}
+
+function buildAreaCard(a) {
+  var s = getAreaState(a.id);
+  var hasSaved = s.reuniones && s.reuniones.length>0;
+  var assigned = s.trainersAsignados || [];
+  var isTodos  = assigned.length===1 && assigned[0]==='__todos__';
+
+  // trainer mini-avatars for header
+  var trainerHeaderHTML = '';
+  if (isTodos) {
+    trainerHeaderHTML = '<span style="font-size:11px;background:var(--teal-dark);color:#fff;padding:2px 9px;border-radius:20px;font-weight:500;">★ Todos</span>';
+  } else if (assigned.length>0) {
+    trainerHeaderHTML = assigned.map(function(t) {
+      return '<div style="width:24px;height:24px;border-radius:50%;background:' + trainerColor(t)
+        + ';display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;" title="' + t + '">'
+        + trainerInitials(t) + '</div>';
+    }).join('');
+  }
+
+  var div = document.createElement('div');
+  div.className = 'area-card' + (hasSaved?' has-acuerdo':'');
+  div.id = 'card-' + a.id;
+
+  var sc = a.score>=3.7?'var(--green)':a.score>=3.3?'var(--amber)':a.score>=2.8?'#E07020':'var(--red)';
+
+  div.innerHTML =
+    '<div class="area-header" onclick="toggleCard(\'' + a.id + '\')">'
+    + '<div class="area-color-bar bar-' + a.nivel + '"></div>'
+    + '<div class="area-info">'
+    + '<div class="area-name">' + a.name + '</div>'
+    + '<div class="area-meta">n = ' + a.n + ' colaboradores · Encuesta Marzo 2026</div>'
+    + '</div>'
+    + '<div class="area-right">'
+    + (hasSaved ? '<span class="saved-badge-header">✓ '+s.reuniones.length+' registro(s)</span>' : '')
+    + (trainerHeaderHTML ? '<div style="display:flex;align-items:center;gap:4px;">' + trainerHeaderHTML + '</div>' : '')
+    + '<div class="score-display">'
+    + '<span class="score-num-big" style="color:' + sc + '">' + a.score.toFixed(2) + '</span>'
+    + '<span class="score-max">/ 5.0</span>'
+    + '</div>'
+    + '<span class="nivel-badge badge-' + a.nivel + '">' + nivelLabel(a.nivel) + '</span>'
+    + '<span class="chevron-icon">▼</span>'
+    + '</div>'
+    + '</div>'
+    + '<div class="area-body" id="body-' + a.id + '" style="display:none;">'
+    + '<div class="tabs">'
+    + '<button class="tab active"   onclick="setTab(\'' + a.id + '\',\'scores\',this)">Indicadores</button>'
+    + '<button class="tab"          onclick="setTab(\'' + a.id + '\',\'voces\',this)">Voz del área</button>'
+    + '<button class="tab"          onclick="setTab(\'' + a.id + '\',\'props\',this)">Propuestas Training</button>'
+    + '<button class="tab tab-trainers" onclick="setTab(\'' + a.id + '\',\'trainers\',this)">Trainers asignados</button>'
+    + '<button class="tab"          onclick="setTab(\'' + a.id + '\',\'acuerdo\',this)">Registro de reunión</button>'
+    + '</div>'
+    + buildScoresPane(a)
+    + buildVocesPane(a)
+    + buildPropsPane(a)
+    + buildTrainersPane(a)
+    + buildAcuerdoPane(a)
+    + '</div>';
+  return div;
+}
+
+// ── SCORES PANE ──
+function buildScoresPane(a) {
+  var rows = a.q.map(function(v,i) {
+    return '<div class="score-row">'
+      + '<span class="score-label" title="' + QLABELS[i] + '">' + QLABELS[i] + '</span>'
+      + '<div class="score-bar-bg"><div class="score-bar-fill" style="width:' + Math.round((v/5)*100) + '%;background:' + barColor(v) + ';"></div></div>'
+      + '<span class="score-val" style="color:' + scoreColor(v) + '">' + v.toFixed(2) + '</span>'
+      + '</div>';
+  }).join('');
+  var tags = a.temas.map(function(t){ return '<span class="tag">'+t+'</span>'; }).join('');
+  return '<div class="pane active" id="pane-' + a.id + '-scores">'
+    + '<div class="section-title">Scores por indicador</div>'
+    + '<div class="score-grid">' + rows + '</div>'
+    + '<div class="section-title">Temas que solicita el área</div>'
+    + '<div class="tags-wrap">' + tags + '</div>'
+    + '</div>';
+}
+
+// ── VOCES PANE ──
+function buildVocesPane(a) {
+  var pos = a.perciben.map(function(c){ return '<div class="comment-item">'+c+'</div>'; }).join('');
+  var neg = a.piden.map(function(c){ return '<div class="comment-item warn">'+c+'</div>'; }).join('');
+  return '<div class="pane" id="pane-' + a.id + '-voces">'
+    + '<div class="section-title">Lo que más valoran</div>'
+    + '<div class="comment-list">' + pos + '</div>'
+    + '<div class="section-title">Qué piden para mejorar</div>'
+    + '<div class="comment-list">' + neg + '</div>'
+    + '</div>';
+}
+
+// ── PROPS PANE ──
+function buildPropsPane(a) {
+  var s = getAreaState(a.id);
+  var props = a.props.map(function(p,pi) {
+    var urgLabel = p.urg==='inm'?'Inmediato':p.urg==='med'?'Mediano plazo':'Continuo';
+    return '<div class="prop-item">'
+      + '<div class="prop-top">'
+      + '<span class="prop-icon">'+p.icon+'</span>'
+      + '<div class="prop-content">'
+      + '<div class="prop-title">'+p.t+'</div>'
+      + '<div class="prop-desc">'+p.d+'</div>'
+      + '</div>'
+      + '<span class="urgency-badge urg-'+p.urg+'">'+urgLabel+'</span>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+  var checks = a.props.map(function(p,pi) {
+    var done = s.checks && s.checks[pi];
+    return '<div class="check-item' + (done?' done':'') + '" id="chkrow-'+a.id+'-'+pi+'" onclick="toggleCheck(\''+a.id+'\','+pi+')">'
+      + '<div class="check-box"><span class="check-tick">✓</span></div>'
+      + '<span class="check-text">'+p.t+'</span>'
+      + '</div>';
+  }).join('');
+  return '<div class="pane" id="pane-' + a.id + '-props">'
+    + '<div class="section-title">Propuestas de acción sugeridas</div>'
+    + '<div class="prop-list">' + props + '</div>'
+    + '<div class="section-title" style="margin-top:18px;">Llevar con el equipo trainer (checklist)</div>'
+    + '<div class="check-list" id="checks-' + a.id + '">' + checks + '</div>'
+    + '</div>';
+}
+
+// ── TRAINERS PANE ──
+function buildTrainersPane(a) {
+  var s       = getAreaState(a.id);
+  var assigned = s.trainersAsignados || [];
+  var isTodos  = assigned.length===1 && assigned[0]==='__todos__';
+  var aid      = a.id;
+
+  // individual trainer cards
+  var cards = TRAINERS.map(function(t) {
+    var isSelected = !isTodos && assigned.includes(t);
+    var selClass   = isSelected ? ' selected' : '';
+    return '<div class="trainer-card' + selClass + '" id="tcard-' + aid + '-' + trainerKey(t) + '" onclick="toggleTrainer(\'' + aid + '\',\'' + t + '\')">'
+      + '<div class="trainer-avatar" style="background:' + trainerColor(t) + ';">' + trainerInitials(t) + '</div>'
+      + '<div class="trainer-info">'
+      + '<div class="trainer-name">' + trainerDisplay(t) + '</div>'
+      + '<div class="trainer-role">' + trainerRole(t) + '</div>'
+      + '</div>'
+      + '<span class="trainer-check-icon">✓</span>'
+      + '</div>';
+  }).join('');
+
+  // todos card
+  var todosSelClass   = isTodos ? ' selected-todos' : '';
+  var todosNameStyle  = isTodos ? ' style="color:#fff"' : '';
+  var todosRoleStyle  = isTodos ? ' style="color:var(--teal-mid)"' : '';
+  var todosIconStyle  = isTodos ? ' style="display:block;color:#fff"' : '';
+  var todosCard = '<div class="trainer-card todos-card' + todosSelClass + '" id="tcard-' + aid + '-__todos__" onclick="toggleTodos(\'' + aid + '\')">'
+    + '<div class="trainer-avatar" style="background:var(--teal-dark);font-size:18px;width:36px;height:36px;">★</div>'
+    + '<div class="trainer-info">'
+    + '<div class="trainer-name"' + todosNameStyle + '>Todos los trainers</div>'
+    + '<div class="trainer-role"' + todosRoleStyle + '>Asignar responsabilidad compartida a todo el equipo</div>'
+    + '</div>'
+    + '<span class="trainer-check-icon"' + todosIconStyle + '>✓</span>'
+    + '</div>';
+
+  return '<div class="pane" id="pane-' + aid + '-trainers">'
+    + '<div class="assigned-summary">'
+    + '<div class="assigned-summary-title">Trainers actualmente asignados</div>'
+    + '<div class="assigned-chips" id="chips-' + aid + '">' + assignedChipsHTML(assigned) + '</div>'
+    + '</div>'
+    + '<div class="section-title" style="margin-bottom:12px;">Seleccionar trainers responsables del área</div>'
+    + '<div class="trainer-assign-grid" id="tgrid-' + aid + '">' + cards + todosCard + '</div>'
+    + '<div class="trainer-save-row">'
+    + '<div class="trainer-toast" id="ttoast-' + aid + '">✓ Asignación guardada</div>'
+    + '<div style="display:flex;gap:8px;margin-left:auto;">'
+    + '<button class="btn btn-outline" onclick="limpiarTrainers(\'' + aid + '\')">Quitar asignación</button>'
+    + '<button class="btn btn-primary" onclick="guardarTrainers(\'' + aid + '\')">Guardar asignación</button>'
+    + '</div>'
+    + '</div>'
+    + '</div>';
+}
+
+// ── ACUERDO PANE ──
+function buildAcuerdoPane(a) {
+  var s = getAreaState(a.id);
+  var trainerOptions = TRAINERS.map(function(t){ return '<option value="'+t+'">'+t+'</option>'; }).join('');
+  var existingReuniones = (s.reuniones||[]).map(function(r,i){ return buildReunionEntry(a.id,r,i); }).join('');
+  var prevSection = '';
+  if (s.reuniones && s.reuniones.length > 0) {
+    prevSection = '<div style="border-top:1px solid var(--border);margin-top:20px;padding-top:20px;">'
+      + '<div class="section-title">Registros anteriores (' + s.reuniones.length + ')</div>'
+      + '<div class="acuerdo-list" id="reuniones-list-' + a.id + '">' + existingReuniones + '</div>'
+      + '</div>';
+  } else {
+    prevSection = '<div id="reuniones-list-' + a.id + '" style="display:none;"></div>';
+  }
+
+  return '<div class="pane" id="pane-' + a.id + '-acuerdo">'
+    + '<div class="form-section">'
+    + '<div class="form-section-title">📋 Datos de la reunión</div>'
+    + '<div class="form-grid-3" style="margin-bottom:12px;">'
+    + '<div class="form-field"><label class="form-label">Fecha de reunión</label>'
+    + '<input type="date" class="form-input" id="r-fecha-' + a.id + '"></div>'
+    + '<div class="form-field"><label class="form-label">Trainer que atendió</label>'
+    + '<select class="form-select" id="r-trainer-' + a.id + '">'
+    + '<option value="">Seleccionar trainer</option>' + trainerOptions
+    + '<option value="otro">Otro...</option></select></div>'
+    + '<div class="form-field"><label class="form-label">Trainer (si no está en lista)</label>'
+    + '<input type="text" class="form-input" id="r-trainer-otro-' + a.id + '" placeholder="Nombre del trainer"></div>'
+    + '</div>'
+    + '<div class="form-grid-3">'
+    + '<div class="form-field"><label class="form-label">Modalidad</label>'
+    + '<select class="form-select" id="r-modalidad-' + a.id + '">'
+    + '<option value="">Seleccionar</option><option>Presencial</option><option>Videollamada</option><option>Híbrida</option>'
+    + '</select></div>'
+    + '<div class="form-field"><label class="form-label">Duración</label>'
+    + '<input type="text" class="form-input" id="r-duracion-' + a.id + '" placeholder="Ej: 1 hora"></div>'
+    + '<div class="form-field"><label class="form-label">Prioridad asignada</label>'
+    + '<select class="form-select" id="r-prio-' + a.id + '">'
+    + '<option value="">Seleccionar</option>'
+    + '<option value="alta">Alta — Esta semana</option>'
+    + '<option value="media">Media — Este mes</option>'
+    + '<option value="plan">Planeación — Próximo mes</option>'
+    + '</select></div>'
+    + '</div></div>'
+    + '<div class="form-section">'
+    + '<div class="form-section-title">🤝 Acuerdos de la reunión</div>'
+    + '<div class="form-grid">'
+    + '<div class="form-field"><label class="form-label">Compromisos del área de Training</label>'
+    + '<textarea class="form-textarea" id="r-training-' + a.id + '" placeholder="Qué se compromete Training a hacer..."></textarea></div>'
+    + '<div class="form-field"><label class="form-label">Compromisos del área operativa</label>'
+    + '<textarea class="form-textarea" id="r-area-' + a.id + '" placeholder="Qué se compromete a hacer el área..."></textarea></div>'
+    + '</div></div>'
+    + '<div class="form-section">'
+    + '<div class="form-section-title">🗒️ Notas de la reunión</div>'
+    + '<div class="form-field"><label class="form-label">Observaciones generales, contexto adicional o hallazgos</label>'
+    + '<textarea class="form-textarea" id="r-notas-' + a.id + '" placeholder="Notas libres de la reunión..."></textarea></div>'
+    + '<div class="form-field" style="margin-top:10px;"><label class="form-label">Fecha de seguimiento acordada</label>'
+    + '<input type="date" class="form-input" id="r-seguimiento-' + a.id + '" style="max-width:200px;"></div>'
+    + '</div>'
+    + '<div class="form-footer">'
+    + '<div class="toast" id="toast-' + a.id + '">✓ Registro guardado correctamente</div>'
+    + '<div style="display:flex;gap:8px;">'
+    + '<button class="btn btn-outline" onclick="limpiarForm(\'' + a.id + '\')">Limpiar</button>'
+    + '<button class="btn btn-primary" onclick="guardarReunion(\'' + a.id + '\')">Guardar registro</button>'
+    + '</div></div>'
+    + prevSection
+    + '</div>';
+}
+
+function buildReunionEntry(areaId, r, idx) {
+  var prioLabel = {alta:'Alta — Esta semana',media:'Media — Este mes',plan:'Planeación — Próximo mes'}[r.prio]||'-';
+  var body = '';
+  if (r.training) body += '<div class="entry-field"><div class="entry-lbl">Compromisos Training</div><div class="entry-val">'+r.training+'</div></div>';
+  if (r.area)     body += '<div class="entry-field"><div class="entry-lbl">Compromisos del área</div><div class="entry-val">'+r.area+'</div></div>';
+  if (r.notas)    body += '<div class="entry-field"><div class="entry-lbl">Notas</div><div class="entry-val">'+r.notas+'</div></div>';
+  if (r.seguimiento) body += '<div class="entry-field"><div class="entry-lbl">Seguimiento</div><div class="entry-val">'+r.seguimiento+'</div></div>';
+  if (r.prio)     body += '<div class="entry-field"><div class="entry-lbl">Prioridad</div><div class="entry-val">'+prioLabel+'</div></div>';
+  return '<div class="acuerdo-entry" id="reunion-'+areaId+'-'+idx+'">'
+    + '<div class="acuerdo-entry-header">'
+    + '<div><span style="font-weight:600;">'+(r.fecha||'Sin fecha')+'</span>'
+    + '<span style="color:var(--ink-soft);margin-left:10px;font-size:12px;">'+(r.trainer||'Sin asignar')+' · '+(r.modalidad||'')+'</span></div>'
+    + '<button class="del-btn" onclick="eliminarReunion(\''+areaId+'\','+idx+')">Eliminar</button>'
+    + '</div>'
+    + '<div class="acuerdo-entry-body">' + body + '</div>'
+    + '</div>';
+}
+
+// ══════════════════════════════════════════════════════════
+// INTERACTIONS
+// ══════════════════════════════════════════════════════════
+function toggleCard(id) {
+  openCards[id] = !openCards[id];
+  var body   = document.getElementById('body-'+id);
+  var header = document.querySelector('#card-'+id+' .area-header');
+  body.style.display = openCards[id] ? 'block' : 'none';
+  if (openCards[id]) header.classList.add('open');
+  else header.classList.remove('open');
+}
+
+function setTab(id, tab, el) {
+  var body = document.getElementById('body-'+id);
+  body.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  el.classList.add('active');
+  body.querySelectorAll('.pane').forEach(function(p){p.classList.remove('active');});
+  document.getElementById('pane-'+id+'-'+tab).classList.add('active');
+}
+
+function toggleCheck(id, pi) {
+  var s = getAreaState(id);
+  if (!s.checks) s.checks = {};
+  s.checks[pi] = !s.checks[pi];
+  var row = document.getElementById('chkrow-'+id+'-'+pi);
+  if (s.checks[pi]) row.classList.add('done');
+  else row.classList.remove('done');
+  saveState();
+  updateStats();
+}
+
+// ── TRAINER INTERACTIONS ──
+function toggleTrainer(areaId, trainer) {
+  var s = getAreaState(areaId);
+  // remove todos mode
+  s.trainersAsignados = s.trainersAsignados.filter(function(t){return t!=='__todos__';});
+  var idx = s.trainersAsignados.indexOf(trainer);
+  if (idx > -1) s.trainersAsignados.splice(idx,1);
+  else s.trainersAsignados.push(trainer);
+  refreshTrainerUI(areaId);
+}
+
+function toggleTodos(areaId) {
+  var s = getAreaState(areaId);
+  var isTodos = s.trainersAsignados.length===1 && s.trainersAsignados[0]==='__todos__';
+  s.trainersAsignados = isTodos ? [] : ['__todos__'];
+  refreshTrainerUI(areaId);
+}
+
+function refreshTrainerUI(areaId) {
+  var s        = getAreaState(areaId);
+  var assigned = s.trainersAsignados || [];
+  var isTodos  = assigned.length===1 && assigned[0]==='__todos__';
+
+  // update individual cards
+  TRAINERS.forEach(function(t) {
+    var card = document.getElementById('tcard-' + areaId + '-' + trainerKey(t));
+    if (!card) return;
+    if (!isTodos && assigned.includes(t)) card.classList.add('selected');
+    else card.classList.remove('selected');
+  });
+
+  // update todos card
+  var todosCard = document.getElementById('tcard-' + areaId + '-__todos__');
+  if (todosCard) {
+    var nm = todosCard.querySelector('.trainer-name');
+    var rl = todosCard.querySelector('.trainer-role');
+    var ic = todosCard.querySelector('.trainer-check-icon');
+    if (isTodos) {
+      todosCard.classList.add('selected-todos');
+      nm.style.color = '#fff';
+      rl.style.color = 'var(--teal-mid)';
+      ic.style.display = 'block';
+      ic.style.color = '#fff';
+    } else {
+      todosCard.classList.remove('selected-todos');
+      nm.style.color = '';
+      rl.style.color = '';
+      ic.style.cssText = '';
+    }
+  }
+
+  // update chips
+  var chipsEl = document.getElementById('chips-' + areaId);
+  if (chipsEl) chipsEl.innerHTML = assignedChipsHTML(assigned);
+}
+
+function guardarTrainers(areaId) {
+  saveState();
+  var toast = document.getElementById('ttoast-' + areaId);
+  if (toast) { toast.classList.add('show'); setTimeout(function(){toast.classList.remove('show');}, 2500); }
+  renderSidebar();
+  var card = document.getElementById('card-' + areaId);
+  if (card) {
+    var s = getAreaState(areaId);
+    var hasR = s.reuniones && s.reuniones.length > 0;
+    if (hasR) card.classList.add('has-acuerdo');
+    else card.classList.remove('has-acuerdo');
+  }
+}
+
+function limpiarTrainers(areaId) {
+  getAreaState(areaId).trainersAsignados = [];
+  refreshTrainerUI(areaId);
+}
+
+// ── REUNION FORM ──
+function guardarReunion(id) {
+  var s = getAreaState(id);
+  var trainerSel   = document.getElementById('r-trainer-' + id).value;
+  var trainerOtro  = document.getElementById('r-trainer-otro-' + id).value;
+  var trainer = (trainerSel === 'otro') ? trainerOtro : trainerSel;
+  var reunion = {
+    fecha:       document.getElementById('r-fecha-' + id).value,
+    trainer:     trainer,
+    modalidad:   document.getElementById('r-modalidad-' + id).value,
+    duracion:    document.getElementById('r-duracion-' + id).value,
+    prio:        document.getElementById('r-prio-' + id).value,
+    training:    document.getElementById('r-training-' + id).value,
+    area:        document.getElementById('r-area-' + id).value,
+    notas:       document.getElementById('r-notas-' + id).value,
+    seguimiento: document.getElementById('r-seguimiento-' + id).value,
+    ts: Date.now()
+  };
+  if (!s.reuniones) s.reuniones = [];
+  s.reuniones.push(reunion);
+  saveState();
+  var toast = document.getElementById('toast-' + id);
+  toast.classList.add('show');
+  setTimeout(function(){toast.classList.remove('show');}, 3000);
+  renderCards();
+  openCards[id] = true;
+  document.getElementById('body-' + id).style.display = 'block';
+  var acuerdoTab = document.querySelector('#body-' + id + ' .tab:nth-child(5)');
+  if (acuerdoTab) setTab(id, 'acuerdo', acuerdoTab);
+  renderSidebar();
+}
+
+function limpiarForm(id) {
+  ['r-fecha','r-trainer','r-trainer-otro','r-modalidad','r-duracion','r-prio','r-training','r-area','r-notas','r-seguimiento'].forEach(function(f) {
+    var el = document.getElementById(f + '-' + id);
+    if (el) el.value = '';
+  });
+}
+
+function eliminarReunion(areaId, idx) {
+  if (!confirm('¿Eliminar este registro?')) return;
+  getAreaState(areaId).reuniones.splice(idx,1);
+  saveState();
+  renderCards();
+  renderSidebar();
+  openCards[areaId] = true;
+}
+
+// ── REGISTROS VIEW ──
+function renderRegistros() {
+  var container = document.getElementById('registros-container');
+  container.innerHTML = '';
+  var total = 0;
+  AREAS.forEach(function(a) {
+    var s = getAreaState(a.id);
+    if (!s.reuniones || s.reuniones.length===0) return;
+    total += s.reuniones.length;
+    var assigned = s.trainersAsignados || [];
+    var isTodos  = assigned.length===1 && assigned[0]==='__todos__';
+    var tchips = '';
+    if (isTodos) {
+      tchips = '<div style="display:inline-flex;align-items:center;gap:5px;background:var(--teal-dark);color:#fff;font-size:11px;padding:3px 9px;border-radius:20px;"><span>★</span>Todos los trainers</div>';
+    } else if (assigned.length > 0) {
+      tchips = assigned.map(function(t) {
+        return '<div style="display:inline-flex;align-items:center;gap:5px;background:' + trainerColor(t) + ';color:#fff;font-size:11px;padding:3px 8px 3px 4px;border-radius:20px;">'
+          + '<div style="width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,0.25);display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;">'
+          + trainerInitials(t) + '</div>' + trainerDisplay(t) + '</div>';
+      }).join('');
+    }
+    var nivLabel = {alta:'Alta',buena:'Buena',moderada:'Moderada',baja:'Baja',critica:'Crítica'}[a.nivel];
+    var reunionesHTML = s.reuniones.map(function(r, i) {
+      var prioLabel = {alta:'Alta — Esta semana',media:'Media — Este mes',plan:'Planeación — Próximo mes'}[r.prio]||'Sin asignar';
+      var sep = i>0 ? 'border-top:1px solid var(--border);padding-top:14px;margin-top:14px;' : '';
+      return '<div class="registro-section" style="' + sep + '">'
+        + '<div class="reg-grid">'
+        + '<div class="reg-info"><div class="reg-lbl">Fecha</div><div class="reg-val">'+(r.fecha||'—')+'</div></div>'
+        + '<div class="reg-info"><div class="reg-lbl">Trainer</div><div class="reg-val">'+(r.trainer||'—')+'</div></div>'
+        + '<div class="reg-info"><div class="reg-lbl">Modalidad</div><div class="reg-val">'+(r.modalidad||'—')+(r.duracion?' · '+r.duracion:'')+'</div></div>'
+        + '</div>'
+        + '<div class="reg-grid">'
+        + '<div class="reg-info"><div class="reg-lbl">Prioridad</div><div class="reg-val">'+prioLabel+'</div></div>'
+        + '<div class="reg-info"><div class="reg-lbl">Seguimiento</div><div class="reg-val">'+(r.seguimiento||'Sin fecha')+'</div></div>'
+        + '<div class="reg-info" style="background:transparent;"></div>'
+        + '</div>'
+        + (r.training ? '<div class="registro-section"><div class="reg-lbl">Compromisos Training</div><div class="reg-val" style="white-space:pre-wrap;">'+r.training+'</div></div>' : '')
+        + (r.area     ? '<div class="registro-section"><div class="reg-lbl">Compromisos área</div><div class="reg-val" style="white-space:pre-wrap;">'+r.area+'</div></div>' : '')
+        + (r.notas    ? '<div class="registro-section"><div class="reg-lbl">Notas</div><div class="reg-val" style="white-space:pre-wrap;">'+r.notas+'</div></div>' : '')
+        + '</div>';
+    }).join('');
+
+    var block = document.createElement('div');
+    block.className = 'registro-card';
+    block.innerHTML = '<div class="registro-header">'
+      + '<div>'
+      + '<div class="registro-title">' + a.name + '</div>'
+      + '<div class="registro-meta">Score: ' + a.score.toFixed(2) + ' / 5.0 · ' + nivLabel + ' · ' + s.reuniones.length + ' reunión(es)</div>'
+      + (tchips ? '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">' + tchips + '</div>' : '')
+      + '</div>'
+      + '<span class="nivel-badge badge-' + a.nivel + '">' + nivLabel + '</span>'
+      + '</div>'
+      + '<div class="registro-body">' + reunionesHTML + '</div>';
+    container.appendChild(block);
+  });
+  if (total===0) {
+    container.innerHTML = '<div class="empty-state">'
+      + '<div class="empty-icon">📋</div>'
+      + '<div class="empty-title">Sin registros aún</div>'
+      + '<div class="empty-desc">Los registros de reunión aparecerán aquí una vez que los guardes en cada área.</div>'
+      + '</div>';
+  }
+}
+
+// ── EXPORT ──
+function exportarTodo() {
+  var txt = 'TMLF — ACUERDOS Y REGISTROS DE REUNIÓN TRAINING\n';
+  txt += '='.repeat(55) + '\n';
+  txt += 'Encuesta de satisfacción · Marzo 2026 · 192 respuestas\n';
+  txt += 'Generado: ' + new Date().toLocaleDateString('es-MX',{dateStyle:'long'}) + '\n\n';
+  var hasData = false;
+  AREAS.forEach(function(a) {
+    var s = getAreaState(a.id);
+    var assigned = s.trainersAsignados || [];
+    var isTodos  = assigned.length===1 && assigned[0]==='__todos__';
+    var hasR     = s.reuniones && s.reuniones.length > 0;
+    if (!hasR && assigned.length===0) return;
+    hasData = true;
+    txt += '\n' + '-'.repeat(55) + '\n';
+    txt += 'ÁREA: ' + a.name + ' | Score: ' + a.score.toFixed(2) + ' / 5.0 | ' + a.nivel.toUpperCase() + '\n';
+    if (isTodos) txt += 'Trainers asignados: Todos los trainers\n';
+    else if (assigned.length>0) txt += 'Trainers asignados: ' + assigned.join(', ') + '\n';
+    txt += '-'.repeat(55) + '\n';
+    (s.reuniones||[]).forEach(function(r, i) {
+      txt += '\nREUNIÓN ' + (i+1) + ':\n';
+      if (r.fecha)       txt += '  Fecha: ' + r.fecha + '\n';
+      if (r.trainer)     txt += '  Trainer: ' + r.trainer + '\n';
+      if (r.modalidad)   txt += '  Modalidad: ' + r.modalidad + (r.duracion?' ('+r.duracion+')':'') + '\n';
+      if (r.prio)        txt += '  Prioridad: ' + r.prio + '\n';
+      if (r.seguimiento) txt += '  Seguimiento: ' + r.seguimiento + '\n';
+      if (r.training)    txt += '\n  Compromisos Training:\n' + r.training.split('\n').map(function(l){return '    '+l;}).join('\n') + '\n';
+      if (r.area)        txt += '\n  Compromisos del área:\n' + r.area.split('\n').map(function(l){return '    '+l;}).join('\n') + '\n';
+      if (r.notas)       txt += '\n  Notas:\n' + r.notas.split('\n').map(function(l){return '    '+l;}).join('\n') + '\n';
+    });
+    var checks = s.checks || {};
+    var confirmed = a.props.filter(function(_,i){return checks[i];});
+    if (confirmed.length>0) {
+      txt += '\n  Acciones confirmadas:\n';
+      confirmed.forEach(function(p){ txt += '    ✓ ' + p.t + '\n'; });
+    }
+  });
+  if (!hasData) { alert('No hay registros para exportar.'); return; }
+  var blob = new Blob([txt],{type:'text/plain;charset=utf-8'});
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  a.href = url;
+  a.download = 'Acuerdos_Training_TMLF_' + new Date().toISOString().slice(0,10) + '.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ══════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════
+function init() {
+  renderSidebar();
+  renderCards();
+}
+init();
+
+</script>
+</body>
+</html>
