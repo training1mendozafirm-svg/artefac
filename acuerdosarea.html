@@ -452,6 +452,29 @@ body {
 .entry-val { color: var(--ink); line-height: 1.5; }
 .del-btn { font-size: 11px; color: var(--red); background: none; border: none; cursor: pointer; padding: 2px 6px; border-radius: 4px; }
 .del-btn:hover { background: var(--red-light); }
+.edit-btn { font-size: 11px; color: var(--teal); background: none; border: none; cursor: pointer; padding: 2px 6px; border-radius: 4px; margin-right: 4px; }
+.edit-btn:hover { background: var(--teal-light); }
+
+/* ── MODAL EDICIÓN ── */
+#modal-editar { display:none; }
+#modal-editar.open { display:flex !important; }
+.modal-editar-inner {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  width: 600px;
+  max-width: 96vw;
+  box-shadow: var(--shadow-lg);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.modal-editar-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 20px;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.modal-editar-sub { font-size: 12px; color: var(--ink-soft); margin-bottom: 20px; }
 
 .add-acuerdo-btn {
   display: flex; align-items: center; gap: 6px;
@@ -551,7 +574,123 @@ body {
   .pane { display: block !important; }
 }
 
-/* ── TRAINER ASSIGNMENT PANE ── */
+/* ── SIDEBAR SEARCH + ADD ── */
+.sidebar-search {
+  width: 100%;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.sidebar-search:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 2px rgba(0,97,110,0.12); }
+.sidebar-add-btn {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--teal-light);
+  border: 1px solid var(--teal-mid);
+  color: var(--teal);
+  font-size: 18px; line-height: 1;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+  font-family: 'DM Sans', sans-serif;
+}
+.sidebar-add-btn:hover { background: var(--teal); color: #fff; border-color: var(--teal); }
+
+/* ── REGISTROS FILTER BAR ── */
+.reg-filter-bar {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow);
+}
+.reg-filter-group { display: flex; flex-direction: column; gap: 4px; min-width: 150px; flex: 1; }
+.reg-filter-lbl { font-size: 11px; font-weight: 500; color: var(--ink-soft); }
+.reg-filter-select, .reg-filter-input {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--white);
+  color: var(--ink);
+  width: 100%;
+}
+.reg-filter-select:focus, .reg-filter-input:focus {
+  outline: none; border-color: var(--teal); box-shadow: 0 0 0 2px rgba(0,97,110,0.1);
+}
+.reg-filter-clear {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px; padding: 8px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface); color: var(--ink-soft);
+  cursor: pointer; align-self: flex-end; white-space: nowrap;
+}
+.reg-filter-clear:hover { border-color: var(--red); color: var(--red); background: var(--red-light); }
+
+/* ── MODAL ── */
+#modal-area { display: none; }
+#modal-area.open { display: flex !important; }
+
+/* ── EXPORT MODAL ── */
+.exp-scope-btn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 500;
+  padding: 8px 18px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--white); color: var(--ink-mid);
+  cursor: pointer; transition: all 0.13s;
+}
+.exp-scope-btn:hover { border-color: var(--teal); color: var(--teal); }
+.exp-scope-btn.active { background: var(--teal); color: #fff; border-color: var(--teal); }
+
+.exp-area-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: background 0.1s;
+}
+.exp-area-row:last-child { border-bottom: none; }
+.exp-area-row:hover { background: var(--surface); }
+.exp-area-row.selected { background: var(--teal-light); }
+.exp-area-cb { width:16px; height:16px; border-radius:4px; border:1.5px solid var(--border); flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all 0.12s; }
+.exp-area-row.selected .exp-area-cb { background:var(--teal); border-color:var(--teal); color:#fff; font-size:11px; }
+.exp-area-name { font-size:13px; color:var(--ink); flex:1; }
+.exp-area-meta { font-size:11px; color:var(--ink-soft); }
+
+.exp-fmt-opt {
+  flex:1; border:1px solid var(--border); border-radius:var(--radius);
+  padding:10px 12px; cursor:pointer; display:flex; flex-direction:column; gap:2px;
+  transition: all 0.13s;
+}
+.exp-fmt-opt:hover { border-color:var(--teal); }
+.exp-fmt-icon { font-size:20px; margin-bottom:2px; }
+.exp-fmt-lbl { font-size:13px; font-weight:500; color:var(--ink); }
+.exp-fmt-desc { font-size:11px; color:var(--ink-soft); }
+
+.exp-mini-btn {
+  font-family:'DM Sans',sans-serif; font-size:11px;
+  padding:3px 9px; border-radius:20px;
+  border:1px solid var(--border); background:var(--white); color:var(--ink-soft);
+  cursor:pointer;
+}
+.exp-mini-btn:hover { border-color:var(--teal); color:var(--teal); }
+
+#modal-export { display:none; }
+#modal-export.open { display:flex !important; }
 .trainer-assign-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -652,9 +791,10 @@ body {
 <div class="topbar">
   <div class="topbar-brand">TMLF <span>· Training Ops</span></div>
   <div class="topbar-actions">
+    <span id="sync-indicator" style="font-size:11px;color:rgba(255,255,255,0.6);display:flex;align-items:center;gap:0;margin-right:4px;white-space:nowrap;"></span>
     <button class="btn btn-ghost" onclick="showView('areas')">Áreas</button>
     <button class="btn btn-ghost" onclick="showView('registros')">Registros</button>
-    <button class="btn btn-primary" onclick="exportarTodo()">Exportar</button>
+    <button class="btn btn-primary" onclick="abrirModalExport()">Exportar</button>
   </div>
 </div>
 
@@ -663,7 +803,11 @@ body {
 <!-- SIDEBAR -->
 <nav class="sidebar" id="sidebar">
   <div class="sidebar-section">
-    <div class="sidebar-label">Áreas por nivel</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div class="sidebar-label" style="margin-bottom:0;">Áreas por nivel</div>
+      <button class="sidebar-add-btn" onclick="abrirModalArea()" title="Agregar nueva área">+</button>
+    </div>
+    <input type="text" id="sidebar-search" class="sidebar-search" placeholder="Buscar área..." oninput="filtrarSidebar(this.value)">
   </div>
   <div id="sidebar-items"></div>
   <div class="sidebar-divider"></div>
@@ -672,6 +816,158 @@ body {
     <div style="font-size:12px;color:var(--ink-soft);padding:4px 10px;" id="sidebar-stats">Sin acuerdos aún</div>
   </div>
 </nav>
+
+<!-- MODAL EDITAR REUNIÓN -->
+<div id="modal-editar" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;">
+  <div class="modal-editar-inner">
+    <div class="modal-editar-title">Editar registro</div>
+    <div class="modal-editar-sub" id="edit-sub">—</div>
+    <input type="hidden" id="edit-area-id">
+    <input type="hidden" id="edit-idx">
+    <div class="form-section">
+      <div class="form-section-title">📋 Datos de la reunión</div>
+      <div class="form-grid-3" style="margin-bottom:12px;">
+        <div class="form-field"><label class="form-label">Fecha de reunión</label>
+          <input type="date" class="form-input" id="edit-fecha"></div>
+        <div class="form-field"><label class="form-label">Trainer</label>
+          <select class="form-select" id="edit-trainer"><option value="">Seleccionar</option></select></div>
+        <div class="form-field"><label class="form-label">Trainer (otro)</label>
+          <input type="text" class="form-input" id="edit-trainer-otro" placeholder="Si no está en la lista"></div>
+      </div>
+      <div class="form-grid-3">
+        <div class="form-field"><label class="form-label">Modalidad</label>
+          <select class="form-select" id="edit-modalidad">
+            <option value="">Seleccionar</option><option>Presencial</option><option>Videollamada</option><option>Híbrida</option>
+          </select></div>
+        <div class="form-field"><label class="form-label">Duración</label>
+          <input type="text" class="form-input" id="edit-duracion" placeholder="Ej: 1 hora"></div>
+        <div class="form-field"><label class="form-label">Prioridad</label>
+          <select class="form-select" id="edit-prio">
+            <option value="">Seleccionar</option>
+            <option value="alta">Alta — Esta semana</option>
+            <option value="media">Media — Este mes</option>
+            <option value="plan">Planeación — Próximo mes</option>
+          </select></div>
+      </div>
+    </div>
+    <div class="form-section">
+      <div class="form-section-title">🤝 Acuerdos</div>
+      <div class="form-grid">
+        <div class="form-field"><label class="form-label">Compromisos del área de Training</label>
+          <textarea class="form-textarea" id="edit-training"></textarea></div>
+        <div class="form-field"><label class="form-label">Compromisos del área operativa</label>
+          <textarea class="form-textarea" id="edit-area-txt"></textarea></div>
+      </div>
+    </div>
+    <div class="form-section">
+      <div class="form-section-title">🗒️ Notas y seguimiento</div>
+      <div class="form-field" style="margin-bottom:10px;"><label class="form-label">Notas</label>
+        <textarea class="form-textarea" id="edit-notas"></textarea></div>
+      <div class="form-field"><label class="form-label">Fecha de seguimiento</label>
+        <input type="date" class="form-input" id="edit-seguimiento" style="max-width:200px;"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">
+      <button class="btn btn-danger" onclick="eliminarDesdeModal()">Eliminar registro</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-outline" onclick="cerrarModalEditar()">Cancelar</button>
+        <button class="btn btn-primary" onclick="guardarEdicion()">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EXPORTAR -->
+<div id="modal-export" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;">
+  <div style="background:var(--white);border-radius:var(--radius-lg);padding:28px;width:520px;max-width:94vw;box-shadow:var(--shadow-lg);max-height:88vh;overflow-y:auto;">
+    <div style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--ink);margin-bottom:4px;">Exportar registros</div>
+    <div style="font-size:12px;color:var(--ink-soft);margin-bottom:20px;">Selecciona qué áreas incluir en el archivo de exportación.</div>
+
+    <!-- selector todo / por area -->
+    <div style="display:flex;gap:8px;margin-bottom:16px;">
+      <button class="exp-scope-btn active" id="exp-btn-todo" onclick="setExportScope('todo',this)">Todas las áreas</button>
+      <button class="exp-scope-btn" id="exp-btn-selec" onclick="setExportScope('selec',this)">Seleccionar áreas</button>
+    </div>
+
+    <!-- lista de areas (solo visible en modo selec) -->
+    <div id="exp-area-list" style="display:none;margin-bottom:16px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+      <div style="background:var(--surface);padding:8px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:11px;font-weight:600;color:var(--ink-soft);letter-spacing:0.05em;text-transform:uppercase;">Áreas disponibles</span>
+        <div style="display:flex;gap:8px;">
+          <button class="exp-mini-btn" onclick="toggleAllAreas(true)">Marcar todas</button>
+          <button class="exp-mini-btn" onclick="toggleAllAreas(false)">Desmarcar</button>
+        </div>
+      </div>
+      <div id="exp-area-checks" style="max-height:260px;overflow-y:auto;"></div>
+    </div>
+
+    <!-- formato -->
+    <div style="margin-bottom:18px;">
+      <div style="font-size:11px;font-weight:600;color:var(--ink-soft);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:8px;">Formato de descarga</div>
+      <div style="display:flex;gap:8px;">
+        <label class="exp-fmt-opt" id="fmt-txt">
+          <input type="radio" name="exp-fmt" value="txt" checked style="display:none;">
+          <span class="exp-fmt-icon">📄</span>
+          <span class="exp-fmt-lbl">Texto (.txt)</span>
+          <span class="exp-fmt-desc">Simple, para compartir por correo</span>
+        </label>
+        <label class="exp-fmt-opt" id="fmt-csv">
+          <input type="radio" name="exp-fmt" value="csv" style="display:none;">
+          <span class="exp-fmt-icon">📊</span>
+          <span class="exp-fmt-lbl">CSV (.csv)</span>
+          <span class="exp-fmt-desc">Para abrir en Excel o Sheets</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- preview count -->
+    <div id="exp-preview-lbl" style="font-size:12px;color:var(--ink-soft);background:var(--surface);border-radius:var(--radius);padding:8px 12px;margin-bottom:18px;"></div>
+
+    <div style="display:flex;justify-content:flex-end;gap:10px;">
+      <button class="btn btn-outline" onclick="cerrarModalExport()">Cancelar</button>
+      <button class="btn btn-primary" onclick="ejecutarExport()">Descargar</button>
+    </div>
+  </div>
+</div>
+<div id="modal-area" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;">
+  <div style="background:var(--white);border-radius:var(--radius-lg);padding:28px;width:460px;max-width:94vw;box-shadow:var(--shadow-lg);">
+    <div style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--ink);margin-bottom:4px;">Agregar nueva área</div>
+    <div style="font-size:12px;color:var(--ink-soft);margin-bottom:20px;">El área se agregará al panel y a la barra lateral.</div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div class="form-field">
+        <label class="form-label">Nombre del área *</label>
+        <input type="text" class="form-input" id="nueva-area-nombre" placeholder="Ej: Case Management">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-field">
+          <label class="form-label">Nivel de satisfacción</label>
+          <select class="form-select" id="nueva-area-nivel">
+            <option value="alta">Alta — 4.0+</option>
+            <option value="buena">Buena — 3.7+</option>
+            <option value="moderada" selected>Moderada — 3.4+</option>
+            <option value="baja">Baja — 3.1+</option>
+            <option value="critica">Crítica — &lt;3.1</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Score aproximado</label>
+          <input type="number" class="form-input" id="nueva-area-score" min="1" max="5" step="0.01" placeholder="3.50">
+        </div>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Número de colaboradores (n)</label>
+        <input type="number" class="form-input" id="nueva-area-n" min="1" placeholder="Ej: 10">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Contexto inicial / observaciones</label>
+        <textarea class="form-textarea" id="nueva-area-contexto" placeholder="Descripción breve del área, sus funciones o necesidades iniciales detectadas..." style="min-height:70px;"></textarea>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
+      <button class="btn btn-outline" onclick="cerrarModalArea()">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarAgregarArea()">Agregar área</button>
+    </div>
+  </div>
+</div>
 
 <!-- MAIN -->
 <main class="main" id="main-content">
@@ -706,13 +1002,34 @@ body {
 
   <!-- VISTA REGISTROS -->
   <div id="view-registros" style="display:none;">
-    <div class="header-card" style="margin-bottom:24px;">
+    <div class="header-card" style="margin-bottom:20px;">
       <div>
         <div class="header-title">Registros de reunión</div>
         <div class="header-sub">Historial de acuerdos documentados con los trainers</div>
       </div>
-      <button class="btn btn-ghost" onclick="exportarTodo()">Exportar todo</button>
+      <button class="btn btn-ghost" onclick="abrirModalExport()">Exportar</button>
     </div>
+    <!-- FILTROS REGISTROS -->
+    <div class="reg-filter-bar">
+      <div class="reg-filter-group">
+        <label class="reg-filter-lbl">Área</label>
+        <select class="reg-filter-select" id="reg-filter-area" onchange="renderRegistros()">
+          <option value="">Todas las áreas</option>
+        </select>
+      </div>
+      <div class="reg-filter-group">
+        <label class="reg-filter-lbl">Trainer</label>
+        <select class="reg-filter-select" id="reg-filter-trainer" onchange="renderRegistros()">
+          <option value="">Todos los trainers</option>
+        </select>
+      </div>
+      <div class="reg-filter-group">
+        <label class="reg-filter-lbl">Buscar en notas</label>
+        <input type="text" class="reg-filter-input" id="reg-filter-texto" placeholder="Palabra clave..." oninput="renderRegistros()">
+      </div>
+      <button class="reg-filter-clear" onclick="limpiarFiltrosReg()">Limpiar filtros</button>
+    </div>
+    <div id="reg-resultado-lbl" style="font-size:12px;color:var(--ink-soft);margin-bottom:12px;"></div>
     <div id="registros-container"></div>
   </div>
 
@@ -879,20 +1196,175 @@ const AREAS = [
 ];
 
 // ══════════════════════════════════════════════════════════
-// STATE
+// CONFIGURACIÓN — PEGA AQUÍ TU URL DE APPS SCRIPT
 // ══════════════════════════════════════════════════════════
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbzKg3zvAegQ0Z9GKUY6iKXoXo71_2yOuADfdEqlomCbYY7SmBXsZR15XlWrS6XhMXpEDw/exec';
+
+// ══════════════════════════════════════════════════════════
+// STATE — Híbrido: localStorage (inmediato) + GAS (compartido)
+// ══════════════════════════════════════════════════════════
+var STATE       = {};
+var GAS_READY   = false;   // true cuando GAS respondió correctamente
+var SYNC_TIMER  = null;    // debounce para no saturar el endpoint
+
 function loadState() {
   try { return JSON.parse(localStorage.getItem('tmlf_acuerdos_v2') || '{}'); } catch(e) { return {}; }
 }
-function saveState() {
+
+// Guarda en localStorage inmediatamente y programa sync con GAS
+function saveState(motivo) {
   try { localStorage.setItem('tmlf_acuerdos_v2', JSON.stringify(STATE)); } catch(e) {}
+  if (GAS_URL) scheduleSync(motivo || 'saveState');
+  actualizarIndicadorSync('pending');
 }
-var STATE = loadState();
+
+// Sync con debounce de 1.5s para no disparar en cada tecla
+function scheduleSync(motivo) {
+  if (SYNC_TIMER) clearTimeout(SYNC_TIMER);
+  SYNC_TIMER = setTimeout(function() { syncConGAS(motivo); }, 1500);
+}
+
+function syncConGAS(motivo) {
+  if (!GAS_URL) return;
+  actualizarIndicadorSync('syncing');
+  var payload = { action: 'saveState', state: STATE, meta: { user: 'Karen', motivo: motivo || 'auto' } };
+  gasPost(payload, function(res) {
+    if (res && res.ok) {
+      actualizarIndicadorSync('ok');
+    } else {
+      actualizarIndicadorSync('error');
+    }
+  });
+}
+
+// Carga el estado desde GAS al iniciar (fuente de verdad compartida)
+function cargarDesdeGAS(callback) {
+  if (!GAS_URL) { callback && callback(false); return; }
+  actualizarIndicadorSync('syncing');
+  gasGet('getState', function(res) {
+    if (res && res.ok && res.data && Object.keys(res.data).length > 0) {
+      // Mezclar: GAS tiene precedencia sobre localStorage
+      var gasState = res.data;
+      var localState = loadState();
+      // Si GAS tiene datos más recientes, usarlos; si no, conservar local
+      STATE = mergeStates(localState, gasState);
+      try { localStorage.setItem('tmlf_acuerdos_v2', JSON.stringify(STATE)); } catch(e) {}
+      GAS_READY = true;
+      actualizarIndicadorSync('ok');
+      callback && callback(true);
+    } else {
+      // GAS vacío o error → usar localStorage
+      STATE = loadState();
+      actualizarIndicadorSync(GAS_URL ? 'error' : 'off');
+      callback && callback(false);
+    }
+  });
+}
+
+// Mezcla dos estados dando prioridad al que tenga más reuniones por área
+function mergeStates(local, gas) {
+  var merged = {};
+  var allKeys = Object.keys(local).concat(Object.keys(gas).filter(function(k){ return !local[k]; }));
+  allKeys.forEach(function(id) {
+    var l = local[id] || {};
+    var g = gas[id]   || {};
+    var lRegs = (l.reuniones || []).length;
+    var gRegs = (g.reuniones || []).length;
+    // Usar el que tenga más datos; si igual, preferir GAS
+    merged[id] = gRegs >= lRegs ? g : l;
+    // Siempre conservar trainersAsignados del que tenga datos
+    if (!merged[id].trainersAsignados || merged[id].trainersAsignados.length === 0) {
+      merged[id].trainersAsignados = (l.trainersAsignados || []).length > 0
+        ? l.trainersAsignados : (g.trainersAsignados || []);
+    }
+  });
+  return merged;
+}
 
 function getAreaState(id) {
   if (!STATE[id]) STATE[id] = { checks:{}, acuerdos:[], reuniones:[], trainersAsignados:[] };
   if (!STATE[id].trainersAsignados) STATE[id].trainersAsignados = [];
   return STATE[id];
+}
+
+// ── COMUNICACIÓN CON GAS ────────────────────────────────────
+function gasGet(action, callback) {
+  if (!GAS_URL) return;
+  var cbName = '_cb_' + Date.now();
+  var url = GAS_URL + '?action=' + action + '&callback=' + cbName + '&_t=' + Date.now();
+  window[cbName] = function(data) {
+    try { delete window[cbName]; } catch(e) {}
+    var tag = document.getElementById('gas-script-' + cbName);
+    if (tag) tag.parentNode.removeChild(tag);
+    callback && callback(data);
+  };
+  var script = document.createElement('script');
+  script.id = 'gas-script-' + cbName;
+  script.onerror = function() {
+    try { delete window[cbName]; } catch(e) {}
+    callback && callback(null);
+  };
+  script.src = url;
+  document.head.appendChild(script);
+  // Timeout de 12s
+  setTimeout(function() {
+    if (window[cbName]) { window[cbName](null); }
+  }, 12000);
+}
+
+function gasPost(payload, callback) {
+  if (!GAS_URL) return;
+  var cbName = '_cb_' + Date.now();
+  var url = GAS_URL + '?callback=' + cbName;
+  window[cbName] = function(data) {
+    try { delete window[cbName]; } catch(e) {}
+    var tag = document.getElementById('gas-script-' + cbName);
+    if (tag) tag.parentNode.removeChild(tag);
+    callback && callback(data);
+  };
+  // GAS no acepta POST directo desde JSONP, usamos GET con payload codificado
+  var encoded = encodeURIComponent(JSON.stringify(payload));
+  var script = document.createElement('script');
+  script.id = 'gas-script-' + cbName;
+  script.onerror = function() {
+    try { delete window[cbName]; } catch(e) {}
+    callback && callback(null);
+  };
+  // Usamos fetch con no-cors como fallback para escritura
+  if (typeof fetch !== 'undefined') {
+    fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      headers: { 'Content-Type': 'text/plain' }
+    }).then(function(r){ return r.json(); })
+      .then(function(data){ callback && callback(data); })
+      .catch(function() {
+        // Fallback JSONP GET con payload en URL
+        script.src = GAS_URL + '?callback=' + cbName + '&payload=' + encoded + '&_t=' + Date.now();
+        document.head.appendChild(script);
+      });
+  } else {
+    script.src = GAS_URL + '?callback=' + cbName + '&payload=' + encoded + '&_t=' + Date.now();
+    document.head.appendChild(script);
+  }
+  setTimeout(function() {
+    if (window[cbName]) { window[cbName]({ ok: false, error: 'timeout' }); }
+  }, 15000);
+}
+
+// ── INDICADOR VISUAL DE SINCRONIZACIÓN ──────────────────────
+function actualizarIndicadorSync(estado) {
+  var el = document.getElementById('sync-indicator');
+  if (!el) return;
+  var cfg = {
+    ok:      { dot: '#1A7A45', txt: 'Sincronizado' },
+    syncing: { dot: '#B5620A', txt: 'Sincronizando…' },
+    pending: { dot: '#B5620A', txt: 'Guardando…' },
+    error:   { dot: '#B02A20', txt: 'Sin conexión al servidor' },
+    off:     { dot: '#637A84', txt: 'Modo local (sin GAS)' }
+  };
+  var c = cfg[estado] || cfg.off;
+  el.innerHTML = '<span style="width:7px;height:7px;border-radius:50%;background:' + c.dot + ';display:inline-block;margin-right:5px;flex-shrink:0;"></span>' + c.txt;
 }
 
 // ══════════════════════════════════════════════════════════
@@ -936,11 +1408,13 @@ function assignedChipsHTML(assigned) {
 // ══════════════════════════════════════════════════════════
 // RENDER SIDEBAR
 // ══════════════════════════════════════════════════════════
-function renderSidebar() {
+function renderSidebar(query) {
   var container = document.getElementById('sidebar-items');
   container.innerHTML = '';
+  var q = (query || '').toLowerCase().trim();
   var sorted = AREAS.slice().sort(function(a,b){return b.score-a.score;});
   sorted.forEach(function(a) {
+    if (q && a.name.toLowerCase().indexOf(q) === -1) return;
     var s = getAreaState(a.id);
     var hasSaved = s.reuniones && s.reuniones.length > 0;
     var assigned = s.trainersAsignados || [];
@@ -976,6 +1450,10 @@ function renderSidebar() {
   updateStats();
 }
 
+function filtrarSidebar(val) {
+  renderSidebar(val);
+}
+
 function updateStats() {
   var total=0, checks=0, regs=0;
   AREAS.forEach(function(a) {
@@ -999,7 +1477,50 @@ function scrollToCard(id) {
 function showView(v) {
   document.getElementById('view-areas').style.display     = v==='areas'     ? 'block':'none';
   document.getElementById('view-registros').style.display = v==='registros' ? 'block':'none';
-  if (v==='registros') renderRegistros();
+  if (v==='registros') {
+    poblarFiltrosReg();
+    renderRegistros();
+  }
+}
+
+function poblarFiltrosReg() {
+  // populate área dropdown
+  var selArea = document.getElementById('reg-filter-area');
+  var prevArea = selArea.value;
+  selArea.innerHTML = '<option value="">Todas las áreas</option>';
+  AREAS.forEach(function(a) {
+    var s = getAreaState(a.id);
+    if (!s.reuniones || s.reuniones.length===0) return;
+    var opt = document.createElement('option');
+    opt.value = a.id; opt.textContent = a.name;
+    selArea.appendChild(opt);
+  });
+  if (prevArea) selArea.value = prevArea;
+
+  // populate trainer dropdown — collect all trainers that appear in any reunion
+  var selTrainer = document.getElementById('reg-filter-trainer');
+  var prevTrainer = selTrainer.value;
+  var trainerSet = {};
+  AREAS.forEach(function(a) {
+    var s = getAreaState(a.id);
+    (s.reuniones||[]).forEach(function(r) {
+      if (r.trainer) trainerSet[r.trainer] = true;
+    });
+  });
+  selTrainer.innerHTML = '<option value="">Todos los trainers</option>';
+  Object.keys(trainerSet).sort().forEach(function(t) {
+    var opt = document.createElement('option');
+    opt.value = t; opt.textContent = t;
+    selTrainer.appendChild(opt);
+  });
+  if (prevTrainer) selTrainer.value = prevTrainer;
+}
+
+function limpiarFiltrosReg() {
+  document.getElementById('reg-filter-area').value    = '';
+  document.getElementById('reg-filter-trainer').value = '';
+  document.getElementById('reg-filter-texto').value   = '';
+  renderRegistros();
 }
 
 function filtrar(f, el) {
@@ -1091,19 +1612,26 @@ function buildAreaCard(a) {
 
 // ── SCORES PANE ──
 function buildScoresPane(a) {
-  var rows = a.q.map(function(v,i) {
-    return '<div class="score-row">'
-      + '<span class="score-label" title="' + QLABELS[i] + '">' + QLABELS[i] + '</span>'
-      + '<div class="score-bar-bg"><div class="score-bar-fill" style="width:' + Math.round((v/5)*100) + '%;background:' + barColor(v) + ';"></div></div>'
-      + '<span class="score-val" style="color:' + scoreColor(v) + '">' + v.toFixed(2) + '</span>'
-      + '</div>';
-  }).join('');
-  var tags = a.temas.map(function(t){ return '<span class="tag">'+t+'</span>'; }).join('');
+  var rows = '';
+  if (a.q && a.q.length > 0) {
+    rows = a.q.map(function(v,i) {
+      return '<div class="score-row">'
+        + '<span class="score-label" title="' + QLABELS[i] + '">' + QLABELS[i] + '</span>'
+        + '<div class="score-bar-bg"><div class="score-bar-fill" style="width:' + Math.round((v/5)*100) + '%;background:' + barColor(v) + ';"></div></div>'
+        + '<span class="score-val" style="color:' + scoreColor(v) + '">' + v.toFixed(2) + '</span>'
+        + '</div>';
+    }).join('');
+  } else {
+    rows = '<div style="font-size:13px;color:var(--ink-soft);padding:12px 0;font-style:italic;">Área agregada manualmente — sin datos de encuesta disponibles.</div>';
+  }
+  var tags = a.temas && a.temas.length > 0
+    ? '<div class="tags-wrap">' + a.temas.map(function(t){ return '<span class="tag">'+t+'</span>'; }).join('') + '</div>'
+    : '<div style="font-size:13px;color:var(--ink-soft);font-style:italic;">Sin temas registrados aún.</div>';
   return '<div class="pane active" id="pane-' + a.id + '-scores">'
-    + '<div class="section-title">Scores por indicador</div>'
+    + (a.q && a.q.length > 0 ? '<div class="section-title">Scores por indicador</div>' : '')
     + '<div class="score-grid">' + rows + '</div>'
-    + '<div class="section-title">Temas que solicita el área</div>'
-    + '<div class="tags-wrap">' + tags + '</div>'
+    + '<div class="section-title" style="margin-top:' + (a.q && a.q.length>0?'8':'0') + 'px;">Temas que solicita el área</div>'
+    + tags
     + '</div>';
 }
 
@@ -1271,21 +1799,29 @@ function buildAcuerdoPane(a) {
 }
 
 function buildReunionEntry(areaId, r, idx) {
-  var prioLabel = {alta:'Alta — Esta semana',media:'Media — Este mes',plan:'Planeación — Próximo mes'}[r.prio]||'-';
+  var prioLabel = {alta:'Alta — Esta semana',media:'Media — Este mes',plan:'Planeación — Próximo mes'}[r.prio]||'Sin asignar';
   var body = '';
-  if (r.training) body += '<div class="entry-field"><div class="entry-lbl">Compromisos Training</div><div class="entry-val">'+r.training+'</div></div>';
-  if (r.area)     body += '<div class="entry-field"><div class="entry-lbl">Compromisos del área</div><div class="entry-val">'+r.area+'</div></div>';
-  if (r.notas)    body += '<div class="entry-field"><div class="entry-lbl">Notas</div><div class="entry-val">'+r.notas+'</div></div>';
+  if (r.training)    body += '<div class="entry-field"><div class="entry-lbl">Compromisos Training</div><div class="entry-val" style="white-space:pre-wrap;">'+escHtml(r.training)+'</div></div>';
+  if (r.area)        body += '<div class="entry-field"><div class="entry-lbl">Compromisos del área</div><div class="entry-val" style="white-space:pre-wrap;">'+escHtml(r.area)+'</div></div>';
+  if (r.notas)       body += '<div class="entry-field"><div class="entry-lbl">Notas</div><div class="entry-val" style="white-space:pre-wrap;">'+escHtml(r.notas)+'</div></div>';
   if (r.seguimiento) body += '<div class="entry-field"><div class="entry-lbl">Seguimiento</div><div class="entry-val">'+r.seguimiento+'</div></div>';
-  if (r.prio)     body += '<div class="entry-field"><div class="entry-lbl">Prioridad</div><div class="entry-val">'+prioLabel+'</div></div>';
+  if (r.prio)        body += '<div class="entry-field"><div class="entry-lbl">Prioridad</div><div class="entry-val">'+prioLabel+'</div></div>';
+  if (r.modalidad)   body += '<div class="entry-field"><div class="entry-lbl">Modalidad</div><div class="entry-val">'+r.modalidad+(r.duracion?' · '+r.duracion:'')+'</div></div>';
   return '<div class="acuerdo-entry" id="reunion-'+areaId+'-'+idx+'">'
     + '<div class="acuerdo-entry-header">'
     + '<div><span style="font-weight:600;">'+(r.fecha||'Sin fecha')+'</span>'
-    + '<span style="color:var(--ink-soft);margin-left:10px;font-size:12px;">'+(r.trainer||'Sin asignar')+' · '+(r.modalidad||'')+'</span></div>'
+    + '<span style="color:var(--ink-soft);margin-left:10px;font-size:12px;">'+(r.trainer||'Sin asignar')+(r.modalidad?' · '+r.modalidad:'')+'</span></div>'
+    + '<div style="display:flex;gap:4px;align-items:center;">'
+    + '<button class="edit-btn" onclick="abrirEditar(\''+areaId+'\','+idx+')">✏️ Editar</button>'
     + '<button class="del-btn" onclick="eliminarReunion(\''+areaId+'\','+idx+')">Eliminar</button>'
     + '</div>'
-    + '<div class="acuerdo-entry-body">' + body + '</div>'
+    + '</div>'
+    + (body ? '<div class="acuerdo-entry-body">' + body + '</div>' : '')
     + '</div>';
+}
+
+function escHtml(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 // ══════════════════════════════════════════════════════════
@@ -1433,10 +1969,119 @@ function limpiarForm(id) {
   });
 }
 
+// ── EDITAR REUNIÓN ──────────────────────────────────────────
+function abrirEditar(areaId, idx) {
+  var s = getAreaState(areaId);
+  var r = (s.reuniones || [])[idx];
+  if (!r) return;
+
+  // Populate hidden fields
+  document.getElementById('edit-area-id').value = areaId;
+  document.getElementById('edit-idx').value     = idx;
+
+  // Subtitle
+  var area = AREAS.find(function(a){ return a.id === areaId; });
+  document.getElementById('edit-sub').textContent =
+    (area ? area.name : areaId) + ' · Reunión #' + (idx+1) + (r.fecha ? ' · ' + r.fecha : '');
+
+  // Populate trainer select
+  var sel = document.getElementById('edit-trainer');
+  sel.innerHTML = '<option value="">Seleccionar</option>';
+  TRAINERS.forEach(function(t) {
+    var opt = document.createElement('option');
+    opt.value = t; opt.textContent = t;
+    if (r.trainer === t) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  // If trainer not in list, put in "otro" field
+  var inList = TRAINERS.indexOf(r.trainer) !== -1;
+  document.getElementById('edit-trainer-otro').value = (!inList && r.trainer) ? r.trainer : '';
+
+  // Populate all fields
+  document.getElementById('edit-fecha').value      = r.fecha      || '';
+  document.getElementById('edit-modalidad').value  = r.modalidad  || '';
+  document.getElementById('edit-duracion').value   = r.duracion   || '';
+  document.getElementById('edit-prio').value       = r.prio       || '';
+  document.getElementById('edit-training').value   = r.training   || '';
+  document.getElementById('edit-area-txt').value   = r.area       || '';
+  document.getElementById('edit-notas').value      = r.notas      || '';
+  document.getElementById('edit-seguimiento').value= r.seguimiento|| '';
+
+  // Open modal
+  var m = document.getElementById('modal-editar');
+  m.classList.add('open');
+  m.style.display = 'flex';
+}
+
+function cerrarModalEditar() {
+  var m = document.getElementById('modal-editar');
+  m.classList.remove('open');
+  m.style.display = 'none';
+}
+
+function guardarEdicion() {
+  var areaId = document.getElementById('edit-area-id').value;
+  var idx    = parseInt(document.getElementById('edit-idx').value, 10);
+  var s      = getAreaState(areaId);
+  if (!s.reuniones || !s.reuniones[idx]) return;
+
+  var trainerSel  = document.getElementById('edit-trainer').value;
+  var trainerOtro = document.getElementById('edit-trainer-otro').value.trim();
+  var trainer = (trainerSel === '' && trainerOtro) ? trainerOtro : trainerSel;
+
+  // Update the reunion object preserving ts
+  var existing = s.reuniones[idx];
+  s.reuniones[idx] = {
+    fecha:       document.getElementById('edit-fecha').value,
+    trainer:     trainer,
+    modalidad:   document.getElementById('edit-modalidad').value,
+    duracion:    document.getElementById('edit-duracion').value,
+    prio:        document.getElementById('edit-prio').value,
+    training:    document.getElementById('edit-training').value,
+    area:        document.getElementById('edit-area-txt').value,
+    notas:       document.getElementById('edit-notas').value,
+    seguimiento: document.getElementById('edit-seguimiento').value,
+    ts:          existing.ts || Date.now(),
+    editedAt:    Date.now()
+  };
+
+  saveState('editReunion');
+  cerrarModalEditar();
+
+  // Re-render keeping card open on acuerdo tab
+  renderCards();
+  renderSidebar();
+  openCards[areaId] = true;
+  var body = document.getElementById('body-' + areaId);
+  if (body) {
+    body.style.display = 'block';
+    var acuerdoTab = body.querySelector('.tab:nth-child(5)');
+    if (acuerdoTab) setTab(areaId, 'acuerdo', acuerdoTab);
+  }
+
+  // Show toast
+  var toast = document.getElementById('toast-' + areaId);
+  if (toast) {
+    toast.textContent = '✓ Registro actualizado correctamente';
+    toast.classList.add('show');
+    setTimeout(function(){
+      toast.classList.remove('show');
+      toast.textContent = '✓ Registro guardado correctamente';
+    }, 3000);
+  }
+}
+
+function eliminarDesdeModal() {
+  var areaId = document.getElementById('edit-area-id').value;
+  var idx    = parseInt(document.getElementById('edit-idx').value, 10);
+  cerrarModalEditar();
+  eliminarReunion(areaId, idx);
+}
+
 function eliminarReunion(areaId, idx) {
-  if (!confirm('¿Eliminar este registro?')) return;
-  getAreaState(areaId).reuniones.splice(idx,1);
-  saveState();
+  if (!confirm('¿Eliminar este registro? Esta acción no se puede deshacer.')) return;
+  getAreaState(areaId).reuniones.splice(idx, 1);
+  saveState('deleteReunion');
   renderCards();
   renderSidebar();
   openCards[areaId] = true;
@@ -1444,13 +2089,35 @@ function eliminarReunion(areaId, idx) {
 
 // ── REGISTROS VIEW ──
 function renderRegistros() {
-  var container = document.getElementById('registros-container');
+  var container  = document.getElementById('registros-container');
+  var lblEl      = document.getElementById('reg-resultado-lbl');
   container.innerHTML = '';
-  var total = 0;
+
+  var filtArea    = (document.getElementById('reg-filter-area')    || {}).value || '';
+  var filtTrainer = (document.getElementById('reg-filter-trainer') || {}).value || '';
+  var filtTexto   = ((document.getElementById('reg-filter-texto')  || {}).value || '').toLowerCase().trim();
+
+  var totalRegs = 0, totalAreas = 0;
+
   AREAS.forEach(function(a) {
     var s = getAreaState(a.id);
     if (!s.reuniones || s.reuniones.length===0) return;
-    total += s.reuniones.length;
+
+    // filter by area
+    if (filtArea && a.id !== filtArea) return;
+
+    // filter reuniones by trainer and texto
+    var reunionesFilt = s.reuniones.filter(function(r) {
+      var passTrainer = !filtTrainer || (r.trainer && r.trainer === filtTrainer);
+      var haystack = [(r.trainer||''), (r.training||''), (r.area||''), (r.notas||''), (r.fecha||'')].join(' ').toLowerCase();
+      var passTexto = !filtTexto || haystack.indexOf(filtTexto) !== -1;
+      return passTrainer && passTexto;
+    });
+    if (reunionesFilt.length === 0) return;
+
+    totalAreas++;
+    totalRegs += reunionesFilt.length;
+
     var assigned = s.trainersAsignados || [];
     var isTodos  = assigned.length===1 && assigned[0]==='__todos__';
     var tchips = '';
@@ -1464,13 +2131,20 @@ function renderRegistros() {
       }).join('');
     }
     var nivLabel = {alta:'Alta',buena:'Buena',moderada:'Moderada',baja:'Baja',critica:'Crítica'}[a.nivel];
-    var reunionesHTML = s.reuniones.map(function(r, i) {
+
+    var reunionesHTML = reunionesFilt.map(function(r, i) {
       var prioLabel = {alta:'Alta — Esta semana',media:'Media — Este mes',plan:'Planeación — Próximo mes'}[r.prio]||'Sin asignar';
       var sep = i>0 ? 'border-top:1px solid var(--border);padding-top:14px;margin-top:14px;' : '';
+      // highlight search text in displayed values
+      function hl(txt) {
+        if (!filtTexto || !txt) return txt||'';
+        var re = new RegExp('(' + filtTexto.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi');
+        return txt.replace(re, '<mark style="background:#FEF08A;border-radius:2px;">$1</mark>');
+      }
       return '<div class="registro-section" style="' + sep + '">'
         + '<div class="reg-grid">'
         + '<div class="reg-info"><div class="reg-lbl">Fecha</div><div class="reg-val">'+(r.fecha||'—')+'</div></div>'
-        + '<div class="reg-info"><div class="reg-lbl">Trainer</div><div class="reg-val">'+(r.trainer||'—')+'</div></div>'
+        + '<div class="reg-info"><div class="reg-lbl">Trainer</div><div class="reg-val">'+hl(r.trainer||'—')+'</div></div>'
         + '<div class="reg-info"><div class="reg-lbl">Modalidad</div><div class="reg-val">'+(r.modalidad||'—')+(r.duracion?' · '+r.duracion:'')+'</div></div>'
         + '</div>'
         + '<div class="reg-grid">'
@@ -1478,9 +2152,9 @@ function renderRegistros() {
         + '<div class="reg-info"><div class="reg-lbl">Seguimiento</div><div class="reg-val">'+(r.seguimiento||'Sin fecha')+'</div></div>'
         + '<div class="reg-info" style="background:transparent;"></div>'
         + '</div>'
-        + (r.training ? '<div class="registro-section"><div class="reg-lbl">Compromisos Training</div><div class="reg-val" style="white-space:pre-wrap;">'+r.training+'</div></div>' : '')
-        + (r.area     ? '<div class="registro-section"><div class="reg-lbl">Compromisos área</div><div class="reg-val" style="white-space:pre-wrap;">'+r.area+'</div></div>' : '')
-        + (r.notas    ? '<div class="registro-section"><div class="reg-lbl">Notas</div><div class="reg-val" style="white-space:pre-wrap;">'+r.notas+'</div></div>' : '')
+        + (r.training ? '<div class="registro-section"><div class="reg-lbl">Compromisos Training</div><div class="reg-val" style="white-space:pre-wrap;">'+hl(r.training)+'</div></div>' : '')
+        + (r.area     ? '<div class="registro-section"><div class="reg-lbl">Compromisos área</div><div class="reg-val" style="white-space:pre-wrap;">'+hl(r.area)+'</div></div>' : '')
+        + (r.notas    ? '<div class="registro-section"><div class="reg-lbl">Notas</div><div class="reg-val" style="white-space:pre-wrap;">'+hl(r.notas)+'</div></div>' : '')
         + '</div>';
     }).join('');
 
@@ -1489,7 +2163,7 @@ function renderRegistros() {
     block.innerHTML = '<div class="registro-header">'
       + '<div>'
       + '<div class="registro-title">' + a.name + '</div>'
-      + '<div class="registro-meta">Score: ' + a.score.toFixed(2) + ' / 5.0 · ' + nivLabel + ' · ' + s.reuniones.length + ' reunión(es)</div>'
+      + '<div class="registro-meta">Score: ' + a.score.toFixed(2) + ' / 5.0 · ' + nivLabel + ' · ' + reunionesFilt.length + ' reunión(es) mostrada(s)</div>'
       + (tchips ? '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">' + tchips + '</div>' : '')
       + '</div>'
       + '<span class="nivel-badge badge-' + a.nivel + '">' + nivLabel + '</span>'
@@ -1497,68 +2171,367 @@ function renderRegistros() {
       + '<div class="registro-body">' + reunionesHTML + '</div>';
     container.appendChild(block);
   });
-  if (total===0) {
+
+  // result label
+  var anyFilter = filtArea || filtTrainer || filtTexto;
+  if (lblEl) {
+    if (totalRegs === 0 && anyFilter) {
+      lblEl.textContent = 'Sin resultados para los filtros aplicados.';
+    } else if (anyFilter) {
+      lblEl.textContent = totalRegs + ' registro(s) en ' + totalAreas + ' área(s) — filtro activo';
+    } else {
+      lblEl.textContent = totalRegs > 0 ? totalRegs + ' registro(s) en total' : '';
+    }
+  }
+
+  if (totalRegs === 0 && !anyFilter) {
     container.innerHTML = '<div class="empty-state">'
       + '<div class="empty-icon">📋</div>'
       + '<div class="empty-title">Sin registros aún</div>'
       + '<div class="empty-desc">Los registros de reunión aparecerán aquí una vez que los guardes en cada área.</div>'
       + '</div>';
+  } else if (totalRegs === 0) {
+    container.innerHTML = '<div class="empty-state">'
+      + '<div class="empty-icon">🔍</div>'
+      + '<div class="empty-title">Sin resultados</div>'
+      + '<div class="empty-desc">Prueba cambiando o limpiando los filtros.</div>'
+      + '</div>';
   }
 }
 
 // ── EXPORT ──
-function exportarTodo() {
-  var txt = 'TMLF — ACUERDOS Y REGISTROS DE REUNIÓN TRAINING\n';
-  txt += '='.repeat(55) + '\n';
-  txt += 'Encuesta de satisfacción · Marzo 2026 · 192 respuestas\n';
-  txt += 'Generado: ' + new Date().toLocaleDateString('es-MX',{dateStyle:'long'}) + '\n\n';
-  var hasData = false;
+// ══════════════════════════════════════════════════════════
+// EXPORTAR — MODAL SELECTOR
+// ══════════════════════════════════════════════════════════
+var exportScope = 'todo'; // 'todo' | 'selec'
+var exportSelected = {}; // areaId -> bool
+
+function abrirModalExport() {
+  // populate area list
+  var list = document.getElementById('exp-area-checks');
+  list.innerHTML = '';
+  var hasAny = false;
   AREAS.forEach(function(a) {
+    var s = getAreaState(a.id);
+    var hasData = (s.reuniones && s.reuniones.length > 0) || (s.trainersAsignados && s.trainersAsignados.length > 0);
+    if (!hasData) return;
+    hasAny = true;
+    var sel = !!exportSelected[a.id];
+    var nivLabel = {alta:'Alta',buena:'Buena',moderada:'Moderada',baja:'Baja',critica:'Crítica'}[a.nivel] || a.nivel;
+    var row = document.createElement('div');
+    row.className = 'exp-area-row' + (sel ? ' selected' : '');
+    row.id = 'exp-row-' + a.id;
+    row.innerHTML = '<div class="exp-area-cb">' + (sel ? '✓' : '') + '</div>'
+      + '<div class="exp-area-name">' + a.name + '</div>'
+      + '<div class="exp-area-meta">' + (s.reuniones ? s.reuniones.length : 0) + ' registro(s)</div>'
+      + '<span class="nivel-badge badge-' + a.nivel + '" style="font-size:10px;padding:2px 8px;">' + nivLabel + '</span>';
+    row.onclick = function() { toggleAreaExport(a.id); };
+    list.appendChild(row);
+  });
+  if (!hasAny) {
+    list.innerHTML = '<div style="padding:16px;font-size:13px;color:var(--ink-soft);text-align:center;font-style:italic;">Sin datos para exportar aún.</div>';
+  }
+  // reset to "todo" scope on open
+  setExportScope('todo', document.getElementById('exp-btn-todo'));
+  actualizarPreviewExport();
+  var m = document.getElementById('modal-export');
+  m.classList.add('open');
+  m.style.display = 'flex';
+}
+
+function cerrarModalExport() {
+  var m = document.getElementById('modal-export');
+  m.classList.remove('open');
+  m.style.display = 'none';
+}
+
+function setExportScope(scope, el) {
+  exportScope = scope;
+  document.querySelectorAll('.exp-scope-btn').forEach(function(b){ b.classList.remove('active'); });
+  el.classList.add('active');
+  document.getElementById('exp-area-list').style.display = scope === 'selec' ? 'block' : 'none';
+  actualizarPreviewExport();
+}
+
+function toggleAreaExport(id) {
+  exportSelected[id] = !exportSelected[id];
+  var row = document.getElementById('exp-row-' + id);
+  if (row) {
+    row.classList.toggle('selected', !!exportSelected[id]);
+    var cb = row.querySelector('.exp-area-cb');
+    if (cb) cb.textContent = exportSelected[id] ? '✓' : '';
+  }
+  actualizarPreviewExport();
+}
+
+function toggleAllAreas(on) {
+  AREAS.forEach(function(a) {
+    var row = document.getElementById('exp-row-' + a.id);
+    if (!row) return;
+    exportSelected[a.id] = on;
+    row.classList.toggle('selected', on);
+    var cb = row.querySelector('.exp-area-cb');
+    if (cb) cb.textContent = on ? '✓' : '';
+  });
+  actualizarPreviewExport();
+}
+
+function actualizarPreviewExport() {
+  var lbl = document.getElementById('exp-preview-lbl');
+  if (!lbl) return;
+  var areas = getAreasParaExportar();
+  var totalRegs = 0;
+  areas.forEach(function(a) {
+    var s = getAreaState(a.id);
+    totalRegs += (s.reuniones || []).length;
+  });
+  if (areas.length === 0) {
+    lbl.textContent = 'Sin áreas seleccionadas.';
+    lbl.style.color = 'var(--red)';
+  } else {
+    lbl.innerHTML = '&#10003; Se exportarán <strong>' + areas.length + ' área(s)</strong> con <strong>' + totalRegs + ' registro(s)</strong>.';
+    lbl.style.color = 'var(--ink-soft)';
+  }
+}
+
+function getAreasParaExportar() {
+  if (exportScope === 'todo') {
+    return AREAS.filter(function(a) {
+      var s = getAreaState(a.id);
+      return (s.reuniones && s.reuniones.length > 0) || (s.trainersAsignados && s.trainersAsignados.length > 0);
+    });
+  } else {
+    return AREAS.filter(function(a) { return !!exportSelected[a.id]; });
+  }
+}
+
+function getFmt() {
+  var radios = document.querySelectorAll('input[name="exp-fmt"]');
+  for (var i = 0; i < radios.length; i++) {
+    if (radios[i].checked) return radios[i].value;
+  }
+  return 'txt';
+}
+
+function ejecutarExport() {
+  var areas = getAreasParaExportar();
+  if (areas.length === 0) {
+    document.getElementById('exp-preview-lbl').textContent = 'Selecciona al menos un área para exportar.';
+    document.getElementById('exp-preview-lbl').style.color = 'var(--red)';
+    return;
+  }
+  var fmt = getFmt();
+  if (fmt === 'csv') {
+    exportarCSV(areas);
+  } else {
+    exportarTXT(areas);
+  }
+  cerrarModalExport();
+}
+
+function exportarTXT(areas) {
+  var isTodo = exportScope === 'todo';
+  var titulo = isTodo ? 'TMLF — ACUERDOS Y REGISTROS TRAINING (TODAS LAS ÁREAS)' : 'TMLF — ACUERDOS Y REGISTROS TRAINING (' + areas.length + ' ÁREA(S) SELECCIONADA(S))';
+  var txt = titulo + '\n' + '='.repeat(55) + '\n';
+  txt += 'Encuesta de satisfacción · Marzo 2026 · 192 respuestas\n';
+  txt += 'Generado: ' + new Date().toLocaleDateString('es-MX',{dateStyle:'long'}) + '\n';
+  if (!isTodo) txt += 'Áreas incluidas: ' + areas.map(function(a){return a.name;}).join(', ') + '\n';
+  txt += '\n';
+
+  areas.forEach(function(a) {
     var s = getAreaState(a.id);
     var assigned = s.trainersAsignados || [];
     var isTodos  = assigned.length===1 && assigned[0]==='__todos__';
-    var hasR     = s.reuniones && s.reuniones.length > 0;
-    if (!hasR && assigned.length===0) return;
-    hasData = true;
-    txt += '\n' + '-'.repeat(55) + '\n';
+    txt += '\n' + '─'.repeat(55) + '\n';
     txt += 'ÁREA: ' + a.name + ' | Score: ' + a.score.toFixed(2) + ' / 5.0 | ' + a.nivel.toUpperCase() + '\n';
     if (isTodos) txt += 'Trainers asignados: Todos los trainers\n';
     else if (assigned.length>0) txt += 'Trainers asignados: ' + assigned.join(', ') + '\n';
-    txt += '-'.repeat(55) + '\n';
-    (s.reuniones||[]).forEach(function(r, i) {
+    txt += '─'.repeat(55) + '\n';
+    var reuniones = s.reuniones || [];
+    if (reuniones.length === 0) {
+      txt += '  (Sin registros de reunión aún)\n';
+    }
+    reuniones.forEach(function(r, i) {
       txt += '\nREUNIÓN ' + (i+1) + ':\n';
-      if (r.fecha)       txt += '  Fecha: ' + r.fecha + '\n';
-      if (r.trainer)     txt += '  Trainer: ' + r.trainer + '\n';
-      if (r.modalidad)   txt += '  Modalidad: ' + r.modalidad + (r.duracion?' ('+r.duracion+')':'') + '\n';
-      if (r.prio)        txt += '  Prioridad: ' + r.prio + '\n';
-      if (r.seguimiento) txt += '  Seguimiento: ' + r.seguimiento + '\n';
+      if (r.fecha)       txt += '  Fecha:      ' + r.fecha + '\n';
+      if (r.trainer)     txt += '  Trainer:    ' + r.trainer + '\n';
+      if (r.modalidad)   txt += '  Modalidad:  ' + r.modalidad + (r.duracion ? ' (' + r.duracion + ')' : '') + '\n';
+      if (r.prio)        txt += '  Prioridad:  ' + r.prio + '\n';
+      if (r.seguimiento) txt += '  Seguimiento:' + r.seguimiento + '\n';
       if (r.training)    txt += '\n  Compromisos Training:\n' + r.training.split('\n').map(function(l){return '    '+l;}).join('\n') + '\n';
       if (r.area)        txt += '\n  Compromisos del área:\n' + r.area.split('\n').map(function(l){return '    '+l;}).join('\n') + '\n';
       if (r.notas)       txt += '\n  Notas:\n' + r.notas.split('\n').map(function(l){return '    '+l;}).join('\n') + '\n';
     });
     var checks = s.checks || {};
-    var confirmed = a.props.filter(function(_,i){return checks[i];});
+    var confirmed = (a.props||[]).filter(function(_,i){return checks[i];});
     if (confirmed.length>0) {
-      txt += '\n  Acciones confirmadas:\n';
+      txt += '\n  Acciones confirmadas con el equipo trainer:\n';
       confirmed.forEach(function(p){ txt += '    ✓ ' + p.t + '\n'; });
     }
   });
-  if (!hasData) { alert('No hay registros para exportar.'); return; }
-  var blob = new Blob([txt],{type:'text/plain;charset=utf-8'});
+
+  var nombreArchivo = isTodo
+    ? 'Acuerdos_Training_Todas_' + new Date().toISOString().slice(0,10) + '.txt'
+    : 'Acuerdos_Training_' + areas.map(function(a){return a.name.replace(/\s/g,'_');}).join('-') + '_' + new Date().toISOString().slice(0,10) + '.txt';
+  descargarBlob(txt, nombreArchivo, 'text/plain;charset=utf-8');
+}
+
+function exportarCSV(areas) {
+  var rows = [['Área','Score','Nivel','Trainers asignados','N° reunión','Fecha','Trainer','Modalidad','Duración','Prioridad','Fecha seguimiento','Compromisos Training','Compromisos Área','Notas']];
+  areas.forEach(function(a) {
+    var s = getAreaState(a.id);
+    var assigned = s.trainersAsignados || [];
+    var isTodos  = assigned.length===1 && assigned[0]==='__todos__';
+    var trainerStr = isTodos ? 'Todos los trainers' : assigned.join(' | ');
+    var reuniones = s.reuniones || [];
+    if (reuniones.length === 0) {
+      rows.push([a.name, a.score.toFixed(2), a.nivel, trainerStr, '', '', '', '', '', '', '', '', '', '']);
+    } else {
+      reuniones.forEach(function(r, i) {
+        rows.push([
+          a.name, a.score.toFixed(2), a.nivel, trainerStr,
+          String(i+1),
+          r.fecha||'', r.trainer||'', r.modalidad||'', r.duracion||'',
+          r.prio||'', r.seguimiento||'',
+          (r.training||'').replace(/\n/g,' | '),
+          (r.area||'').replace(/\n/g,' | '),
+          (r.notas||'').replace(/\n/g,' | ')
+        ]);
+      });
+    }
+  });
+  var csv = rows.map(function(row) {
+    return row.map(function(cell) {
+      var c = String(cell).replace(/"/g,'""');
+      return (c.indexOf(',')!==-1||c.indexOf('"')!==-1||c.indexOf('\n')!==-1) ? '"'+c+'"' : c;
+    }).join(',');
+  }).join('\n');
+
+  var isTodo = exportScope === 'todo';
+  var nombreArchivo = isTodo
+    ? 'Acuerdos_Training_Todas_' + new Date().toISOString().slice(0,10) + '.csv'
+    : 'Acuerdos_Training_' + areas.map(function(a){return a.name.replace(/\s/g,'_');}).join('-') + '_' + new Date().toISOString().slice(0,10) + '.csv';
+  descargarBlob('\uFEFF' + csv, nombreArchivo, 'text/csv;charset=utf-8');
+}
+
+function descargarBlob(contenido, nombre, tipo) {
+  var blob = new Blob([contenido], {type: tipo});
   var url  = URL.createObjectURL(blob);
-  var a    = document.createElement('a');
-  a.href = url;
-  a.download = 'Acuerdos_Training_TMLF_' + new Date().toISOString().slice(0,10) + '.txt';
-  a.click();
+  var el   = document.createElement('a');
+  el.href = url; el.download = nombre; el.click();
   URL.revokeObjectURL(url);
 }
 
+// close modals on overlay click or Escape
+document.addEventListener('click', function(e) {
+  if (e.target === document.getElementById('modal-export'))  cerrarModalExport();
+  if (e.target === document.getElementById('modal-area'))    cerrarModalArea();
+  if (e.target === document.getElementById('modal-editar'))  cerrarModalEditar();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') { cerrarModalExport(); cerrarModalArea(); cerrarModalEditar(); }
+});
+
+// format option radio toggle via label click
+document.addEventListener('change', function(e) {
+  if (e.target && e.target.name === 'exp-fmt') {
+    document.querySelectorAll('.exp-fmt-opt').forEach(function(l) {
+      l.style.borderColor = '';
+      l.style.background = '';
+    });
+    var lbl = e.target.closest('.exp-fmt-opt');
+    if (lbl) { lbl.style.borderColor = 'var(--teal)'; lbl.style.background = 'var(--teal-light)'; }
+  }
+});
+
 // ══════════════════════════════════════════════════════════
-// INIT
+// AGREGAR ÁREA
 // ══════════════════════════════════════════════════════════
-function init() {
+function abrirModalArea() {
+  var m = document.getElementById('modal-area');
+  m.classList.add('open');
+  m.style.display = 'flex';
+  document.getElementById('nueva-area-nombre').focus();
+}
+
+function cerrarModalArea() {
+  var m = document.getElementById('modal-area');
+  m.classList.remove('open');
+  m.style.display = 'none';
+  // clear fields
+  ['nueva-area-nombre','nueva-area-score','nueva-area-n','nueva-area-contexto'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('nueva-area-nivel').value = 'moderada';
+}
+
+function confirmarAgregarArea() {
+  var nombre = document.getElementById('nueva-area-nombre').value.trim();
+  if (!nombre) {
+    document.getElementById('nueva-area-nombre').focus();
+    document.getElementById('nueva-area-nombre').style.borderColor = 'var(--red)';
+    return;
+  }
+  document.getElementById('nueva-area-nombre').style.borderColor = '';
+  var nivel    = document.getElementById('nueva-area-nivel').value;
+  var scoreRaw = parseFloat(document.getElementById('nueva-area-score').value);
+  var nRaw     = parseInt(document.getElementById('nueva-area-n').value, 10);
+  var contexto = document.getElementById('nueva-area-contexto').value.trim();
+  // default score by nivel if not provided
+  var scoreDefault = {alta:4.1,buena:3.8,moderada:3.5,baja:3.2,critica:2.8};
+  var score = isNaN(scoreRaw) ? scoreDefault[nivel] : Math.min(5, Math.max(1, scoreRaw));
+  var n     = isNaN(nRaw) ? 0 : nRaw;
+
+  // generate unique id
+  var id = nombre.toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/__+/g,'_').replace(/^_|_$/g,'') + '_' + Date.now();
+
+  var nuevaArea = {
+    id: id,
+    name: nombre,
+    n: n,
+    score: score,
+    nivel: nivel,
+    q: [],    // no encuesta data — empty
+    temas: [],
+    perciben: contexto ? [contexto] : ['Área agregada manualmente.'],
+    piden: [],
+    props: [],
+    custom: true
+  };
+
+  AREAS.push(nuevaArea);
+  cerrarModalArea();
   renderSidebar();
   renderCards();
+  // scroll to the new card
+  setTimeout(function(){
+    var card = document.getElementById('card-' + id);
+    if (card) card.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 150);
+}
+
+// modal-area: close on overlay click handled by shared listener below
+
+
+function init() {
+  // Mostrar UI inmediatamente con datos locales (rápido)
+  STATE = loadState();
+  actualizarIndicadorSync(GAS_URL ? 'syncing' : 'off');
+  renderSidebar();
+  renderCards();
+
+  // Luego intentar cargar desde GAS (fuente de verdad compartida)
+  if (GAS_URL) {
+    cargarDesdeGAS(function(ok) {
+      if (ok) {
+        renderSidebar();
+        renderCards();
+      }
+    });
+  } else {
+    actualizarIndicadorSync('off');
+  }
 }
 init();
 
