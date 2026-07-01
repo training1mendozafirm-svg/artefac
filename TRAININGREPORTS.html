@@ -1223,7 +1223,7 @@ tbody td {
         <select class="filter-select" id="cal-filter-trainer" onchange="renderCalendar()">
           <option value="">Todos los trainers</option>
           <option>Andrea Zendejas</option><option>Joham Burgos</option><option>Diego Romo</option>
-          <option>Mariana Díaz</option><option>Brenda Domínguez</option>
+          <option>Brenda Domínguez</option>
         </select>
         <select class="filter-select" id="cal-filter-cat" onchange="renderCalendar()">
           <option value="">Todas las categorías</option>
@@ -1238,7 +1238,6 @@ tbody td {
         <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#00ACC1;"></div> Diego</div>
         <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#8E24AA;"></div> Joham</div>
         <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#43A047;"></div> Andrea</div>
-        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#1E88E5;"></div> Mariana</div>
         <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#F9A825;"></div> Brenda</div>
         <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#ef5350;"></div> Día OFF</div>
         <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#AB47BC;"></div> 🎂 Cumpleaños</div>
@@ -1289,7 +1288,6 @@ tbody td {
                 <option>Andrea Zendejas</option>
                 <option>Joham Burgos</option>
                 <option>Diego Romo</option>
-                <option>Mariana Díaz</option>
                 <option>Brenda Domínguez</option>
               </select>
             </div>
@@ -1332,6 +1330,8 @@ tbody td {
                 <option>CASE REVIEW</option>
                 <option>PACKETS</option>
                 <option>BACK OFFICE</option>
+                <option>TRAINING</option>
+                <option>TMLF</option>
                 <option value="__otra__">Otra (escribir)</option>
               </select>
               <input type="text" class="form-control" id="f-area-manual" placeholder="ESCRIBE EL ÁREA EN MAYÚSCULAS" style="display:none;margin-top:8px;text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
@@ -1395,7 +1395,6 @@ tbody td {
           <option>Andrea Zendejas</option>
           <option>Joham Burgos</option>
           <option>Diego Romo</option>
-          <option>Mariana Díaz</option>
           <option>Brenda Domínguez</option>
         </select>
         <select class="filter-select" id="dash-mes" onchange="renderDashboard()">
@@ -1428,6 +1427,8 @@ tbody td {
           <option>PRE WELCOME CALL</option><option>PRE CASE REVIEW</option><option>RFE</option>
           <option>COLLECTIONS</option><option>CASE REVIEW</option><option>PACKETS</option>
           <option>BACK OFFICE</option>
+          <option>TRAINING</option>
+          <option>TMLF</option>
         </select>
         <button class="btn btn-ghost btn-sm" onclick="clearDashFilters()">✕ Limpiar filtros</button>
       </div>
@@ -1549,7 +1550,7 @@ tbody td {
         <select class="filter-select" id="period-trainer" onchange="renderPeriodReport()">
           <option value="">Todos los trainers</option>
           <option>Andrea Zendejas</option><option>Joham Burgos</option><option>Diego Romo</option>
-          <option>Mariana Díaz</option><option>Brenda Domínguez</option>
+          <option>Brenda Domínguez</option>
         </select>
         <select class="filter-select" id="period-cat" onchange="renderPeriodReport()">
           <option value="">Todas las categorías</option>
@@ -1565,6 +1566,8 @@ tbody td {
           <option>PRE WELCOME CALL</option><option>PRE CASE REVIEW</option><option>RFE</option>
           <option>COLLECTIONS</option><option>CASE REVIEW</option><option>PACKETS</option>
           <option>BACK OFFICE</option>
+          <option>TRAINING</option>
+          <option>TMLF</option>
         </select>
       </div>
       <div id="period-report-content">
@@ -1592,7 +1595,7 @@ tbody td {
           <select class="filter-select" id="coord-trainer" onchange="renderCoordReport()">
             <option value="">Todos los trainers</option>
             <option>Andrea Zendejas</option><option>Joham Burgos</option><option>Diego Romo</option>
-            <option>Mariana Díaz</option><option>Brenda Domínguez</option>
+            <option>Brenda Domínguez</option>
           </select>
           <select class="filter-select" id="coord-mes" onchange="renderCoordReport()">
             <option value="">Todos los meses</option>
@@ -1824,7 +1827,7 @@ tbody td {
         <select class="form-control" id="ev-trainer" required>
           <option value="">— Seleccionar —</option>
           <option>Andrea Zendejas</option><option>Joham Burgos</option>
-          <option>Diego Romo</option><option>Mariana Díaz</option><option>Brenda Domínguez</option>
+          <option>Diego Romo</option><option>Brenda Domínguez</option>
         </select>
       </div>
       <div class="form-group">
@@ -1851,7 +1854,9 @@ tbody td {
           <option>WAE'S</option><option>CALLBACKS</option><option>TRUCKERS</option>
           <option>PRE WELCOME CALL</option><option>PRE CASE REVIEW</option><option>RFE</option>
           <option>COLLECTIONS</option><option>CASE REVIEW</option><option>PACKETS</option>
-          <option>BACK OFFICE</option><option value="__otra__">Otra (escribir)</option>
+          <option>BACK OFFICE</option><option>TRAINING</option>
+                <option>TMLF</option>
+                <option value="__otra__">Otra (escribir)</option>
         </select>
         <input type="text" class="form-control" id="ev-area-manual" placeholder="ESCRIBE EL ÁREA EN MAYÚSCULAS" style="display:none;margin-top:8px;text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
       </div>
@@ -1932,7 +1937,7 @@ tbody td {
         <select class="form-control" id="off-trainer" required>
           <option value="">— Seleccionar —</option>
           <option>Andrea Zendejas</option><option>Joham Burgos</option>
-          <option>Diego Romo</option><option>Mariana Díaz</option><option>Brenda Domínguez</option>
+          <option>Diego Romo</option><option>Brenda Domínguez</option>
         </select>
       </div>
       <div class="form-group">
@@ -2058,7 +2063,7 @@ function filterRecords(filters = {}) {
 // ======================================================
 //  UTILS
 // ======================================================
-const TRAINERS = ['Andrea Zendejas','Joham Burgos','Diego Romo','Mariana Díaz','Brenda Domínguez'];
+const TRAINERS = ['Andrea Zendejas','Joham Burgos','Diego Romo','Brenda Domínguez'];
 const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
 const CATEGORIAS = ['Training','Desarrollo','Acompañamiento / Shadowing','Llamadas'];
@@ -3048,17 +3053,14 @@ function loadDemoData() {
     {fecha:'2026-05-12',trainer:'Andrea Zendejas',categoria:'Desarrollo',especificacion:'Training (SCORM)',area:'Training',horas:'4',descripcion:'Diseño del módulo 3 del training Visa T - EMP framework',resultado:'Módulo completado con 4 pantallas interactivas y simulador',evidencia:'VISA_T_M3.html',observaciones:''},
     {fecha:'2026-05-12',trainer:'Joham Burgos',categoria:'Training',especificacion:'Impartición',area:'Case Review',horas:'3',descripcion:'Training VAWA para equipo Case Review - nuevas colaboradoras',resultado:'8 colaboradoras habilitadas, evaluación aprobada por todas',evidencia:'Lista asistencia Canva',observaciones:'Solicitar material impreso próxima sesión'},
     {fecha:'2026-05-11',trainer:'Diego Romo',categoria:'Acompañamiento / Shadowing',especificacion:'1 to 1',area:'Operación',horas:'2',descripcion:'Acompañamiento individual en el uso de TramCase para registros nuevos',resultado:'3 colaboradoras de operación ya cargan casos de forma autónoma',evidencia:'',observaciones:''},
-    {fecha:'2026-05-11',trainer:'Mariana Díaz',categoria:'Desarrollo',especificacion:'Materiales',area:'Training',horas:'5',descripcion:'Configuración de módulos en Moodle para Common Core',resultado:'5 módulos publicados y accesibles en el LMS',evidencia:'URL Moodle',observaciones:'Pendiente agregar evaluación final'},
     {fecha:'2026-05-10',trainer:'Brenda Domínguez',categoria:'Desarrollo',especificacion:'Actualización de Material',area:'Compliance',horas:'3',descripcion:'Revisión y actualización de training de Compliance Dilatory Conducts',resultado:'Módulo actualizado con 2 nuevos escenarios de práctica',evidencia:'COMPLIANCE_V2.html',observaciones:''},
     {fecha:'2026-05-09',trainer:'Andrea Zendejas',categoria:'Acompañamiento / Shadowing',especificacion:'Apoyo training',area:'Training',horas:'1',descripcion:'Sesión de apoyo a trainer en coordinación semanal con Karen Reyna',resultado:'Prioridades definidas para la semana. Plan de trabajo actualizado.',evidencia:'',observaciones:''},
     {fecha:'2026-05-09',trainer:'Diego Romo',categoria:'Desarrollo',especificacion:'Scripts',area:'Case Review',horas:'2',descripcion:'Diseño del script interactivo para Visa U checklist',resultado:'Script funcional entregado para revisión',evidencia:'VISA_U_SIM.html',observaciones:''},
     {fecha:'2026-05-08',trainer:'Joham Burgos',categoria:'Training',especificacion:'Actualizaciones',area:'Customer Service',horas:'1.5',descripcion:'Actualización en protocolo VDP para customer service',resultado:'6 colaboradoras capacitadas en Validación-Disculpa-Puente versión 2026',evidencia:'Lista asistencia',observaciones:''},
-    {fecha:'2026-05-08',trainer:'Mariana Díaz',categoria:'Llamadas',especificacion:'Área',area:'MGM',horas:'1',descripcion:'Llamada de coordinación con MGM sobre reporte semanal de actividades',resultado:'Reporte enviado y aprobado',evidencia:'Reporte_S19.pdf',observaciones:''},
     {fecha:'2026-05-07',trainer:'Brenda Domínguez',categoria:'Acompañamiento / Shadowing',especificacion:'Habilitación',area:'P+',horas:'3',descripcion:'Habilitación de nuevas colaboradoras en protocolo PWI',resultado:'4 colaboradoras habilitadas en P+ con evaluación práctica',evidencia:'',observaciones:''},
     {fecha:'2026-05-06',trainer:'Andrea Zendejas',categoria:'Desarrollo',especificacion:'Materiales',area:'Psych',horas:'2',descripcion:'Elaboración de guías rápidas de operación para equipo PSYCH',resultado:'3 guías entregadas: Visa T, VAWA, screening inicial',evidencia:'Guías PDF',observaciones:''},
     {fecha:'2026-05-05',trainer:'Diego Romo',categoria:'Training',especificacion:'Impartición',area:'Training',horas:'4',descripcion:'Sesión práctica Common Core - módulo documentación',resultado:'Sesión completada. 10 colaboradoras participaron activamente.',evidencia:'Capturas Canva',observaciones:'Solicitar sala de capacitación más grande'},
     {fecha:'2026-04-30',trainer:'Joham Burgos',categoria:'Desarrollo',especificacion:'Training (SCORM)',area:'DI',horas:'6',descripcion:'Desarrollo del simulador Visa T EMP para DI',resultado:'Simulador entregado con scoring automático y retroalimentación',evidencia:'VISA_T_EMP.html',observaciones:''},
-    {fecha:'2026-04-29',trainer:'Mariana Díaz',categoria:'Acompañamiento / Shadowing',especificacion:'Shadowing',area:'Case Review',horas:'1.5',descripcion:'Shadowing en uso de MyCase para vaciado de información',resultado:'2 colaboradoras ya operan MyCase de forma autónoma',evidencia:'',observaciones:''},
     {fecha:'2026-04-28',trainer:'Brenda Domínguez',categoria:'Llamadas',especificacion:'Área',area:'Operación',horas:'1',descripcion:'Llamada con equipo de Operación para identificar necesidades de capacitación',resultado:'Listado de 5 necesidades identificadas y priorizadas',evidencia:'',observaciones:'Seguimiento en semana siguiente'},
     {fecha:'2026-04-25',trainer:'Andrea Zendejas',categoria:'Desarrollo',especificacion:'Actualización de Material',area:'Training',horas:'5',descripcion:'Actualización del training VAWA con nuevas rutas de elegibilidad',resultado:'Módulo actualizado, validado por abogada supervisora',evidencia:'VAWA_V3.html',observaciones:''},
     {fecha:'2026-04-24',trainer:'Diego Romo',categoria:'Training',especificacion:'Impartición',area:'Operación',horas:'2',descripcion:'Training completo de TramCase Updates para equipo de operación',resultado:'12 colaboradoras habilitadas en la nueva versión de TramCase',evidencia:'Lista asistencia',observaciones:''},
@@ -3190,7 +3192,6 @@ const TRAINER_COLORS = {
   'Diego Romo':        { cls:'tc-diego',   bg:'#00ACC1', init:'D', textDark:false },
   'Joham Burgos':      { cls:'tc-joham',   bg:'#8E24AA', init:'J', textDark:false },
   'Andrea Zendejas':   { cls:'tc-andrea',  bg:'#43A047', init:'A', textDark:false },
-  'Mariana Díaz':      { cls:'tc-mariana', bg:'#1E88E5', init:'M', textDark:false },
   'Brenda Domínguez':  { cls:'tc-brenda',  bg:'#F9A825', init:'B', textDark:true  },
 };
 function trainerCls(name)  { return TRAINER_COLORS[name]?.cls  || 'tc-mariana'; }
