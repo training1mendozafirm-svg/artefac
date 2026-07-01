@@ -3673,16 +3673,70 @@ function refreshCurrentView() {
   setTimeout(() => { if (lbl) lbl.textContent = 'En vivo'; }, 4000);
 }
 
+let _syncCounter = 0;
+
 // Check for data changes (polling for cross-tab / multi-trainer sync)
 function checkForUpdates() {
   const fp = dataFingerprint();
   if (fp !== _lastFingerprint && _lastFingerprint !== '') {
     _lastFingerprint = fp;
     refreshCurrentView();
-    toast('📡 Datos actualizados', 'info');
   } else {
     _lastFingerprint = fp;
   }
+
+  // Every ~40 seconds (5 cycles × 8s), silently re-sync from Sheets
+  // so changes by other trainers appear automatically
+  _syncCounter++;
+  if (_syncCounter >= 5) {
+    _syncCounter = 0;
+    silentSyncFromSheets();
+  }
+}
+
+async function silentSyncFromSheets() {
+  const url = getScriptUrl();
+  if (!url) return;
+  try {
+    const res  = await fetch(`${url}?action=getAll`, { method: 'GET' });
+    const data = await res.json();
+    if (!data.ok) return;
+    const { registros, calendario, diasoff } = data.data;
+
+    let changed = false;
+    const fpBefore = dataFingerprint();
+
+    if (registros && Array.isArray(registros) && registros.length > 0) {
+      const local = loadData();
+      const remoteIds = new Set(registros.map(r => r.id || r.ID));
+      const onlyLocal = local.filter(r => !remoteIds.has(r.id));
+      const merged = [...registros, ...onlyLocal];
+      if (merged.length !== local.length || JSON.stringify(merged.map(r=>r.id)) !== JSON.stringify(local.map(r=>r.id))) {
+        saveData(merged);
+        changed = true;
+      }
+    }
+    if (calendario && Array.isArray(calendario) && calendario.length > 0) {
+      const localCal = loadCalEvents();
+      const remoteIds = new Set(calendario.map(e => e.id || e.ID));
+      const onlyLocal = localCal.filter(e => !remoteIds.has(e.id));
+      const merged = [...calendario, ...onlyLocal];
+      if (merged.length !== localCal.length) { saveCalEvents(merged); changed = true; }
+    }
+    if (diasoff && Array.isArray(diasoff)) {
+      const local = loadOffDays();
+      if (diasoff.length !== local.length) { saveOffDays(diasoff); changed = true; }
+    }
+
+    if (changed) {
+      _lastFingerprint = dataFingerprint();
+      refreshCurrentView();
+      const lbl = document.getElementById('live-label');
+      if (lbl) { lbl.textContent = 'Actualizado'; setTimeout(()=>{ lbl.textContent='En vivo'; }, 3000); }
+      const dot = document.getElementById('live-dot');
+      if (dot) dot.classList.remove('stale');
+    }
+  } catch(_) { /* silent */ }
 }
 
 // Listen for localStorage changes from other tabs/windows (same origin)
@@ -3762,6 +3816,67 @@ async function pingScript() {
     setSheetsStatus('error');
     setSyncLog(`Error: ${err.message}`);
     toast('Error al conectar con Sheets: ' + err.message, 'error');
+  }
+}
+
+// ── AUTO-LOAD ON STARTUP ──────────────────────────────────
+async function autoLoadFromSheets() {
+  const url = getScriptUrl();
+  if (!url) return;
+
+  // Show loading indicator in live badge
+  const dot = document.getElementById('live-dot');
+  const lbl = document.getElementById('live-label');
+  if (dot) dot.classList.add('stale');
+  if (lbl) lbl.textContent = 'Cargando desde Sheets…';
+
+  try {
+    const res  = await fetch(`${url}?action=getAll`, { method: 'GET' });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'Error');
+
+    const { registros, calendario, diasoff } = data.data;
+    let changed = false;
+
+    // Merge Sheet data into localStorage (Sheet is source of truth)
+    if (registros && Array.isArray(registros) && registros.length > 0) {
+      // Merge: combine local + remote, remote wins on conflict (same ID)
+      const local    = loadData();
+      const remoteIds = new Set(registros.map(r => r.id || r.ID));
+      const onlyLocal = local.filter(r => !remoteIds.has(r.id));
+      saveData([...registros, ...onlyLocal]);
+      changed = true;
+    }
+    if (calendario && Array.isArray(calendario) && calendario.length > 0) {
+      const localCal   = loadCalEvents();
+      const remoteCalIds = new Set(calendario.map(e => e.id || e.ID));
+      const onlyLocalCal = localCal.filter(e => !remoteCalIds.has(e.id));
+      saveCalEvents([...calendario, ...onlyLocalCal]);
+      changed = true;
+    }
+    if (diasoff && Array.isArray(diasoff) && diasoff.length > 0) {
+      saveOffDays(diasoff);
+      changed = true;
+    }
+
+    if (changed) {
+      _lastFingerprint = dataFingerprint();
+      refreshCurrentView();
+      const total = (registros?.length || 0);
+      if (lbl) lbl.textContent = `${total} registros cargados`;
+      if (dot) dot.classList.remove('stale');
+      setTimeout(() => { if (lbl) lbl.textContent = 'En vivo'; }, 4000);
+      setSheetsStatus('ok');
+    } else {
+      if (lbl) lbl.textContent = 'En vivo';
+      if (dot) dot.classList.remove('stale');
+      setSheetsStatus('ok');
+    }
+
+  } catch(err) {
+    if (lbl) lbl.textContent = 'Sin conexión';
+    if (dot) dot.classList.add('stale');
+    // Silent fail — app works with localStorage
   }
 }
 
@@ -3867,6 +3982,9 @@ document.addEventListener('DOMContentLoaded', function() {
   renderHome();
   _lastFingerprint = dataFingerprint();
   initScriptUrl();
+
+  // Auto-cargar datos desde Sheets al abrir
+  setTimeout(autoLoadFromSheets, 800);
 
   // Auto-refresh every 8 seconds
   _liveIntervalId = setInterval(checkForUpdates, 8000);
