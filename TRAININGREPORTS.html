@@ -3217,21 +3217,12 @@ function loadAllCalEvents() {
 function saveCalEvents(arr) { localStorage.setItem(CAL_KEY, JSON.stringify(arr)); }
 
 function buildAllEvents(trainerF, catF) {
+  // El calendario solo muestra trainings planeados (tmlf_calendar_2026).
+  // Los registros de actividad aparecen ÚNICAMENTE en reportes, no en el calendario.
   let calEvts = loadCalEvents().map(e => ({...e, _src:'cal'}));
-  let regEvts = loadData().map(r => ({
-    id: 'reg_'+r.id, fecha: r.fecha, trainer: r.trainer,
-    categoria: r.categoria, especificacion: r.especificacion, area: r.area, horas: r.horas,
-    nombre: r.descripcion || `${r.categoria} · ${r.especificacion||''}`,
-    status:'completado', horaInicio:'', horaFin:'', _src:'reg', _regId: r.id
-  }));
-  if (trainerF) { calEvts = calEvts.filter(e=>e.trainer===trainerF); regEvts = regEvts.filter(e=>e.trainer===trainerF); }
-  if (catF)     { calEvts = calEvts.filter(e=>e.categoria===catF);   regEvts = regEvts.filter(e=>e.categoria===catF); }
-
-  // Calendar events that have _regId are already in the registry — remove their reg duplicates
-  const linkedRegIds = new Set(calEvts.filter(e=>e._regId).map(e=>e._regId));
-  regEvts = regEvts.filter(r => !linkedRegIds.has(r._regId));
-
-  return [...calEvts, ...regEvts];
+  if (trainerF) calEvts = calEvts.filter(e => e.trainer === trainerF);
+  if (catF)     calEvts = calEvts.filter(e => e.categoria === catF);
+  return calEvts;
 }
 
 function buildByDate(allEvts, trainerF) {
