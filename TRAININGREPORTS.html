@@ -1756,7 +1756,7 @@ tbody td {
         <div class="table-wrap">
           <table>
             <thead><tr>
-              <th>Fecha</th><th>Trainer</th><th>Categoría</th><th>Especificación</th><th>Área</th><th>Hrs</th><th>Descripción</th><th>Acciones</th>
+              <th>Fecha</th><th>Trainer</th><th>Categoría</th><th>Especificación</th><th>Área</th><th>Hrs</th><th>Descripción</th><th>Estado</th><th>Acciones</th>
             </tr></thead>
             <tbody id="gestion-table-body"></tbody>
           </table>
@@ -1766,6 +1766,46 @@ tbody td {
 
   </div><!-- /content -->
 </main>
+
+<!-- ===== MODAL DETALLE DE EVENTO ===== -->
+<div class="modal-overlay" id="modal-event-detail">
+  <div class="event-modal" style="max-width:480px;">
+    <div class="modal-header">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div id="ev-detail-avatar" style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0;"></div>
+        <div>
+          <div id="ev-detail-trainer" style="font-size:12px;font-weight:500;color:var(--text-muted);"></div>
+          <div id="ev-detail-title" style="font-family:var(--font-heading);font-size:20px;font-weight:600;color:var(--text);line-height:1.2;"></div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeEventDetailModal()">✕</button>
+    </div>
+
+    <div id="ev-detail-cat-row" style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;"></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;" id="ev-detail-grid"></div>
+
+    <div id="ev-detail-link-row" style="display:none;margin-bottom:18px;">
+      <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Enlace</div>
+      <a id="ev-detail-link" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#2f5c8f;padding:7px 14px;background:#f0f6ff;border:1px solid #d0dff0;border-radius:8px;text-decoration:none;">
+        🔗 <span id="ev-detail-link-label"></span>
+      </a>
+    </div>
+
+    <div id="ev-detail-reg-note" style="display:none;padding:10px 14px;background:#e8f5e9;border:1px solid #c8e6c9;border-radius:8px;font-size:12px;color:#2e7d32;margin-bottom:16px;">
+      ✓ Este training está <strong>registrado en los reportes</strong> del trainer.
+    </div>
+
+    <hr class="section-divider">
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="goEditFromDetail()" id="ev-detail-edit-btn">✎ Editar</button>
+      <button class="btn btn-ghost" onclick="closeEventDetailModal()">Cerrar</button>
+      <button class="btn btn-danger btn-sm" style="margin-left:auto;" id="ev-detail-delete-btn" onclick="deleteFromDetail()">✕ Eliminar</button>
+    </div>
+    <input type="hidden" id="ev-detail-id" value="">
+    <input type="hidden" id="ev-detail-src" value="">
+  </div>
+</div>
 
 <!-- ===== MODAL CALENDAR EVENT ===== -->
 <div class="modal-overlay" id="modal-event">
@@ -1959,9 +1999,17 @@ const LS_KEY = 'tmlf_training_2026';
 let editingId = null;
 
 function loadData() {
+  // Solo devuelve registros activos (sin status 'eliminado')
   try {
-    return JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+    return JSON.parse(localStorage.getItem(LS_KEY) || '[]')
+      .filter(r => r.status !== 'eliminado');
   } catch { return []; }
+}
+
+function loadAllData() {
+  // Devuelve TODOS incluyendo eliminados (para gestión y Sheets)
+  try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); }
+  catch { return []; }
 }
 
 function saveData(arr) {
@@ -1969,28 +2017,33 @@ function saveData(arr) {
 }
 
 function addRecord(rec) {
-  const arr = loadData();
-  rec.id = Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+  const arr = loadAllData();
+  rec.id        = Date.now().toString(36) + Math.random().toString(36).slice(2,6);
   rec.createdAt = new Date().toISOString();
+  rec.status    = 'activo';
   arr.push(rec);
   saveData(arr);
   return rec;
 }
 
 function updateRecord(id, rec) {
-  const arr = loadData();
+  const arr = loadAllData();
   const idx = arr.findIndex(r => r.id === id);
   if (idx > -1) { arr[idx] = {...arr[idx], ...rec, id}; saveData(arr); return true; }
   return false;
 }
 
+// Soft delete: marca como 'eliminado', NO borra de localStorage ni de Sheets
 function deleteRecord(id) {
-  const arr = loadData().filter(r => r.id !== id);
-  saveData(arr);
+  const rec = loadAllData().find(r => r.id === id) || {};
+  const updated = { ...rec, id, status: 'eliminado', deletedAt: new Date().toISOString() };
+  updateRecord(id, { status: 'eliminado', deletedAt: updated.deletedAt });
+  // Envía el registro COMPLETO con status eliminado (no sobrescribe campos con vacío)
+  pushRecordToSheet('updateRecord', { record: updated });
 }
 
 function filterRecords(filters = {}) {
-  let arr = loadData();
+  let arr = loadData(); // ya excluye eliminados
   if (filters.trainer) arr = arr.filter(r => r.trainer === filters.trainer);
   if (filters.mes !== '' && filters.mes !== undefined && filters.mes !== null)
     arr = arr.filter(r => new Date(r.fecha + 'T12:00:00').getMonth() === parseInt(filters.mes));
@@ -2776,7 +2829,7 @@ function renderCoordReport() {
 // ======================================================
 function renderGestionTable() {
   const q = (document.getElementById('gestion-search').value||'').toLowerCase();
-  let arr = loadData();
+  let arr = loadAllData(); // incluye eliminados
   if (q) arr = arr.filter(r =>
     (r.trainer||'').toLowerCase().includes(q) ||
     (r.categoria||'').toLowerCase().includes(q) ||
@@ -2785,34 +2838,56 @@ function renderGestionTable() {
     (r.descripcion||'').toLowerCase().includes(q) ||
     (r.fecha||'').includes(q)
   );
-  const sorted = [...arr].sort((a,b) => b.fecha.localeCompare(a.fecha));
-  document.getElementById('gestion-table-body').innerHTML = sorted.length ? sorted.map(r => `
-    <tr>
-      <td class="td-main">${fmtDate(r.fecha)}</td>
-      <td>${r.trainer}</td>
-      <td><span class="badge ${getTypeBadge(r.categoria)}">${(r.categoria||'').slice(0,22)}</span></td>
-      <td>${r.especificacion || '—'}</td>
-      <td>${r.area}</td>
-      <td>${fmtHrs(r.horas)}</td>
-      <td title="${r.descripcion}">${(r.descripcion||'').slice(0,40)}${(r.descripcion||'').length>40?'…':''}</td>
+  const sorted = [...arr].sort((a,b) => (b.fecha||'').localeCompare(a.fecha||''));
+  const deletedCount = sorted.filter(r=>r.status==='eliminado').length;
+
+  document.getElementById('gestion-table-body').innerHTML = sorted.length ? sorted.map(r => {
+    const isDeleted = r.status === 'eliminado';
+    const rowStyle  = isDeleted ? 'opacity:0.45;' : '';
+    const statusBadge = isDeleted
+      ? `<span style="font-size:10px;background:rgba(192,85,85,0.12);color:var(--danger);border:1px solid rgba(192,85,85,0.25);padding:2px 7px;border-radius:12px;font-family:var(--font-condensed);letter-spacing:.3px;">Eliminado</span>`
+      : `<span style="font-size:10px;background:rgba(46,153,102,0.1);color:var(--success);border:1px solid rgba(46,153,102,0.2);padding:2px 7px;border-radius:12px;font-family:var(--font-condensed);letter-spacing:.3px;">Activo</span>`;
+    return `
+    <tr style="${rowStyle}">
+      <td class="td-main" style="${isDeleted?'text-decoration:line-through;color:var(--text-muted);':''}">${fmtDate(r.fecha)}</td>
+      <td style="${isDeleted?'color:var(--text-muted);':''}">${r.trainer}</td>
+      <td><span class="badge ${getTypeBadge(r.categoria)}" style="${isDeleted?'opacity:0.5;':''}">${(r.categoria||'').slice(0,22)}</span></td>
+      <td style="${isDeleted?'color:var(--text-muted);':''}">${r.especificacion || '—'}</td>
+      <td style="${isDeleted?'color:var(--text-muted);':''}">${r.area}</td>
+      <td style="${isDeleted?'color:var(--text-muted);':''}">${fmtHrs(r.horas)}</td>
+      <td title="${r.descripcion||''}" style="${isDeleted?'color:var(--text-muted);':''}">${(r.descripcion||'—').slice(0,40)}${(r.descripcion||'').length>40?'…':''}</td>
+      <td>${statusBadge}</td>
       <td>
         <div class="btn-row">
-          <button class="btn btn-ghost btn-sm" onclick="loadForEdit('${r.id}')">✎ Editar</button>
-          <button class="btn btn-danger btn-sm" onclick="confirmDelete('${r.id}')">✕</button>
+          ${!isDeleted
+            ? `<button class="btn btn-ghost btn-sm" onclick="loadForEdit('${r.id}')">✎ Editar</button>
+               <button class="btn btn-danger btn-sm" onclick="confirmDelete('${r.id}')">✕</button>`
+            : `<button class="btn btn-ghost btn-sm" onclick="confirmRestore('${r.id}')">↩ Restaurar</button>`}
         </div>
       </td>
-    </tr>
-  `).join('') : `<tr><td colspan="8"><div class="empty-state"><div class="icon">🗂</div><p>${q ? 'Sin resultados para la búsqueda' : 'No hay registros aún'}</p></div></td></tr>`;
+    </tr>`;
+  }).join('') : `<tr><td colspan="9"><div class="empty-state"><div class="icon">🗂</div><p>${q?'Sin resultados':'No hay registros aún'}</p></div></td></tr>`;
+}
+
+function confirmRestore(id) {
+  updateRecord(id, { status: 'activo', deletedAt: '' });
+  pushRecordToSheet('updateRecord', { record: { id, status: 'activo', deletedAt: '' } });
+  toast('Registro restaurado ✓', 'success');
+  _lastFingerprint = dataFingerprint();
+  refreshCurrentView(); renderGestionTable(); renderDBStats();
 }
 
 function renderDBStats() {
-  const arr = loadData();
-  const totalHrs = arr.reduce((s,r) => s + parseFloat(r.horas||0), 0);
+  const all     = loadAllData();
+  const active  = all.filter(r => r.status !== 'eliminado');
+  const deleted = all.filter(r => r.status === 'eliminado');
+  const totalHrs = active.reduce((s,r) => s + parseFloat(r.horas||0), 0);
   document.getElementById('db-stats').innerHTML = `
-    <div style="display:flex;gap:20px;flex-wrap:wrap;">
-      <div><span style="font-family:var(--font-condensed);font-size:22px;font-weight:700;color:var(--gold-light);">${arr.length}</span><span style="font-size:12px;color:var(--text-muted);margin-left:6px;">registros</span></div>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center;">
+      <div><span style="font-family:var(--font-condensed);font-size:22px;font-weight:700;color:var(--gold-light);">${active.length}</span><span style="font-size:12px;color:var(--text-muted);margin-left:6px;">activos</span></div>
       <div><span style="font-family:var(--font-condensed);font-size:22px;font-weight:700;color:var(--blue-light);">${totalHrs}h</span><span style="font-size:12px;color:var(--text-muted);margin-left:6px;">horas</span></div>
-      <div><span style="font-size:12px;color:var(--text-muted);">Almacenamiento: ~${Math.round(JSON.stringify(arr).length/1024)}KB</span></div>
+      ${deleted.length>0?`<div><span style="font-family:var(--font-condensed);font-size:16px;font-weight:700;color:var(--danger);">${deleted.length}</span><span style="font-size:12px;color:var(--text-muted);margin-left:6px;">eliminados (rastro en Sheets)</span></div>`:''}
+      <div><span style="font-size:12px;color:var(--text-muted);">~${Math.round(JSON.stringify(all).length/1024)}KB</span></div>
     </div>
   `;
 }
@@ -2910,20 +2985,26 @@ function importJSON(e) {
 //  DELETE / CONFIRM
 // ======================================================
 function confirmDelete(id) {
-  const arr = loadData();
+  const arr = loadAllData();
   const rec = arr.find(r => r.id === id);
   if (!rec) return;
   const modal = document.getElementById('modal-confirm');
-  document.getElementById('confirm-title').textContent = 'Eliminar actividad';
-  document.getElementById('confirm-msg').textContent = `¿Eliminar la actividad de ${rec.trainer} del ${fmtDate(rec.fecha)}? Esta acción no se puede deshacer.`;
+  document.getElementById('confirm-title').textContent = 'Marcar como eliminado';
+  document.getElementById('confirm-msg').innerHTML =
+    `¿Marcar la actividad de <strong>${rec.trainer}</strong> del ${fmtDate(rec.fecha)} como eliminada?<br><br>
+    <span style="font-size:12px;color:var(--text-muted);">
+      ✓ El registro <strong>se conserva en Google Sheets</strong> como rastro.<br>
+      ✓ Desaparecerá de todos los reportes y vistas del app.<br>
+      ✓ En Gestión de Datos quedará visible con estado <em>Eliminado</em>.
+    </span>`;
+  document.getElementById('confirm-ok-btn').textContent = 'Marcar como eliminado';
   document.getElementById('confirm-ok-btn').onclick = function() {
     deleteRecord(id);
     modal.classList.remove('open');
-    toast('Actividad eliminada', 'info');
+    toast('Registro marcado como eliminado · conservado en Sheets', 'info');
     _lastFingerprint = dataFingerprint();
     refreshCurrentView();
     renderGestionTable(); renderDBStats();
-    if (document.getElementById('view-trainer').classList.contains('active')) renderTrainerReport();
   };
   modal.classList.add('open');
 }
@@ -3124,7 +3205,14 @@ let currentDayDate  = null;
 let editingEventId  = null;
 let _dragEventId    = null;
 
-function loadCalEvents()    { try { return JSON.parse(localStorage.getItem(CAL_KEY)||'[]'); } catch { return []; } }
+function loadCalEvents() {
+  // Solo eventos activos (sin status 'eliminado')
+  try { return JSON.parse(localStorage.getItem(CAL_KEY)||'[]').filter(e=>e.status!=='eliminado'); }
+  catch { return []; }
+}
+function loadAllCalEvents() {
+  try { return JSON.parse(localStorage.getItem(CAL_KEY)||'[]'); } catch { return []; }
+}
 function saveCalEvents(arr) { localStorage.setItem(CAL_KEY, JSON.stringify(arr)); }
 
 function buildAllEvents(trainerF, catF) {
@@ -3280,8 +3368,8 @@ function buildCard(e, ds, tall) {
   const clickFn = isOff
     ? `event.stopPropagation();openEditOffDayModal('${e._offId}')`
     : e._src==='cal'
-    ? `event.stopPropagation();openEditEventModal('${e.id}','cal')`
-    : `event.stopPropagation();openDayModal('${ds}')`;
+    ? `event.stopPropagation();openEventDetailModal('${e.id}','cal')`
+    : `event.stopPropagation();openEventDetailModal('${e.id}','reg')`;
   return `<div class="cal-card ${cls}" ${dragAttrs} onclick="${clickFn}" title="${e.trainer||''} · ${timeLabel}">
     <div class="cal-card-row1">
       <span class="cal-card-avatar">${init}</span>
@@ -3298,7 +3386,7 @@ function buildCardDay(e, ds) {
   const bg=isOff?'#ef5350':isBday?'#AB47BC':trainerBg(e.trainer);
   const txt=isOff||isBday?'#fff':trainerTxt(e.trainer);
   const timeLabel=e.horaInicio?`${e.horaInicio}${e.horaFin?' \u2013 '+e.horaFin:''}`:'Todo el día';
-  const clickFn=isOff?`openEditOffDayModal('${e._offId}')`:isCal?`openEditEventModal('${e.id}','cal')`:`openDayModal('${ds}')`;
+  const clickFn=isOff?`openEditOffDayModal('${e._offId}')`:isCal?`openEventDetailModal('${e.id}','cal')`:`openEventDetailModal('${e.id}','reg')`;
   const horasLabel = e.horas ? ` · ${e.horas}h` : '';
   return `<div style="background:${bg};color:${txt};border-radius:10px;padding:12px 14px;margin-bottom:10px;cursor:pointer;" onclick="${clickFn}">
     <div style="font-size:11px;opacity:0.85;margin-bottom:4px;">${e.trainer||''} · ${timeLabel}${horasLabel}</div>
@@ -3349,7 +3437,113 @@ function calDrop(evt,newDate){
   refreshCurrentView();
 }
 
-// ---- DAY MODAL ----
+// ---- EVENT DETAIL MODAL (vista previa) ----
+function openEventDetailModal(id, src) {
+  // Close day modal if open
+  document.getElementById('modal-day').classList.remove('open');
+
+  let ev = null;
+  if (src === 'cal') {
+    ev = loadCalEvents().find(e => e.id === id);
+  } else if (src === 'reg') {
+    const realId = id.replace('reg_','');
+    const rec = loadAllData().find(r => r.id === realId);
+    if (rec) ev = {
+      id: realId, _src: 'reg', _regId: realId,
+      fecha: rec.fecha, trainer: rec.trainer,
+      categoria: rec.categoria, especificacion: rec.especificacion,
+      area: rec.area, horas: rec.horas,
+      nombre: rec.descripcion || `${rec.categoria} · ${rec.especificacion}`,
+      horaInicio: '', horaFin: '', sala: '', link: ''
+    };
+  }
+  if (!ev) return;
+
+  // Trainer styling
+  const tc = TRAINER_COLORS[ev.trainer] || { bg:'#1E88E5', init:'?' };
+  const avatar = document.getElementById('ev-detail-avatar');
+  avatar.style.background = tc.bg;
+  avatar.textContent = tc.init || (ev.trainer||'?')[0];
+  document.getElementById('ev-detail-trainer').textContent = ev.trainer || '—';
+  document.getElementById('ev-detail-title').textContent = ev.nombre || `${ev.categoria} · ${ev.especificacion}`;
+
+  // Category badges
+  document.getElementById('ev-detail-cat-row').innerHTML = [
+    ev.categoria     ? `<span class="badge ${getTypeBadge(ev.categoria)}">${ev.categoria}</span>` : '',
+    ev.especificacion? `<span class="badge badge-otro">${ev.especificacion}</span>` : '',
+    ev.area          ? `<span class="badge badge-proyecto">${ev.area}</span>` : '',
+  ].filter(Boolean).join('');
+
+  // Detail grid
+  const timeLabel = ev.horaInicio
+    ? `${ev.horaInicio}${ev.horaFin ? ' – ' + ev.horaFin : ''}`
+    : 'Sin horario definido';
+  const items = [
+    { label:'Fecha',    value: fmtDate(ev.fecha) },
+    { label:'Horario',  value: timeLabel },
+    { label:'Horas',    value: ev.horas ? `${ev.horas} hrs` : '—' },
+    { label:'Sala',     value: ev.sala || '—' },
+  ];
+  document.getElementById('ev-detail-grid').innerHTML = items.map(i => `
+    <div>
+      <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;">${i.label}</div>
+      <div style="font-size:14px;font-weight:500;color:var(--text);">${i.value}</div>
+    </div>
+  `).join('');
+
+  // Link
+  const linkRow = document.getElementById('ev-detail-link-row');
+  if (ev.link) {
+    linkRow.style.display = 'block';
+    const a = document.getElementById('ev-detail-link');
+    a.href = ev.link;
+    document.getElementById('ev-detail-link-label').textContent =
+      ev.link.replace(/^https?:\/\//,'').split('/')[0];
+  } else {
+    linkRow.style.display = 'none';
+  }
+
+  // Registered note
+  const isReg = src === 'reg' || (src === 'cal' && !!ev._regId);
+  document.getElementById('ev-detail-reg-note').style.display = isReg ? 'block' : 'none';
+
+  // Edit/delete buttons
+  document.getElementById('ev-detail-id').value  = id;
+  document.getElementById('ev-detail-src').value = src;
+  // Reg source goes to form edit; cal source goes to edit modal
+  document.getElementById('ev-detail-edit-btn').style.display = src === 'reg' ? 'none' : 'inline-flex';
+  const deleteBtn = document.getElementById('ev-detail-delete-btn');
+  deleteBtn.style.display = src === 'reg' ? 'none' : 'inline-flex'; // cal events deleted via calendar only
+
+  document.getElementById('modal-event-detail').classList.add('open');
+}
+
+function closeEventDetailModal() {
+  document.getElementById('modal-event-detail').classList.remove('open');
+}
+
+function goEditFromDetail() {
+  const id  = document.getElementById('ev-detail-id').value;
+  const src = document.getElementById('ev-detail-src').value;
+  closeEventDetailModal();
+  if (src === 'reg') {
+    loadForEdit(id);
+  } else {
+    openEditEventModal(id, 'cal');
+  }
+}
+
+function deleteFromDetail() {
+  const id  = document.getElementById('ev-detail-id').value;
+  const src = document.getElementById('ev-detail-src').value;
+  closeEventDetailModal();
+  if (src === 'cal') {
+    editingEventId = id;
+    deleteEvent();
+  }
+}
+
+
 function openDayModal(dateStr) {
   currentDayDate = dateStr;
   const [y, m, d] = dateStr.split('-');
@@ -3412,19 +3606,19 @@ function openDayModal(dateStr) {
       const isReg = e._src === 'reg';
       const isCal = e._src === 'cal';
       html += `
-      <div style="background:#f7f8fc;border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;">
+      <div style="background:#f7f8fc;border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;cursor:pointer;" onclick="document.getElementById('modal-day').classList.remove('open');openEventDetailModal('${e.id}','${e._src}')">
         <div style="display:flex;align-items:flex-start;gap:10px;">
           <div style="width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0;background:${trainerColor};"></div>
           <div style="flex:1;">
             <div style="font-size:13px;font-weight:600;color:var(--text);">${e.nombre || e.categoria}</div>
             <div style="font-size:12px;color:var(--text-muted);margin-top:3px;">${e.trainer} · ${e.especificacion||''} ${horaLabel?'· '+horaLabel:''}</div>
             ${e.sala ? `<div style="font-size:11px;color:var(--text-muted);margin-top:2px;">📍 ${e.sala}</div>` : ''}
-            ${e.link ? `<div style="font-size:11px;margin-top:2px;"><a href="${e.link}" target="_blank" style="color:#2f5c8f;">🔗 Abrir enlace</a></div>` : ''}
-            <div style="margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-              <span class="cal-status-badge ${isReg?'status-completado':isCal?'status-completado':'status-planeado'}">${isReg||isCal?'✓ Registrado':'◌ Sin registrar'}</span>
-              ${(isCal) ? `<button class="btn btn-ghost btn-sm" onclick="document.getElementById('modal-day').classList.remove('open');openEditEventModal('${e.id}','cal')">✎ Editar</button>` : ''}
+            ${e.link ? `<div style="font-size:11px;margin-top:2px;"><span style="color:#2f5c8f;">🔗 ${e.link.replace(/^https?:\/\//,'').split('/')[0]}</span></div>` : ''}
+            <div style="margin-top:6px;">
+              <span class="cal-status-badge ${isReg||isCal?'status-completado':'status-planeado'}">${isReg||isCal?'✓ Registrado':'◌ Sin registrar'}</span>
             </div>
           </div>
+          <div style="font-size:11px;color:var(--text-muted);flex-shrink:0;">Ver detalle ›</div>
         </div>
       </div>`;
     });
@@ -3614,19 +3808,27 @@ function saveEvent() {
 
 function deleteEvent() {
   if (!editingEventId) return;
-  const evts = loadCalEvents();
+  const evts = loadAllCalEvents();
   const ev   = evts.find(e => e.id === editingEventId);
+  if (!ev) return;
 
-  // Also remove linked registry record
-  if (ev?._regId) {
-    deleteRecord(ev._regId);
-  }
+  // Soft delete del Registro vinculado (si existe)
+  if (ev._regId) deleteRecord(ev._regId);
 
-  saveCalEvents(evts.filter(e => e.id !== editingEventId));
+  // Soft delete del evento de calendario: marca eliminado, NO borra la fila
+  const updatedEv = { ...ev, status: 'eliminado', deletedAt: new Date().toISOString() };
+  const idx = evts.findIndex(e => e.id === editingEventId);
+  if (idx > -1) evts[idx] = updatedEv;
+  saveCalEvents(evts);
+
+  // Envía evento COMPLETO a Sheets con status=eliminado (preserva todos los campos)
+  pushRecordToSheet('updateCalEvent', { event: updatedEv });
+
   closeEventModal();
+  if (typeof closeEventDetailModal === 'function') closeEventDetailModal();
   _lastFingerprint = dataFingerprint();
   refreshCurrentView();
-  toast('Training eliminado del calendario y de los registros', 'info');
+  toast('Training marcado como eliminado · conservado en Sheets como rastro', 'info');
 }
 
 // ======================================================
@@ -3635,8 +3837,8 @@ function deleteEvent() {
 
 // Returns a lightweight fingerprint of all data
 function dataFingerprint() {
-  const reg = loadData();
-  const cal = loadCalEvents();
+  const reg = loadAllData();
+  const cal = loadAllCalEvents(); // incluye eliminados para fingerprint preciso
   const off = loadOffDays();
   return `${reg.length}:${reg[reg.length-1]?.id||''}|${cal.length}:${cal[cal.length-1]?.id||''}|${off.length}`;
 }
@@ -3698,31 +3900,31 @@ async function silentSyncFromSheets() {
   const url = getScriptUrl();
   if (!url) return;
   try {
-    const res  = await fetch(`${url}?action=getAll`, { method: 'GET' });
-    const data = await res.json();
+    const data = await gasGet(url, { action: 'getAll' });
     if (!data.ok) return;
     const { registros, calendario, diasoff } = data.data;
     let changed = false;
 
     if (registros && Array.isArray(registros) && registros.length > 0) {
-      const normalized = registros.map(normalizeRecord);
-      const local      = loadData();
-      const remoteIds  = new Set(normalized.map(r => r.id).filter(Boolean));
-      const onlyLocal  = local.filter(r => r.id && !remoteIds.has(r.id));
-      const merged     = [...normalized, ...onlyLocal];
-      if (merged.length !== local.length) { saveData(merged); changed = true; }
+      const normalized = deduplicateById(registros.map(normalizeRecord).filter(r=>r.fecha&&r.trainer));
+      const local = loadData();
+      if (normalized.length !== local.length ||
+          JSON.stringify(normalized.map(r=>r.id).sort()) !== JSON.stringify(local.map(r=>r.id).sort())) {
+        saveData(normalized); changed = true;
+      }
     }
     if (calendario && Array.isArray(calendario) && calendario.length > 0) {
-      const normalized   = calendario.map(normalizeCalEvent);
-      const localCal     = loadCalEvents();
-      const remoteCalIds = new Set(normalized.map(e => e.id).filter(Boolean));
-      const onlyLocal    = localCal.filter(e => e.id && !remoteCalIds.has(e.id));
-      const merged       = [...normalized, ...onlyLocal];
-      if (merged.length !== localCal.length) { saveCalEvents(merged); changed = true; }
+      const normalized = deduplicateById(calendario.map(normalizeCalEvent).filter(e=>e.fecha&&e.trainer));
+      const local = loadCalEvents();
+      if (normalized.length !== local.length ||
+          JSON.stringify(normalized.map(e=>e.id).sort()) !== JSON.stringify(local.map(e=>e.id).sort())) {
+        saveCalEvents(normalized); changed = true;
+      }
     }
-    if (diasoff && Array.isArray(diasoff)) {
+    if (diasoff && Array.isArray(diasoff) && diasoff.length > 0) {
+      const normalized = deduplicateById(diasoff.map(normalizeOffDay).filter(o=>o.trainer));
       const local = loadOffDays();
-      if (diasoff.length !== local.length) { saveOffDays(diasoff.map(normalizeOffDay)); changed = true; }
+      if (normalized.length !== local.length) { saveOffDays(normalized); changed = true; }
     }
 
     if (changed) {
@@ -3748,9 +3950,73 @@ window.addEventListener('storage', function(e) {
 // ======================================================
 const GAS_URL_KEY = 'tmlf_gas_url';
 
+// ── JSONP fetcher (funciona desde file://, sin CORS) ──
+function fetchJSONP(url, params = {}) {
+  return new Promise((resolve, reject) => {
+    const cbName = '_tmlf_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+    const timeout = setTimeout(() => {
+      delete window[cbName];
+      script.remove();
+      reject(new Error('Timeout'));
+    }, 12000);
+    window[cbName] = function(data) {
+      clearTimeout(timeout);
+      delete window[cbName];
+      script.remove();
+      resolve(data);
+    };
+    const qs = new URLSearchParams({...params, callback: cbName}).toString();
+    const script = document.createElement('script');
+    script.src = `${url}?${qs}`;
+    script.onerror = () => {
+      clearTimeout(timeout);
+      delete window[cbName];
+      reject(new Error('JSONP script error'));
+    };
+    document.head.appendChild(script);
+  });
+}
+
+// ── gasGet: intenta fetch, cae en JSONP automáticamente ──
+async function gasGet(url, params = {}) {
+  const qs  = params.action ? `?action=${params.action}` : '';
+  try {
+    // Fetch normal (funciona desde HTTP/HTTPS)
+    const res = await fetch(`${url}${qs}`, { method:'GET', redirect:'follow' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch(_) {
+    // Fallback JSONP (funciona desde file://)
+    return await fetchJSONP(url, params);
+  }
+}
+
+// ── gasPost: POST con fallback a JSONP GET para datos pequeños ──
+async function gasPost(url, body) {
+  try {
+    const res = await fetch(url, {
+      method:  'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body:    JSON.stringify(body),
+      redirect:'follow'
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch(_) {
+    // Fallback: JSONP GET con datos en parámetro (para datasets pequeños)
+    try {
+      const data = encodeURIComponent(JSON.stringify(body));
+      if (data.length < 7000) {
+        return await fetchJSONP(url, { action: body.action || 'syncAll', data });
+      }
+    } catch(_2) {}
+    throw new Error('POST y JSONP fallaron');
+  }
+}
+
 function getScriptUrl() {
   return localStorage.getItem(GAS_URL_KEY)
-    || 'https://script.google.com/macros/s/AKfycbxyFChqr_elTXSHIHUE2m_A3m4mn2UDhjkIAqWmcRXZTbKe0LpWcN29X72lyKB0k13hTw/exec';
+    || 'https://script.google.com/macros/s/AKfycbx_ztyiptd0LnXcXmg2CNGKMPc8xGUdg-rOM96f_5VCoQCHmmEAQxtuIcXttwMm2jRkDA/exec';
 }
 
 function saveScriptUrl(url) {
@@ -3798,8 +4064,7 @@ async function pingScript() {
   setSheetsStatus('syncing');
   setSyncLog('Verificando conexión…');
   try {
-    const res  = await fetch(`${url}?action=ping`, { method: 'GET' });
-    const data = await res.json();
+    const data = await gasGet(url, { action: 'ping' });
     if (data.ok) {
       setSheetsStatus('ok');
       setSyncLog(`Conexión exitosa · ${data.data?.timestamp || ''}`);
@@ -3825,36 +4090,33 @@ async function autoLoadFromSheets() {
   if (lbl) lbl.textContent = 'Cargando desde Sheets…';
 
   try {
-    const res  = await fetch(`${url}?action=getAll`, { method: 'GET' });
-    const data = await res.json();
+    const data = await gasGet(url, { action: 'getAll' });
     if (!data.ok) throw new Error(data.error || 'Error del servidor');
 
     const { registros, calendario, diasoff } = data.data;
     let loaded = 0;
 
-    // Registros: Sheet es fuente de verdad
+    // Sheet es fuente de verdad — REEMPLAZA localStorage (no merge, sin duplicados)
     if (registros && Array.isArray(registros) && registros.length > 0) {
-      const normalized = registros.map(normalizeRecord);
-      const local      = loadData();
-      const remoteIds  = new Set(normalized.map(r => r.id).filter(Boolean));
-      const onlyLocal  = local.filter(r => r.id && !remoteIds.has(r.id));
-      saveData([...normalized, ...onlyLocal]);
+      const normalized = deduplicateById(
+        registros.map(normalizeRecord).filter(r => r.fecha && r.trainer)
+      );
+      saveData(normalized);
       loaded += normalized.length;
     }
 
-    // Calendario
     if (calendario && Array.isArray(calendario) && calendario.length > 0) {
-      const normalized   = calendario.map(normalizeCalEvent);
-      const localCal     = loadCalEvents();
-      const remoteCalIds = new Set(normalized.map(e => e.id).filter(Boolean));
-      const onlyLocal    = localCal.filter(e => e.id && !remoteCalIds.has(e.id));
-      saveCalEvents([...normalized, ...onlyLocal]);
+      const normalized = deduplicateById(
+        calendario.map(normalizeCalEvent).filter(e => e.fecha && e.trainer)
+      );
+      saveCalEvents(normalized);
       loaded += normalized.length;
     }
 
-    // Días OFF
     if (diasoff && Array.isArray(diasoff) && diasoff.length > 0) {
-      const normalized = diasoff.map(normalizeOffDay);
+      const normalized = deduplicateById(
+        diasoff.map(normalizeOffDay).filter(o => o.trainer)
+      );
       saveOffDays(normalized);
     }
 
@@ -3866,32 +4128,76 @@ async function autoLoadFromSheets() {
     setSheetsStatus('ok');
     setTimeout(() => { if (lbl) lbl.textContent = 'En vivo'; }, 5000);
 
-  } catch(err) {
-    if (lbl) lbl.textContent = 'Sin conexión a Sheets';
+  } catch(_) {
+    if (lbl) lbl.textContent = 'Sheets no disponible · usando local';
     if (dot) dot.classList.add('stale');
-    console.warn('autoLoadFromSheets:', err.message);
+    // El app sigue funcionando con localStorage
   }
+}
+
+// Normaliza cualquier formato de fecha a "YYYY-MM-DD"
+function normalizeDate(d) {
+  if (!d || d === '' || d === 'undefined') return '';
+  const s = String(d).trim();
+  // Ya está en formato correcto
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  // Formato DD/MM/YYYY o MM/DD/YYYY
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) {
+    const p = s.split('/');
+    // Detectar si es DD/MM o MM/DD por el valor del primer número
+    if (parseInt(p[0]) > 12) {
+      // DD/MM/YYYY
+      return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+    } else {
+      // MM/DD/YYYY (formato americano de Sheets)
+      return `${p[2]}-${p[0].padStart(2,'0')}-${p[1].padStart(2,'0')}`;
+    }
+  }
+  // Cualquier otro formato — intentar parsear como Date
+  try {
+    const parsed = new Date(s);
+    if (!isNaN(parsed.getTime())) {
+      const yr = parsed.getFullYear();
+      const mo = String(parsed.getMonth()+1).padStart(2,'0');
+      const dy = String(parsed.getDate()).padStart(2,'0');
+      return `${yr}-${mo}-${dy}`;
+    }
+  } catch(_) {}
+  return '';
+}
+
+// Deduplica un array de registros — gana el primero encontrado con ese ID
+function deduplicateById(arr) {
+  const seen = new Set();
+  return arr.filter(r => {
+    const key = r.id || '';
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 // Normaliza un registro de la Sheet al formato del app
 function normalizeRecord(r) {
   return {
-    id:             r.id             || r.ID             || genId(),
-    fecha:          r.fecha          || r.Fecha          || '',
+    id:             r.id             || genId(),
+    fecha:          normalizeDate(r.fecha          || r.Fecha          || ''),
     trainer:        r.trainer        || r.Trainer        || '',
-    categoria:      r.categoria      || r.Categoría      || r['Categor\u00eda'] || '',
-    especificacion: r.especificacion || r.Especificación  || r['Especificaci\u00f3n'] || '',
-    area:           r.area           || r.Área            || r['\u00c1rea'] || '',
-    horas:          r.horas          || r.Horas          || '',
-    descripcion:    r.descripcion    || r.Descripción     || r['Descripci\u00f3n'] || '',
+    categoria:      r.categoria      || r.Categoría      || '',
+    especificacion: r.especificacion || r.Especificación  || '',
+    area:           r.area           || r.Área            || '',
+    horas:          r.horas          || r.Horas           || '',
+    descripcion:    r.descripcion    || r.Descripción     || '',
     createdAt:      r.createdAt      || r.Creado          || new Date().toISOString(),
+    status:         r.status         || r.Status          || 'activo',  // preserva 'eliminado'
+    deletedAt:      r.deletedAt      || '',
   };
 }
 
 function normalizeCalEvent(r) {
   return {
-    id:             r.id             || r.ID             || genId(),
-    fecha:          r.fecha          || r.Fecha          || '',
+    id:             r.id             || genId(),
+    fecha:          normalizeDate(r.fecha          || r.Fecha          || ''),
     trainer:        r.trainer        || r.Trainer        || '',
     categoria:      r.categoria      || r.Categoría      || '',
     especificacion: r.especificacion || r.Especificación  || '',
@@ -3902,18 +4208,17 @@ function normalizeCalEvent(r) {
     nombre:         r.nombre         || r.Nombre          || '',
     sala:           r.sala           || r.Sala            || '',
     link:           r.link           || r.Link            || '',
-    _regId:         r._regId         || r.RegID           || r.regId || '',
+    _regId:         r._regId         || r.RegID           || r.regId  || '',
     status:         r.status         || 'completado',
-    _src:           'cal',
   };
 }
 
 function normalizeOffDay(r) {
   return {
-    id:          r.id          || r.ID          || genId(),
+    id:          r.id          || genId(),
     trainer:     r.trainer     || r.Trainer     || '',
-    fechaInicio: r.fechaInicio || r.FechaInicio || '',
-    fechaFin:    r.fechaFin    || r.FechaFin    || '',
+    fechaInicio: normalizeDate(r.fechaInicio || r.FechaInicio || ''),
+    fechaFin:    normalizeDate(r.fechaFin    || r.FechaFin    || ''),
     motivo:      r.motivo      || r.Motivo      || '',
   };
 }
@@ -3935,17 +4240,12 @@ async function syncToSheets() {
   try {
     const payload = {
       action:     'syncAll',
-      registros:  loadData(),
-      calendario: loadCalEvents(),
+      registros:  loadAllData(),       // incluye eliminados → rastro en Sheets
+      calendario: loadAllCalEvents(),  // incluye eliminados → rastro en Sheets
       diasoff:    loadOffDays()
     };
 
-    const res  = await fetch(url, {
-      method:  'POST',
-      headers: { 'Content-Type': 'text/plain' }, // text/plain avoids CORS preflight
-      body:    JSON.stringify(payload)
-    });
-    const data = await res.json();
+    const data = await gasPost(url, payload);
 
     if (data.ok) {
       const d = data.data;
@@ -3975,8 +4275,7 @@ async function loadFromSheets() {
   setSyncLog('Descargando datos desde Google Sheets…');
 
   try {
-    const res  = await fetch(`${url}?action=getAll`, { method: 'GET' });
-    const data = await res.json();
+    const data = await gasGet(url, { action: 'getAll' });
 
     if (!data.ok) throw new Error(data.error || 'Error del servidor');
 
@@ -4006,14 +4305,10 @@ async function loadFromSheets() {
 // ── AUTO-SYNC: push a single record/event after any save ──
 async function pushRecordToSheet(action, payload) {
   const url = getScriptUrl();
-  if (!url) return; // silent if not configured
+  if (!url) return;
   try {
-    await fetch(url, {
-      method:  'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body:    JSON.stringify({ action, ...payload })
-    });
-  } catch(_) { /* silent — local save already succeeded */ }
+    await gasPost(url, { action, ...payload });
+  } catch(_) { /* silent — local save ya fue exitoso */ }
 }
 
 // ======================================================
