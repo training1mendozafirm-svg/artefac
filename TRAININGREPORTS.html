@@ -3832,53 +3832,57 @@ function deleteEvent() {
 }
 
 // ======================================================
-//  REFRESH SYSTEM — AUTO-SYNC ACROSS VIEWS & TABS
+//  REFRESH SYSTEM — REAL-TIME SYNC
 // ======================================================
 
-// Returns a lightweight fingerprint of all data
 function dataFingerprint() {
   const reg = loadAllData();
-  const cal = loadAllCalEvents(); // incluye eliminados para fingerprint preciso
+  const cal = loadAllCalEvents();
   const off = loadOffDays();
   return `${reg.length}:${reg[reg.length-1]?.id||''}|${cal.length}:${cal[cal.length-1]?.id||''}|${off.length}`;
 }
 
-let _lastFingerprint = '';
-let _liveIntervalId  = null;
+let _lastFingerprint  = '';
+let _lastRemoteTs     = '0';  // timestamp del último cambio en Sheets
+let _liveIntervalId   = null;
+let _syncCounter      = 0;
+let _isSyncing        = false;
 
-// Re-render whichever view is currently active
+// Re-renderiza la vista activa
 function refreshCurrentView() {
   const active = VIEWS.find(v => document.getElementById(`view-${v}`)?.classList.contains('active'));
   if (!active) return;
   try {
-    if (active === 'home')          renderHome();
-    else if (active === 'calendario') renderCalendar();
-    else if (active === 'dashboard')  renderDashboard();
+    if (active === 'home')           renderHome();
+    else if (active === 'calendario')  renderCalendar();
+    else if (active === 'dashboard')   renderDashboard();
     else if (active === 'trainer' && selectedTrainer) { renderTrainerSelector(); renderTrainerReport(); }
-    else if (active === 'trainer')    renderTrainerSelector();
-    else if (active === 'periodos')   { populatePeriodSelect(); renderPeriodReport(); }
+    else if (active === 'trainer')     renderTrainerSelector();
+    else if (active === 'periodos')    { populatePeriodSelect(); renderPeriodReport(); }
     else if (active === 'coordinacion') renderCoordReport();
-    else if (active === 'gestion')    { renderGestionTable(); renderDBStats(); }
+    else if (active === 'gestion')     { renderGestionTable(); renderDBStats(); }
   } catch(e) { /* silent */ }
 
-  // Flash the content area to indicate update
+  // Flash sutil para indicar actualización
   const content = document.querySelector('.content');
   if (content) { content.classList.remove('sync-flash'); void content.offsetWidth; content.classList.add('sync-flash'); }
-
-  // Update live indicator
-  const now = new Date();
-  const hm  = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
-  const dot = document.getElementById('live-dot');
-  const lbl = document.getElementById('live-label');
-  if (dot) { dot.classList.remove('stale'); }
-  if (lbl) lbl.textContent = `Actualizado ${hm}`;
-  setTimeout(() => { if (lbl) lbl.textContent = 'En vivo'; }, 4000);
 }
 
-let _syncCounter = 0;
+function setLiveLabel(text, temporary) {
+  const lbl = document.getElementById('live-label');
+  const dot  = document.getElementById('live-dot');
+  if (lbl) lbl.textContent = text;
+  if (dot) dot.classList.remove('stale');
+  if (temporary) setTimeout(() => { if (lbl) lbl.textContent = 'En vivo'; }, 4000);
+}
 
-// Check for data changes (polling for cross-tab / multi-trainer sync)
-function checkForUpdates() {
+// ── PASO 1: polling ligero cada 4s — solo consulta el timestamp ──
+// Si el timestamp cambió → trae los datos completos
+async function pollRemoteChanges() {
+  const url = getScriptUrl();
+  if (!url || _isSyncing) return;
+
+  // También chequea cambios en localStorage (otras pestañas)
   const fp = dataFingerprint();
   if (fp !== _lastFingerprint && _lastFingerprint !== '') {
     _lastFingerprint = fp;
@@ -3887,69 +3891,102 @@ function checkForUpdates() {
     _lastFingerprint = fp;
   }
 
-  // Every ~40 seconds (5 cycles × 8s), silently re-sync from Sheets
-  // so changes by other trainers appear automatically
-  _syncCounter++;
-  if (_syncCounter >= 5) {
-    _syncCounter = 0;
-    silentSyncFromSheets();
-  }
+  try {
+    const data = await gasGet(url, { action: 'getLastModified' });
+    if (!data?.ok) return;
+
+    const remoteTs = data.data?.ts || '0';
+    if (remoteTs !== '0' && remoteTs !== _lastRemoteTs) {
+      if (_lastRemoteTs !== '0') {
+        // Hay cambios remotos nuevos — sincronizar datos
+        await pullFromSheets(true); // silent=true, no toast
+      }
+      _lastRemoteTs = remoteTs;
+    }
+  } catch(_) { /* silent — funciona offline con localStorage */ }
 }
 
-async function silentSyncFromSheets() {
+// ── PASO 2: trae los datos completos desde Sheets ──
+async function pullFromSheets(silent = false) {
   const url = getScriptUrl();
-  if (!url) return;
+  if (!url || _isSyncing) return;
+  _isSyncing = true;
+
   try {
     const data = await gasGet(url, { action: 'getAll' });
-    if (!data.ok) return;
+    if (!data?.ok) return;
+
     const { registros, calendario, diasoff } = data.data;
     let changed = false;
 
-    if (registros && Array.isArray(registros) && registros.length > 0) {
-      const localDelReg = new Set(loadAllData().filter(r=>r.status==='eliminado').map(r=>r.id));
+    const localDelReg = new Set(loadAllData().filter(r=>r.status==='eliminado').map(r=>r.id));
+    const localDelCal = new Set(loadAllCalEvents().filter(e=>e.status==='eliminado').map(e=>e.id));
+
+    if (registros?.length > 0) {
       const normalized = deduplicateById(
         registros.map(normalizeRecord).filter(r=>r.fecha&&r.trainer)
-          .map(r => localDelReg.has(r.id) ? {...r, status:'eliminado'} : r)
+          .map(r => localDelReg.has(r.id) ? {...r,status:'eliminado'} : r)
       );
       const local = loadAllData();
-      if (normalized.length !== local.length ||
-          JSON.stringify(normalized.map(r=>r.id).sort()) !== JSON.stringify(local.map(r=>r.id).sort())) {
-        saveData(normalized); changed = true;
-      }
+      const lids  = local.map(r=>r.id).sort().join(',');
+      const rids  = normalized.map(r=>r.id).sort().join(',');
+      if (lids !== rids || local.length !== normalized.length) { saveData(normalized); changed = true; }
     }
-    if (calendario && Array.isArray(calendario) && calendario.length > 0) {
-      const localDelCal = new Set(loadAllCalEvents().filter(e=>e.status==='eliminado').map(e=>e.id));
+
+    if (calendario?.length > 0) {
       const normalized = deduplicateById(
         calendario.map(normalizeCalEvent).filter(e=>e.fecha&&e.trainer)
-          .map(e => localDelCal.has(e.id) ? {...e, status:'eliminado'} : e)
+          .map(e => localDelCal.has(e.id) ? {...e,status:'eliminado'} : e)
       );
       const local = loadAllCalEvents();
-      if (normalized.length !== local.length ||
-          JSON.stringify(normalized.map(e=>e.id).sort()) !== JSON.stringify(local.map(e=>e.id).sort())) {
-        saveCalEvents(normalized); changed = true;
-      }
+      const lids  = local.map(e=>e.id).sort().join(',');
+      const rids  = normalized.map(e=>e.id).sort().join(',');
+      if (lids !== rids || local.length !== normalized.length) { saveCalEvents(normalized); changed = true; }
     }
-    if (diasoff && Array.isArray(diasoff) && diasoff.length > 0) {
+
+    if (diasoff?.length > 0) {
       const normalized = deduplicateById(diasoff.map(normalizeOffDay).filter(o=>o.trainer));
-      const local = loadOffDays();
-      if (normalized.length !== local.length) { saveOffDays(normalized); changed = true; }
+      if (normalized.length !== loadOffDays().length) { saveOffDays(normalized); changed = true; }
     }
 
     if (changed) {
       _lastFingerprint = dataFingerprint();
       refreshCurrentView();
-      const lbl = document.getElementById('live-label');
-      if (lbl) { lbl.textContent = 'Actualizado'; setTimeout(()=>{ lbl.textContent='En vivo'; }, 3000); }
+      if (!silent) {
+        setLiveLabel('Actualizado', true);
+        toast('📡 Datos sincronizados', 'info');
+      } else {
+        setLiveLabel('Actualizado', true);
+      }
     }
   } catch(_) { /* silent */ }
+  finally { _isSyncing = false; }
 }
 
-// Listen for localStorage changes from other tabs/windows (same origin)
+// Alias para compatibilidad con llamadas existentes
+async function autoLoadFromSheets() { await pullFromSheets(false); }
+async function silentSyncFromSheets() { await pullFromSheets(true); }
+async function loadFromSheets() {
+  const btn = document.getElementById('btn-sync-down');
+  if (btn) { btn.disabled=true; btn.textContent='⟳ Descargando…'; }
+  setSheetsStatus('syncing'); setSyncLog('Descargando datos desde Google Sheets…');
+  try {
+    await pullFromSheets(false);
+    setSheetsStatus('ok'); setSyncLog('↓ Datos descargados correctamente');
+    toast('✓ Datos descargados desde Google Sheets', 'success');
+  } catch(err) {
+    setSheetsStatus('error'); setSyncLog(`Error: ${err.message}`);
+    toast('Error al descargar: ' + err.message, 'error');
+  } finally {
+    if (btn) { btn.disabled=false; btn.textContent='↓ Bajar de Sheets'; }
+  }
+}
+
+// Storage event: cambios desde otra pestaña del mismo navegador
 window.addEventListener('storage', function(e) {
   if (e.key === LS_KEY || e.key === CAL_KEY || e.key === OFF_KEY) {
     _lastFingerprint = dataFingerprint();
     refreshCurrentView();
-    toast('📡 Actualización recibida', 'info');
   }
 });
 
@@ -4024,7 +4061,7 @@ async function gasPost(url, body) {
 
 function getScriptUrl() {
   return localStorage.getItem(GAS_URL_KEY)
-    || 'https://script.google.com/macros/s/AKfycbx_ztyiptd0LnXcXmg2CNGKMPc8xGUdg-rOM96f_5VCoQCHmmEAQxtuIcXttwMm2jRkDA/exec';
+    || 'https://script.google.com/macros/s/AKfycbxHnPdpTjptVBXtF0v__h_DPaSiEz2f49dP8pxnZgq7wsgYCvTOcoK_vNv0SVS4cYHe8w/exec';
 }
 
 function saveScriptUrl(url) {
@@ -4041,8 +4078,6 @@ function initScriptUrl() {
     input.value = saved;
     setSheetsStatus('configured');
   }
-  // Auto-ping on load to confirm connection
-  if (saved) setTimeout(pingScript, 1500);
 }
 
 function setSheetsStatus(state) {
@@ -4368,11 +4403,12 @@ document.addEventListener('DOMContentLoaded', function() {
   _lastFingerprint = dataFingerprint();
   initScriptUrl();
 
-  // Auto-cargar datos desde Sheets al abrir
-  setTimeout(autoLoadFromSheets, 800);
+  // Carga inicial desde Sheets
+  setTimeout(() => pullFromSheets(false), 800);
 
-  // Auto-refresh every 8 seconds
-  _liveIntervalId = setInterval(checkForUpdates, 8000);
+  // Polling en tiempo real: chequeo ligero cada 4 segundos
+  // Solo trae datos completos si el timestamp remoto cambió
+  _liveIntervalId = setInterval(pollRemoteChanges, 4000);
 
   // Mobile sidebar toggle
   document.querySelector('.topbar-title').addEventListener('click', function() {
