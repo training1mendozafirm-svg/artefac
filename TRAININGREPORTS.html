@@ -935,6 +935,8 @@ tbody td {
 .tc-brenda   { background: var(--tr-brenda);  color: var(--tr-brenda-t);  }
 .tc-offday   { background: #ef5350; color: #fff; }
 .tc-birthday { background: #AB47BC; color: #fff; }
+.tc-gestion  { background: #546E7A; color: #fff; }
+.badge-gestion { background: rgba(84,110,122,0.12); color: #37474F; border: 1px solid rgba(84,110,122,0.25); }
 .tc-planned  { opacity: 0.65; }
 /* Week view */
 .cal-week-grid {
@@ -1060,7 +1062,26 @@ tbody td {
 .cal-filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
 
 
-/* ===== LIVE INDICATOR ===== */
+/* ===== BATCH INLINE TABLE ===== */
+#batch-table td { padding: 5px 6px; vertical-align: middle; border-bottom: 1px solid var(--border); }
+#batch-table tr:last-child td { border-bottom: none; }
+#batch-table tbody tr:hover td { background: rgba(201,168,76,0.03); }
+.batch-select {
+  width:100%; background:transparent; border:1px solid transparent;
+  border-radius:6px; padding:5px 26px 5px 7px; font-size:13px;
+  color:var(--text); font-family:var(--font-body); cursor:pointer; appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236e7f96' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 5px center; transition:border-color .15s,background .15s;
+}
+.batch-select:hover,.batch-select:focus { border-color:var(--gold); background-color:#fff; outline:none; }
+.batch-select option { background:#fff; color:var(--text); }
+.batch-input {
+  width:100%; background:transparent; border:1px solid transparent;
+  border-radius:6px; padding:5px 7px; font-size:13px; color:var(--text);
+  font-family:var(--font-body); transition:border-color .15s,background .15s;
+}
+.batch-input:hover,.batch-input:focus { border-color:var(--gold); background:#fff; outline:none; }
+
 .live-dot {
   width: 7px; height: 7px; border-radius: 50%;
   background: var(--success); flex-shrink: 0;
@@ -1229,6 +1250,7 @@ tbody td {
           <option value="">Todas las categorías</option>
           <option>Training</option><option>Desarrollo</option>
           <option>Acompañamiento / Shadowing</option><option>Llamadas</option>
+        <option>Gestión</option>
         </select>
         <button class="btn btn-primary" onclick="openNewEventModal(null)">＋ Planear training</button>
         <button class="btn btn-ghost" onclick="openOffDayModal(null)" style="gap:6px;">🚫 Día OFF</button>
@@ -1269,116 +1291,136 @@ tbody td {
     <!-- ========================= VIEW: REGISTRO ========================= -->
     <div class="view" id="view-registro">
       <div class="page-header">
-        <h1>Registrar Actividad</h1>
-        <p class="subtitle">Completa los campos para registrar tu actividad del período</p>
+        <h1>Registrar Actividades</h1>
+        <p class="subtitle">Llena varias filas a la vez · guarda todo de un click</p>
         <div class="divider"></div>
       </div>
 
-      <div class="card">
-        <form id="activity-form" onsubmit="submitForm(event)">
+      <!-- FECHA COMPARTIDA + ACCIONES -->
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 16px;">
+          <span style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;">📅 Fecha</span>
+          <input type="date" id="f-fecha" class="form-control" style="width:160px;border:none;background:transparent;padding:0;font-size:14px;font-weight:600;color:var(--text);" required>
+        </div>
+        <button class="btn btn-primary" onclick="addBatchRow()">＋ Añadir fila</button>
+        <button class="btn btn-ghost" onclick="clearBatchRows()">↺ Limpiar todo</button>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:12px;">
+          <div id="batch-summary" style="font-size:13px;color:var(--text-muted);"></div>
+          <button class="btn btn-primary btn-lg" id="save-all-btn" onclick="saveAllBatch()" style="display:none;">
+            ✓ Guardar todo
+          </button>
+        </div>
+      </div>
+
+      <!-- TABLA DE ENTRADA DIRECTA -->
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="table-wrap">
+          <table id="batch-table" style="width:100%;">
+            <thead>
+              <tr style="background:#152040;">
+                <th style="color:rgba(200,215,235,.75);font-family:var(--font-condensed);font-size:11px;letter-spacing:1.5px;padding:11px 12px;font-weight:600;text-transform:uppercase;white-space:nowrap;">Trainer <span style="color:#c9a84c;">*</span></th>
+                <th style="color:rgba(200,215,235,.75);font-family:var(--font-condensed);font-size:11px;letter-spacing:1.5px;padding:11px 12px;font-weight:600;text-transform:uppercase;white-space:nowrap;">Categoría <span style="color:#c9a84c;">*</span></th>
+                <th style="color:rgba(200,215,235,.75);font-family:var(--font-condensed);font-size:11px;letter-spacing:1.5px;padding:11px 12px;font-weight:600;text-transform:uppercase;white-space:nowrap;">Especificación <span style="color:#c9a84c;">*</span></th>
+                <th style="color:rgba(200,215,235,.75);font-family:var(--font-condensed);font-size:11px;letter-spacing:1.5px;padding:11px 12px;font-weight:600;text-transform:uppercase;white-space:nowrap;">Área <span style="color:#c9a84c;">*</span></th>
+                <th style="color:rgba(200,215,235,.75);font-family:var(--font-condensed);font-size:11px;letter-spacing:1.5px;padding:11px 8px;font-weight:600;text-transform:uppercase;white-space:nowrap;">Hrs <span style="color:#c9a84c;">*</span></th>
+                <th style="color:rgba(200,215,235,.75);font-family:var(--font-condensed);font-size:11px;letter-spacing:1.5px;padding:11px 12px;font-weight:600;text-transform:uppercase;">Descripción</th>
+                <th style="width:40px;"></th>
+              </tr>
+            </thead>
+            <tbody id="batch-tbody"></tbody>
+          </table>
+        </div>
+        <div id="batch-empty" style="padding:40px 20px;text-align:center;color:var(--text-muted);">
+          <div style="font-size:28px;margin-bottom:10px;opacity:.25;">📋</div>
+          <p style="font-size:14px;">Haz clic en <strong>＋ Añadir fila</strong> para comenzar</p>
+          <p style="font-size:12px;margin-top:4px;">Puedes agregar todas las actividades que necesites antes de guardar</p>
+        </div>
+      </div>
+
+      <!-- EDIT MODE (para editar registros existentes) -->
+      <div id="edit-mode-panel" style="display:none;margin-top:20px;">
+        <div class="card" style="border-color:rgba(201,168,76,0.3);">
+          <div class="card-header">
+            <div class="card-title">Editando registro existente</div>
+            <button class="btn btn-ghost btn-sm" onclick="cancelEditMode()">✕ Cancelar</button>
+          </div>
           <div class="form-grid">
             <div class="form-group">
-              <label class="form-label">Fecha <span class="req">*</span></label>
-              <input type="date" class="form-control" id="f-fecha" required>
+              <label class="form-label">Fecha</label>
+              <input type="date" class="form-control" id="f-fecha-edit">
             </div>
             <div class="form-group">
-              <label class="form-label">Trainer <span class="req">*</span></label>
-              <select class="form-control" id="f-trainer" required>
+              <label class="form-label">Trainer</label>
+              <select class="form-control" id="f-trainer-edit">
                 <option value="">— Seleccionar —</option>
-                <option>Andrea Zendejas</option>
-                <option>Joham Burgos</option>
-                <option>Diego Romo</option>
-                <option>Brenda Domínguez</option>
+                <option>Andrea Zendejas</option><option>Joham Burgos</option>
+                <option>Diego Romo</option><option>Brenda Domínguez</option>
               </select>
             </div>
             <div class="form-group">
-              <label class="form-label">Categoría <span class="req">*</span></label>
-              <select class="form-control" id="f-categoria" required onchange="updateEspecificacion()">
+              <label class="form-label">Categoría</label>
+              <select class="form-control" id="f-categoria-edit" onchange="updateEspEdit()">
                 <option value="">— Seleccionar —</option>
-                <option>Training</option>
-                <option>Desarrollo</option>
-                <option>Acompañamiento / Shadowing</option>
-                <option>Llamadas</option>
+                <option>Training</option><option>Desarrollo</option>
+                <option>Acompañamiento / Shadowing</option><option>Llamadas</option><option>Gestión</option>
               </select>
             </div>
             <div class="form-group">
-              <label class="form-label">Especificación <span class="req">*</span></label>
-              <select class="form-control" id="f-especificacion" required disabled>
-                <option value="">— Selecciona una categoría primero —</option>
+              <label class="form-label">Especificación</label>
+              <select class="form-control" id="f-especificacion-edit" disabled>
+                <option value="">— Selecciona categoría —</option>
               </select>
             </div>
             <div class="form-group">
-              <label class="form-label">Área solicitante <span class="req">*</span></label>
-              <select class="form-control" id="f-area" required onchange="toggleAreaManual()">
+              <label class="form-label">Área</label>
+              <select class="form-control" id="f-area-edit" onchange="toggleAreaManualEdit()">
                 <option value="">— Seleccionar —</option>
-                <option>PR ATTY</option>
-                <option>CUSTOMER SERVICE</option>
-                <option>PWI</option>
-                <option>COMPLIANCE</option>
-                <option>SALES DVS</option>
-                <option>PWI VISA T</option>
-                <option>MARKETING</option>
-                <option>DISCOVERY CALLS</option>
-                <option>LSU</option>
-                <option>WAE'S</option>
-                <option>CALLBACKS</option>
-                <option>TRUCKERS</option>
-                <option>PRE WELCOME CALL</option>
-                <option>PRE CASE REVIEW</option>
-                <option>RFE</option>
-                <option>COLLECTIONS</option>
-                <option>CASE REVIEW</option>
-                <option>PACKETS</option>
-                <option>BACK OFFICE</option>
-                <option>TRAINING</option>
-                <option>TMLF</option>
+                <option>PR ATTY</option><option>CUSTOMER SERVICE</option><option>PWI</option>
+                <option>COMPLIANCE</option><option>SALES DVS</option><option>PWI VISA T</option>
+                <option>MARKETING</option><option>DISCOVERY CALLS</option><option>LSU</option>
+                <option>WAE'S</option><option>CALLBACKS</option><option>TRUCKERS</option>
+                <option>PRE WELCOME CALL</option><option>PRE CASE REVIEW</option><option>RFE</option>
+                <option>COLLECTIONS</option><option>CASE REVIEW</option><option>PACKETS</option>
+                <option>BACK OFFICE</option><option>TRAINING</option><option>TMLF</option>
                 <option value="__otra__">Otra (escribir)</option>
               </select>
-              <input type="text" class="form-control" id="f-area-manual" placeholder="ESCRIBE EL ÁREA EN MAYÚSCULAS" style="display:none;margin-top:8px;text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
+              <input type="text" class="form-control" id="f-area-manual-edit" style="display:none;margin-top:8px;text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()" placeholder="ÁREA EN MAYÚSCULAS">
             </div>
             <div class="form-group">
-              <label class="form-label">Horas dedicadas <span class="req">*</span></label>
-              <select class="form-control" id="f-horas" required>
+              <label class="form-label">Horas</label>
+              <select class="form-control" id="f-horas-edit">
                 <option value="">— Seleccionar —</option>
-                <option value="0.5">0.5 hrs</option>
-                <option value="1">1 hr</option>
-                <option value="1.5">1.5 hrs</option>
-                <option value="2">2 hrs</option>
-                <option value="2.5">2.5 hrs</option>
-                <option value="3">3 hrs</option>
-                <option value="3.5">3.5 hrs</option>
-                <option value="4">4 hrs</option>
-                <option value="4.5">4.5 hrs</option>
-                <option value="5">5 hrs</option>
-                <option value="5.5">5.5 hrs</option>
-                <option value="6">6 hrs</option>
-                <option value="6.5">6.5 hrs</option>
-                <option value="7">7 hrs</option>
-                <option value="7.5">7.5 hrs</option>
-                <option value="8">8 hrs</option>
-                <option value="8.5">8.5 hrs</option>
-                <option value="9">9 hrs</option>
-                <option value="9.5">9.5 hrs</option>
-                <option value="10">10 hrs</option>
-                <option value="10.5">10.5 hrs</option>
-                <option value="11">11 hrs</option>
-                <option value="11.5">11.5 hrs</option>
-                <option value="12">12 hrs</option>
+                <option value="0.5">0.5 hrs</option><option value="1">1 hr</option><option value="1.5">1.5 hrs</option>
+                <option value="2">2 hrs</option><option value="2.5">2.5 hrs</option><option value="3">3 hrs</option>
+                <option value="3.5">3.5 hrs</option><option value="4">4 hrs</option><option value="4.5">4.5 hrs</option>
+                <option value="5">5 hrs</option><option value="5.5">5.5 hrs</option><option value="6">6 hrs</option>
+                <option value="6.5">6.5 hrs</option><option value="7">7 hrs</option><option value="7.5">7.5 hrs</option>
+                <option value="8">8 hrs</option><option value="9">9 hrs</option><option value="10">10 hrs</option>
+                <option value="11">11 hrs</option><option value="12">12 hrs</option>
               </select>
             </div>
             <div class="form-group full">
-              <label class="form-label">Descripción breve <span style="color:var(--text-muted);font-weight:400;margin-left:4px;">(opcional)</span></label>
-              <textarea class="form-control" id="f-descripcion" placeholder="Describe brevemente la actividad realizada..." style="min-height:70px;"></textarea>
+              <label class="form-label">Descripción</label>
+              <textarea class="form-control" id="f-descripcion-edit" style="min-height:60px;"></textarea>
             </div>
           </div>
           <hr class="section-divider">
           <div class="btn-row">
-            <button type="submit" class="btn btn-primary btn-lg" id="submit-btn">✓ Guardar actividad</button>
-            <button type="button" class="btn btn-ghost" onclick="resetForm()">↺ Limpiar</button>
+            <button class="btn btn-primary" onclick="saveEditMode()">✓ Actualizar registro</button>
+            <button class="btn btn-ghost" onclick="cancelEditMode()">Cancelar</button>
           </div>
           <input type="hidden" id="f-edit-id" value="">
-        </form>
+        </div>
       </div>
+
+      <!-- Hidden fields kept for compatibility -->
+      <input type="hidden" id="f-trainer">
+      <input type="hidden" id="f-categoria">
+      <input type="hidden" id="f-especificacion">
+      <input type="hidden" id="f-area">
+      <input type="hidden" id="f-area-manual">
+      <input type="hidden" id="f-horas">
+      <input type="hidden" id="f-descripcion">
     </div>
 
     <!-- ========================= VIEW: DASHBOARD ========================= -->
@@ -1417,6 +1459,7 @@ tbody td {
           <option>Materiales</option><option>Scripts</option><option>Training (SCORM)</option><option>Actualización de Material</option>
           <option>1 to 1</option><option>Habilitación</option><option>Shadowing</option><option>Apoyo training</option>
           <option>Área</option>
+          <option>Informativa</option><option>Planeación</option><option>Coordinación</option>
         </select>
         <select class="filter-select" id="dash-area" onchange="renderDashboard()">
           <option value="">Todas las áreas</option>
@@ -1506,6 +1549,7 @@ tbody td {
                 <option value="">Todas las categorías</option>
                 <option>Training</option><option>Desarrollo</option>
                 <option>Acompañamiento / Shadowing</option><option>Llamadas</option>
+              <option>Gestión</option>
               </select>
               <select class="filter-select" id="trainer-filter-area" onchange="renderTrainerReport()">
                 <option value="">Todas las áreas</option>
@@ -1556,6 +1600,7 @@ tbody td {
           <option value="">Todas las categorías</option>
           <option>Training</option><option>Desarrollo</option>
           <option>Acompañamiento / Shadowing</option><option>Llamadas</option>
+        <option>Gestión</option>
         </select>
         <select class="filter-select" id="period-area" onchange="renderPeriodReport()">
           <option value="">Todas las áreas</option>
@@ -1608,6 +1653,7 @@ tbody td {
             <option value="">Todas las categorías</option>
             <option>Training</option><option>Desarrollo</option>
             <option>Acompañamiento / Shadowing</option><option>Llamadas</option>
+          <option>Gestión</option>
           </select>
           <select class="filter-select" id="coord-esp" onchange="renderCoordReport()">
             <option value="">Todas las especificaciones</option>
@@ -1615,6 +1661,7 @@ tbody td {
             <option>Materiales</option><option>Scripts</option><option>Training (SCORM)</option><option>Actualización de Material</option>
             <option>1 to 1</option><option>Habilitación</option><option>Shadowing</option><option>Apoyo training</option>
             <option>Área</option>
+          <option>Informativa</option><option>Planeación</option><option>Coordinación</option>
           </select>
           <select class="filter-select" id="coord-area" onchange="renderCoordReport()">
             <option value="">Todas las áreas</option>
@@ -2066,13 +2113,14 @@ function filterRecords(filters = {}) {
 const TRAINERS = ['Andrea Zendejas','Joham Burgos','Diego Romo','Brenda Domínguez'];
 const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
-const CATEGORIAS = ['Training','Desarrollo','Acompañamiento / Shadowing','Llamadas'];
+const CATEGORIAS = ['Training','Desarrollo','Acompañamiento / Shadowing','Llamadas','Gestión'];
 
 const CATEGORIAS_MAP = {
   'Training':                    ['Impartición', 'Sombra trainee', 'Actualizaciones'],
   'Desarrollo':                  ['Materiales', 'Scripts', 'Training (SCORM)', 'Actualización de Material'],
   'Acompañamiento / Shadowing':  ['1 to 1', 'Habilitación', 'Shadowing', 'Apoyo training'],
-  'Llamadas':                    ['Área']
+  'Llamadas':                    ['Área'],
+  'Gestión':                     ['Informativa', 'Planeación', 'Coordinación']
 };
 
 function toggleAreaManual() {
@@ -2201,40 +2249,273 @@ function navigate(view) {
 // ======================================================
 //  FORM
 // ======================================================
-function submitForm(e) {
-  e.preventDefault();
-  const rec = {
-    fecha: document.getElementById('f-fecha').value,
-    trainer: document.getElementById('f-trainer').value,
-    categoria: document.getElementById('f-categoria').value,
-    especificacion: document.getElementById('f-especificacion').value,
-    area: getAreaValue(),
-    horas: document.getElementById('f-horas').value,
-    descripcion: document.getElementById('f-descripcion').value,
-  };
-  const editId = document.getElementById('f-edit-id').value;
-  if (editId) {
-    updateRecord(editId, rec);
-    toast('Actividad actualizada correctamente', 'success');
-    document.getElementById('f-edit-id').value = '';
-    document.getElementById('submit-btn').textContent = '✓ Guardar actividad';
-    editingId = null;
-    pushRecordToSheet('updateRecord', { record: {...rec, id: editId} });
-  } else {
-    const saved = addRecord(rec);
-    toast('Actividad registrada exitosamente', 'success');
-    pushRecordToSheet('addRecord', { record: saved });
+// ── BATCH INLINE REGISTRATION ────────────────────────────────
+let batchRows = [];       // filas inline pendientes
+let _batchRowSeq = 0;
+
+// AREA OPTIONS shared
+const AREA_OPTIONS = ['PR ATTY','CUSTOMER SERVICE','PWI','COMPLIANCE','SALES DVS','PWI VISA T',
+  'MARKETING','DISCOVERY CALLS','LSU',"WAE'S",'CALLBACKS','TRUCKERS','PRE WELCOME CALL',
+  'PRE CASE REVIEW','RFE','COLLECTIONS','CASE REVIEW','PACKETS','BACK OFFICE','TRAINING','TMLF'];
+
+const HORAS_OPTIONS = ['0.5','1','1.5','2','2.5','3','3.5','4','4.5','5','5.5','6',
+  '6.5','7','7.5','8','8.5','9','9.5','10','10.5','11','11.5','12'];
+
+function trainerOptions(sel='') {
+  return ['Andrea Zendejas','Joham Burgos','Diego Romo','Brenda Domínguez']
+    .map(t=>`<option${sel===t?' selected':''}>${t}</option>`).join('');
+}
+function catOptions(sel='') {
+  return ['Training','Desarrollo','Acompañamiento / Shadowing','Llamadas','Gestión']
+    .map(v=>`<option${sel===v?' selected':''}>${v}</option>`).join('');
+}
+function espOptions(cat, sel='') {
+  const opts = CATEGORIAS_MAP[cat] || [];
+  return opts.map(v=>`<option${sel===v?' selected':''}>${v}</option>`).join('');
+}
+function areaOptions(sel='') {
+  return AREA_OPTIONS.map(v=>`<option${sel===v?' selected':''}>${v}</option>`).join('') +
+    `<option value="__otra__"${sel==='__otra__'?' selected':''}>Otra (escribir)</option>`;
+}
+function horasOptions(sel='') {
+  return HORAS_OPTIONS.map(v=>`<option value="${v}"${sel===v?' selected':''}>${v} hr${v==='1'?'':'s'}</option>`).join('');
+}
+
+function addBatchRow(prefill={}) {
+  _batchRowSeq++;
+  const id = 'br_' + _batchRowSeq;
+  // Copy last row's trainer if available
+  const lastTrainer = batchRows.length ? batchRows[batchRows.length-1].trainer : '';
+  batchRows.push({ id, trainer:prefill.trainer||lastTrainer, categoria:prefill.categoria||'',
+    especificacion:prefill.especificacion||'', area:prefill.area||'', horas:prefill.horas||'', descripcion:prefill.descripcion||'' });
+  renderBatchTable();
+  // Focus first empty cell of new row
+  setTimeout(() => {
+    const sel = document.querySelector(`#brow-${id} .batch-select`);
+    if (sel) sel.focus();
+  }, 50);
+}
+
+function renderBatchTable() {
+  const tbody = document.getElementById('batch-tbody');
+  const empty = document.getElementById('batch-empty');
+  const saveBtn = document.getElementById('save-all-btn');
+  const summary = document.getElementById('batch-summary');
+
+  if (!batchRows.length) {
+    tbody.innerHTML = '';
+    if (empty) empty.style.display = 'block';
+    if (saveBtn) saveBtn.style.display = 'none';
+    if (summary) summary.textContent = '';
+    return;
   }
-  resetForm();
+  if (empty) empty.style.display = 'none';
+
+  const totalHrs = batchRows.reduce((s,r)=>s+parseFloat(r.horas||0),0);
+  if (summary) summary.textContent = `${batchRows.length} actividad${batchRows.length>1?'es':''} · ${totalHrs}h total`;
+  if (saveBtn) { saveBtn.style.display='inline-flex'; saveBtn.textContent=`✓ Guardar ${batchRows.length} actividad${batchRows.length>1?'es':''}`; }
+
+  tbody.innerHTML = batchRows.map((r,i) => {
+    const espOpts = espOptions(r.categoria, r.especificacion);
+    const hasEsp  = !!espOpts;
+    return `<tr id="brow-${r.id}">
+      <td style="width:155px;">
+        <select class="batch-select" onchange="batchUpdate('${r.id}','trainer',this.value)">
+          <option value="">— Trainer —</option>${trainerOptions(r.trainer)}
+        </select>
+      </td>
+      <td style="width:155px;">
+        <select class="batch-select" onchange="batchUpdate('${r.id}','categoria',this.value)">
+          <option value="">— Categoría —</option>${catOptions(r.categoria)}
+        </select>
+      </td>
+      <td style="width:155px;">
+        <select class="batch-select" id="besp-${r.id}" ${!hasEsp?'disabled':''} onchange="batchUpdate('${r.id}','especificacion',this.value)">
+          <option value="">${r.categoria?'— Especificación —':'— Selecciona categoría —'}</option>${espOpts}
+        </select>
+      </td>
+      <td style="width:155px;">
+        <select class="batch-select" onchange="batchUpdate('${r.id}','area',this.value)">
+          <option value="">— Área —</option>${areaOptions(r.area)}
+        </select>
+      </td>
+      <td style="width:80px;">
+        <select class="batch-select" onchange="batchUpdate('${r.id}','horas',this.value)">
+          <option value="">— Hrs —</option>${horasOptions(r.horas)}
+        </select>
+      </td>
+      <td>
+        <input type="text" class="batch-input" placeholder="Descripción opcional"
+          value="${(r.descripcion||'').replace(/"/g,'&quot;')}"
+          onchange="batchUpdate('${r.id}','descripcion',this.value)"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();addBatchRow();}">
+      </td>
+      <td style="width:36px;text-align:center;">
+        <button class="btn btn-danger btn-sm" style="padding:4px 8px;" onclick="removeBatchRow('${r.id}')" title="Eliminar fila">✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function batchUpdate(id, field, value) {
+  const row = batchRows.find(r=>r.id===id);
+  if (!row) return;
+  row[field] = value;
+  // If categoria changed → reset especificacion and re-render its dropdown only
+  if (field === 'categoria') {
+    row.especificacion = '';
+    const espSel = document.getElementById('besp-'+id);
+    if (espSel) {
+      const opts = espOptions(value, '');
+      espSel.innerHTML = `<option value="">${value?'— Especificación —':'— Selecciona categoría —'}</option>${opts}`;
+      espSel.disabled = !opts;
+    }
+  }
+  updateBatchSummary();
+}
+
+function updateBatchSummary() {
+  const totalHrs = batchRows.reduce((s,r)=>s+parseFloat(r.horas||0),0);
+  const summary  = document.getElementById('batch-summary');
+  const saveBtn  = document.getElementById('save-all-btn');
+  if (summary) summary.textContent = batchRows.length ? `${batchRows.length} actividad${batchRows.length>1?'es':''} · ${totalHrs}h total` : '';
+  if (saveBtn && batchRows.length) saveBtn.textContent = `✓ Guardar ${batchRows.length} actividad${batchRows.length>1?'es':''}`;
+}
+
+function removeBatchRow(id) {
+  batchRows = batchRows.filter(r=>r.id!==id);
+  renderBatchTable();
+}
+
+function clearBatchRows() {
+  if (!batchRows.length) return;
+  batchRows = [];
+  renderBatchTable();
+}
+
+async function saveAllBatch() {
+  const fecha = document.getElementById('f-fecha').value;
+  if (!fecha) { toast('Selecciona una fecha primero', 'error'); return; }
+
+  // Validate all rows
+  const invalid = batchRows.filter(r => !r.trainer||!r.categoria||!r.especificacion||!r.area||!r.horas);
+  if (invalid.length) {
+    const plural = invalid.length > 1 ? 's' : '';
+    toast(`${invalid.length} fila${plural} sin completar — revisa Trainer, Categoría, Especificación, Área y Horas`, 'error');
+    // Highlight invalid rows
+    invalid.forEach(r => {
+      const row = document.getElementById('brow-'+r.id);
+      if (row) { row.style.background='rgba(192,85,85,0.07)'; setTimeout(()=>row.style.background='',2500); }
+    });
+    return;
+  }
+
+  const btn = document.getElementById('save-all-btn');
+  btn.disabled = true; btn.textContent = '⟳ Guardando…';
+
+  const saved = [];
+  for (const r of batchRows) {
+    const rec = { fecha, trainer:r.trainer, categoria:r.categoria,
+      especificacion:r.especificacion, area:r.area==='__otra__'?r.areaManual||r.area:r.area,
+      horas:r.horas, descripcion:r.descripcion||'' };
+    const result = addRecord(rec);
+    saved.push(result);
+    pushRecordToSheet('addRecord', { record: result });
+  }
+
+  batchRows = [];
+  renderBatchTable();
+  _lastFingerprint = dataFingerprint();
+  refreshCurrentView();
   updateNavBadge();
+  btn.disabled = false;
+  toast(`✓ ${saved.length} actividad${saved.length>1?'es':''} guardada${saved.length>1?'s':''} correctamente`, 'success');
+}
+
+// ── EDIT MODE (registro existente desde Gestión/Trainer) ──
+function editModePanel(show) {
+  document.getElementById('edit-mode-panel').style.display = show ? 'block' : 'none';
+}
+
+function updateEspEdit() {
+  const cat = document.getElementById('f-categoria-edit').value;
+  const esp = document.getElementById('f-especificacion-edit');
+  const opts = espOptions(cat, '');
+  esp.innerHTML = `<option value="">— Especificación —</option>${opts}`;
+  esp.disabled = !opts;
+}
+
+function toggleAreaManualEdit() {
+  const sel    = document.getElementById('f-area-edit');
+  const manual = document.getElementById('f-area-manual-edit');
+  manual.style.display = sel.value==='__otra__' ? 'block' : 'none';
+}
+
+function saveEditMode() {
+  const id  = document.getElementById('f-edit-id').value;
+  if (!id) return;
+  const rec = {
+    fecha:          document.getElementById('f-fecha-edit').value,
+    trainer:        document.getElementById('f-trainer-edit').value,
+    categoria:      document.getElementById('f-categoria-edit').value,
+    especificacion: document.getElementById('f-especificacion-edit').value,
+    area:           document.getElementById('f-area-edit').value==='__otra__'
+                      ? document.getElementById('f-area-manual-edit').value.toUpperCase()
+                      : document.getElementById('f-area-edit').value,
+    horas:          document.getElementById('f-horas-edit').value,
+    descripcion:    document.getElementById('f-descripcion-edit').value,
+  };
+  updateRecord(id, rec);
+  pushRecordToSheet('updateRecord', { record:{...rec,id} });
+  toast('Registro actualizado ✓', 'success');
+  cancelEditMode();
   _lastFingerprint = dataFingerprint();
   refreshCurrentView();
 }
 
+function cancelEditMode() {
+  editModePanel(false);
+  document.getElementById('f-edit-id').value = '';
+  editingId = null;
+}
+
+// Override loadForEdit to use the new edit panel
+function loadForEdit(id) {
+  const rec = loadAllData().find(r=>r.id===id);
+  if (!rec) return;
+  navigate('registro');
+  setTimeout(()=>{
+    document.getElementById('f-fecha-edit').value = rec.fecha || '';
+    document.getElementById('f-trainer-edit').value = rec.trainer || '';
+    document.getElementById('f-categoria-edit').value = rec.categoria || '';
+    updateEspEdit();
+    setTimeout(()=>{ document.getElementById('f-especificacion-edit').value = rec.especificacion||''; },50);
+    const areaEdit = document.getElementById('f-area-edit');
+    const knownA = Array.from(areaEdit.options).map(o=>o.value);
+    if (rec.area && !knownA.includes(rec.area)) {
+      areaEdit.value='__otra__';
+      document.getElementById('f-area-manual-edit').style.display='block';
+      document.getElementById('f-area-manual-edit').value=rec.area;
+    } else { areaEdit.value=rec.area||''; }
+    document.getElementById('f-horas-edit').value = rec.horas||'';
+    document.getElementById('f-descripcion-edit').value = rec.descripcion||'';
+    document.getElementById('f-edit-id').value = id;
+    editingId = id;
+    editModePanel(true);
+    document.getElementById('edit-mode-panel').scrollIntoView({behavior:'smooth'});
+  },80);
+}
+
+// Legacy compatibility stubs
+function submitForm(e) { if(e) e.preventDefault(); }
+function resetForm() { clearBatchRows(); document.getElementById('f-fecha').value = new Date().toISOString().split('T')[0]; }
+function getAreaValue() { return ''; }
+function toggleAreaManual() {}
+function updateEspecificacion() {}
 function resetForm() {
   document.getElementById('activity-form').reset();
   document.getElementById('f-edit-id').value = '';
-  document.getElementById('submit-btn').textContent = '✓ Guardar actividad';
+  document.getElementById('submit-btn').textContent = '＋ Añadir a la lista';
   document.getElementById('f-especificacion').innerHTML = '<option value="">— Selecciona una categoría primero —</option>';
   document.getElementById('f-especificacion').disabled = true;
   document.getElementById('f-area-manual').style.display = 'none';
@@ -2269,6 +2550,8 @@ function loadForEdit(id) {
     document.getElementById('f-edit-id').value = id;
     document.getElementById('submit-btn').textContent = '✓ Actualizar actividad';
     editingId = id;
+    // Scroll to form
+    document.getElementById('activity-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 50);
 }
 
@@ -2497,7 +2780,7 @@ function cascadeDashEsp() {
       <option>Impartición</option><option>Sombra trainee</option><option>Actualizaciones</option>
       <option>Materiales</option><option>Scripts</option><option>Training (SCORM)</option><option>Actualización de Material</option>
       <option>1 to 1</option><option>Habilitación</option><option>Shadowing</option><option>Apoyo training</option>
-      <option>Área</option>`;
+      <option>Área</option><option>Informativa</option><option>Planeación</option><option>Coordinación</option>`;
   }
   esp.value = '';
 }
