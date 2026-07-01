@@ -3361,7 +3361,7 @@ function buildCard(e, ds, tall) {
   const init = isOff?'🚫': isBday?'🎂': trainerInit(e.trainer);
   const trainerShort = (e.trainer||'').split(' ')[0];
   const nombre = (e.nombre||e.categoria||'').slice(0, tall?22:18);
-  const timeLabel = e.horaInicio ? `${e.horaInicio}${e.horaFin?' \u2013 '+e.horaFin:''}` : 'Todo el día';
+  const timeLabel = e.horaInicio ? `${fmtTime(e.horaInicio)}${e.horaFin?' – '+fmtTime(e.horaFin):''}` : 'Todo el día';
   const dragAttrs = isDraggable
     ? `draggable="true" ondragstart="calDragStart(event,'${e.id}')" ondragend="calDragEnd(event)"`
     : '';
@@ -3476,7 +3476,7 @@ function openEventDetailModal(id, src) {
 
   // Detail grid
   const timeLabel = ev.horaInicio
-    ? `${ev.horaInicio}${ev.horaFin ? ' – ' + ev.horaFin : ''}`
+    ? `${fmtTime(ev.horaInicio)}${ev.horaFin ? ' – ' + fmtTime(ev.horaFin) : ''}`
     : 'Sin horario definido';
   const items = [
     { label:'Fecha',    value: fmtDate(ev.fecha) },
@@ -3906,16 +3906,24 @@ async function silentSyncFromSheets() {
     let changed = false;
 
     if (registros && Array.isArray(registros) && registros.length > 0) {
-      const normalized = deduplicateById(registros.map(normalizeRecord).filter(r=>r.fecha&&r.trainer));
-      const local = loadData();
+      const localDelReg = new Set(loadAllData().filter(r=>r.status==='eliminado').map(r=>r.id));
+      const normalized = deduplicateById(
+        registros.map(normalizeRecord).filter(r=>r.fecha&&r.trainer)
+          .map(r => localDelReg.has(r.id) ? {...r, status:'eliminado'} : r)
+      );
+      const local = loadAllData();
       if (normalized.length !== local.length ||
           JSON.stringify(normalized.map(r=>r.id).sort()) !== JSON.stringify(local.map(r=>r.id).sort())) {
         saveData(normalized); changed = true;
       }
     }
     if (calendario && Array.isArray(calendario) && calendario.length > 0) {
-      const normalized = deduplicateById(calendario.map(normalizeCalEvent).filter(e=>e.fecha&&e.trainer));
-      const local = loadCalEvents();
+      const localDelCal = new Set(loadAllCalEvents().filter(e=>e.status==='eliminado').map(e=>e.id));
+      const normalized = deduplicateById(
+        calendario.map(normalizeCalEvent).filter(e=>e.fecha&&e.trainer)
+          .map(e => localDelCal.has(e.id) ? {...e, status:'eliminado'} : e)
+      );
+      const local = loadAllCalEvents();
       if (normalized.length !== local.length ||
           JSON.stringify(normalized.map(e=>e.id).sort()) !== JSON.stringify(local.map(e=>e.id).sort())) {
         saveCalEvents(normalized); changed = true;
@@ -4096,21 +4104,35 @@ async function autoLoadFromSheets() {
     const { registros, calendario, diasoff } = data.data;
     let loaded = 0;
 
-    // Sheet es fuente de verdad — REEMPLAZA localStorage (no merge, sin duplicados)
+    // Sheet es fuente de verdad, PERO respeta los status 'eliminado' locales
+    // (evita que un delete pendiente de sincronizar sea revertido al cargar)
+
+    // IDs eliminados localmente (para Registros)
+    const localDeletedReg = new Set(
+      loadAllData().filter(r => r.status === 'eliminado').map(r => r.id)
+    );
+    // IDs eliminados localmente (para Calendario)
+    const localDeletedCal = new Set(
+      loadAllCalEvents().filter(e => e.status === 'eliminado').map(e => e.id)
+    );
+
     if (registros && Array.isArray(registros) && registros.length > 0) {
       const normalized = deduplicateById(
         registros.map(normalizeRecord).filter(r => r.fecha && r.trainer)
+        // Si está eliminado localmente, conservar ese status aunque Sheets diga activo
+        .map(r => localDeletedReg.has(r.id) ? {...r, status:'eliminado'} : r)
       );
       saveData(normalized);
-      loaded += normalized.length;
+      loaded += normalized.filter(r => r.status !== 'eliminado').length;
     }
 
     if (calendario && Array.isArray(calendario) && calendario.length > 0) {
       const normalized = deduplicateById(
         calendario.map(normalizeCalEvent).filter(e => e.fecha && e.trainer)
+        .map(e => localDeletedCal.has(e.id) ? {...e, status:'eliminado'} : e)
       );
       saveCalEvents(normalized);
-      loaded += normalized.length;
+      loaded += normalized.filter(e => e.status !== 'eliminado').length;
     }
 
     if (diasoff && Array.isArray(diasoff) && diasoff.length > 0) {
@@ -4166,7 +4188,33 @@ function normalizeDate(d) {
   return '';
 }
 
-// Deduplica un array de registros — gana el primero encontrado con ese ID
+// Normaliza cualquier formato de hora a "HH:MM"
+function normalizeTime(t) {
+  if (!t || t === '' || t === 'undefined') return '';
+  const s = String(t).trim();
+  // Ya en formato HH:MM o H:MM
+  if (/^\d{1,2}:\d{2}$/.test(s)) return s;
+  // Objeto Date serializado desde Sheets ("Sat Dec 30 1899 13:00:00 GMT...")
+  // o cualquier string que contenga una hora
+  try {
+    const d = new Date(s);
+    if (!isNaN(d.getTime())) {
+      return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+    }
+  } catch(_) {}
+  return '';
+}
+
+// Convierte hora "13:00" → "1:00 PM", "08:30" → "8:30 AM"
+function fmtTime(t) {
+  if (!t) return '';
+  const clean = normalizeTime(t);
+  if (!clean) return t;
+  const [h, m] = clean.split(':').map(Number);
+  const period = h >= 12 ? 'PM' : 'AM';
+  const h12    = h % 12 || 12;
+  return `${h12}:${String(m).padStart(2,'0')} ${period}`;
+}
 function deduplicateById(arr) {
   const seen = new Set();
   return arr.filter(r => {
@@ -4202,8 +4250,8 @@ function normalizeCalEvent(r) {
     categoria:      r.categoria      || r.Categoría      || '',
     especificacion: r.especificacion || r.Especificación  || '',
     area:           r.area           || r.Área            || '',
-    horaInicio:     r.horaInicio     || r.HoraInicio      || '',
-    horaFin:        r.horaFin        || r.HoraFin         || '',
+    horaInicio:     normalizeTime(r.horaInicio     || r.HoraInicio      || ''),
+    horaFin:        normalizeTime(r.horaFin        || r.HoraFin         || ''),
     horas:          r.horas          || r.Horas           || '',
     nombre:         r.nombre         || r.Nombre          || '',
     sala:           r.sala           || r.Sala            || '',
