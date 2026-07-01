@@ -3702,30 +3702,27 @@ async function silentSyncFromSheets() {
     const data = await res.json();
     if (!data.ok) return;
     const { registros, calendario, diasoff } = data.data;
-
     let changed = false;
-    const fpBefore = dataFingerprint();
 
     if (registros && Array.isArray(registros) && registros.length > 0) {
-      const local = loadData();
-      const remoteIds = new Set(registros.map(r => r.id || r.ID));
-      const onlyLocal = local.filter(r => !remoteIds.has(r.id));
-      const merged = [...registros, ...onlyLocal];
-      if (merged.length !== local.length || JSON.stringify(merged.map(r=>r.id)) !== JSON.stringify(local.map(r=>r.id))) {
-        saveData(merged);
-        changed = true;
-      }
+      const normalized = registros.map(normalizeRecord);
+      const local      = loadData();
+      const remoteIds  = new Set(normalized.map(r => r.id).filter(Boolean));
+      const onlyLocal  = local.filter(r => r.id && !remoteIds.has(r.id));
+      const merged     = [...normalized, ...onlyLocal];
+      if (merged.length !== local.length) { saveData(merged); changed = true; }
     }
     if (calendario && Array.isArray(calendario) && calendario.length > 0) {
-      const localCal = loadCalEvents();
-      const remoteIds = new Set(calendario.map(e => e.id || e.ID));
-      const onlyLocal = localCal.filter(e => !remoteIds.has(e.id));
-      const merged = [...calendario, ...onlyLocal];
+      const normalized   = calendario.map(normalizeCalEvent);
+      const localCal     = loadCalEvents();
+      const remoteCalIds = new Set(normalized.map(e => e.id).filter(Boolean));
+      const onlyLocal    = localCal.filter(e => e.id && !remoteCalIds.has(e.id));
+      const merged       = [...normalized, ...onlyLocal];
       if (merged.length !== localCal.length) { saveCalEvents(merged); changed = true; }
     }
     if (diasoff && Array.isArray(diasoff)) {
       const local = loadOffDays();
-      if (diasoff.length !== local.length) { saveOffDays(diasoff); changed = true; }
+      if (diasoff.length !== local.length) { saveOffDays(diasoff.map(normalizeOffDay)); changed = true; }
     }
 
     if (changed) {
@@ -3733,8 +3730,6 @@ async function silentSyncFromSheets() {
       refreshCurrentView();
       const lbl = document.getElementById('live-label');
       if (lbl) { lbl.textContent = 'Actualizado'; setTimeout(()=>{ lbl.textContent='En vivo'; }, 3000); }
-      const dot = document.getElementById('live-dot');
-      if (dot) dot.classList.remove('stale');
     }
   } catch(_) { /* silent */ }
 }
@@ -3755,7 +3750,7 @@ const GAS_URL_KEY = 'tmlf_gas_url';
 
 function getScriptUrl() {
   return localStorage.getItem(GAS_URL_KEY)
-    || 'https://script.google.com/macros/s/AKfycbxaOQ8kbdYFkF7UrlztvMkFZzsWVB2F20Wa8D8Dhsc-0DlW0WO_hZsobS-OrLRjSqKufw/exec';
+    || 'https://script.google.com/macros/s/AKfycbxyFChqr_elTXSHIHUE2m_A3m4mn2UDhjkIAqWmcRXZTbKe0LpWcN29X72lyKB0k13hTw/exec';
 }
 
 function saveScriptUrl(url) {
@@ -3824,7 +3819,6 @@ async function autoLoadFromSheets() {
   const url = getScriptUrl();
   if (!url) return;
 
-  // Show loading indicator in live badge
   const dot = document.getElementById('live-dot');
   const lbl = document.getElementById('live-label');
   if (dot) dot.classList.add('stale');
@@ -3833,51 +3827,99 @@ async function autoLoadFromSheets() {
   try {
     const res  = await fetch(`${url}?action=getAll`, { method: 'GET' });
     const data = await res.json();
-    if (!data.ok) throw new Error(data.error || 'Error');
+    if (!data.ok) throw new Error(data.error || 'Error del servidor');
 
     const { registros, calendario, diasoff } = data.data;
-    let changed = false;
+    let loaded = 0;
 
-    // Merge Sheet data into localStorage (Sheet is source of truth)
+    // Registros: Sheet es fuente de verdad
     if (registros && Array.isArray(registros) && registros.length > 0) {
-      // Merge: combine local + remote, remote wins on conflict (same ID)
-      const local    = loadData();
-      const remoteIds = new Set(registros.map(r => r.id || r.ID));
-      const onlyLocal = local.filter(r => !remoteIds.has(r.id));
-      saveData([...registros, ...onlyLocal]);
-      changed = true;
-    }
-    if (calendario && Array.isArray(calendario) && calendario.length > 0) {
-      const localCal   = loadCalEvents();
-      const remoteCalIds = new Set(calendario.map(e => e.id || e.ID));
-      const onlyLocalCal = localCal.filter(e => !remoteCalIds.has(e.id));
-      saveCalEvents([...calendario, ...onlyLocalCal]);
-      changed = true;
-    }
-    if (diasoff && Array.isArray(diasoff) && diasoff.length > 0) {
-      saveOffDays(diasoff);
-      changed = true;
+      const normalized = registros.map(normalizeRecord);
+      const local      = loadData();
+      const remoteIds  = new Set(normalized.map(r => r.id).filter(Boolean));
+      const onlyLocal  = local.filter(r => r.id && !remoteIds.has(r.id));
+      saveData([...normalized, ...onlyLocal]);
+      loaded += normalized.length;
     }
 
-    if (changed) {
-      _lastFingerprint = dataFingerprint();
-      refreshCurrentView();
-      const total = (registros?.length || 0);
-      if (lbl) lbl.textContent = `${total} registros cargados`;
-      if (dot) dot.classList.remove('stale');
-      setTimeout(() => { if (lbl) lbl.textContent = 'En vivo'; }, 4000);
-      setSheetsStatus('ok');
-    } else {
-      if (lbl) lbl.textContent = 'En vivo';
-      if (dot) dot.classList.remove('stale');
-      setSheetsStatus('ok');
+    // Calendario
+    if (calendario && Array.isArray(calendario) && calendario.length > 0) {
+      const normalized   = calendario.map(normalizeCalEvent);
+      const localCal     = loadCalEvents();
+      const remoteCalIds = new Set(normalized.map(e => e.id).filter(Boolean));
+      const onlyLocal    = localCal.filter(e => e.id && !remoteCalIds.has(e.id));
+      saveCalEvents([...normalized, ...onlyLocal]);
+      loaded += normalized.length;
     }
+
+    // Días OFF
+    if (diasoff && Array.isArray(diasoff) && diasoff.length > 0) {
+      const normalized = diasoff.map(normalizeOffDay);
+      saveOffDays(normalized);
+    }
+
+    _lastFingerprint = dataFingerprint();
+    refreshCurrentView();
+
+    if (lbl) lbl.textContent = loaded > 0 ? `${loaded} registros cargados` : 'En vivo';
+    if (dot) dot.classList.remove('stale');
+    setSheetsStatus('ok');
+    setTimeout(() => { if (lbl) lbl.textContent = 'En vivo'; }, 5000);
 
   } catch(err) {
-    if (lbl) lbl.textContent = 'Sin conexión';
+    if (lbl) lbl.textContent = 'Sin conexión a Sheets';
     if (dot) dot.classList.add('stale');
-    // Silent fail — app works with localStorage
+    console.warn('autoLoadFromSheets:', err.message);
   }
+}
+
+// Normaliza un registro de la Sheet al formato del app
+function normalizeRecord(r) {
+  return {
+    id:             r.id             || r.ID             || genId(),
+    fecha:          r.fecha          || r.Fecha          || '',
+    trainer:        r.trainer        || r.Trainer        || '',
+    categoria:      r.categoria      || r.Categoría      || r['Categor\u00eda'] || '',
+    especificacion: r.especificacion || r.Especificación  || r['Especificaci\u00f3n'] || '',
+    area:           r.area           || r.Área            || r['\u00c1rea'] || '',
+    horas:          r.horas          || r.Horas          || '',
+    descripcion:    r.descripcion    || r.Descripción     || r['Descripci\u00f3n'] || '',
+    createdAt:      r.createdAt      || r.Creado          || new Date().toISOString(),
+  };
+}
+
+function normalizeCalEvent(r) {
+  return {
+    id:             r.id             || r.ID             || genId(),
+    fecha:          r.fecha          || r.Fecha          || '',
+    trainer:        r.trainer        || r.Trainer        || '',
+    categoria:      r.categoria      || r.Categoría      || '',
+    especificacion: r.especificacion || r.Especificación  || '',
+    area:           r.area           || r.Área            || '',
+    horaInicio:     r.horaInicio     || r.HoraInicio      || '',
+    horaFin:        r.horaFin        || r.HoraFin         || '',
+    horas:          r.horas          || r.Horas           || '',
+    nombre:         r.nombre         || r.Nombre          || '',
+    sala:           r.sala           || r.Sala            || '',
+    link:           r.link           || r.Link            || '',
+    _regId:         r._regId         || r.RegID           || r.regId || '',
+    status:         r.status         || 'completado',
+    _src:           'cal',
+  };
+}
+
+function normalizeOffDay(r) {
+  return {
+    id:          r.id          || r.ID          || genId(),
+    trainer:     r.trainer     || r.Trainer     || '',
+    fechaInicio: r.fechaInicio || r.FechaInicio || '',
+    fechaFin:    r.fechaFin    || r.FechaFin    || '',
+    motivo:      r.motivo      || r.Motivo      || '',
+  };
+}
+
+function genId() {
+  return 'gs_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
 }
 
 // ── UPLOAD: localStorage → Google Sheets ─────────────────
