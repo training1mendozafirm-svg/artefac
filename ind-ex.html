@@ -2373,12 +2373,14 @@ function updateHoursTracker() {
   const goalHrs  = document.getElementById('ht-goal-hrs');
   if (goalHrs) goalHrs.textContent = goal + 'h';
 
-  // Hours already saved for this date (filtered by trainer if selected)
-  const saved = loadData()
-    .filter(r => r.fecha === fecha && (!trainer || r.trainer === trainer))
-    .reduce((s,r) => s + parseFloat(r.horas||0), 0);
+  // Hours already saved — only show when a trainer is selected
+  const saved = trainer
+    ? loadData()
+        .filter(r => r.fecha === fecha && r.trainer === trainer)
+        .reduce((s,r) => s + parseFloat(r.horas||0), 0)
+    : 0;
 
-  // Hours in pending batch (filtered by trainer if selected)
+  // Hours in pending batch — only count for selected trainer
   const pending = batchRows
     .filter(r => !trainer || r.trainer === trainer)
     .reduce((s,r) => s + parseFloat(r.horas||0), 0);
@@ -2388,7 +2390,17 @@ function updateHoursTracker() {
 
   document.getElementById('ht-saved').textContent   = saved   + 'h';
   document.getElementById('ht-pending').textContent = pending + 'h';
-  document.getElementById('ht-total').textContent   = total   + 'h';
+  document.getElementById('ht-total').textContent   = trainer ? total + 'h' : '—';
+
+  // If no trainer selected, show hint and reset bar
+  const msg = document.getElementById('ht-msg');
+  if (!trainer) {
+    document.getElementById('ht-bar').style.width = '0%';
+    document.getElementById('ht-total').style.color = 'var(--text-muted)';
+    msg.textContent = 'Selecciona un trainer para ver sus horas';
+    msg.style.color = 'var(--text-muted)';
+    return;
+  }
 
   // Bar color
   const bar = document.getElementById('ht-bar');
@@ -2401,7 +2413,6 @@ function updateHoursTracker() {
   document.getElementById('ht-total').style.color = totalColor;
 
   // Message
-  const msg  = document.getElementById('ht-msg');
   const diff = Math.round(Math.abs(goal - total) * 100) / 100;
   if (goal === 0) {
     msg.textContent = ''; msg.style.color = '';
