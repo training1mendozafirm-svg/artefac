@@ -976,7 +976,8 @@ tbody td {
 .tc-andrea   { background: var(--tr-andrea);  color: var(--tr-andrea-t);  }
 .tc-mariana  { background: var(--tr-mariana); color: var(--tr-mariana-t); }
 .tc-brenda   { background: var(--tr-brenda);  color: var(--tr-brenda-t);  }
-.tc-offday   { background: #ef5350; color: #fff; }
+.tc-offday      { background: #ef5350; color: #fff; }
+.tc-homeoffice  { background: #42A5F5; color: #fff; }
 .tc-birthday { background: #AB47BC; color: #fff; }
 .tc-gestion  { background: #546E7A; color: #fff; }
 .badge-gestion { background: rgba(84,110,122,0.12); color: #37474F; border: 1px solid rgba(84,110,122,0.25); }
@@ -1325,7 +1326,8 @@ tbody td {
                 <option>Documentación</option>
         </select>
         <button class="btn btn-primary" onclick="openNewEventModal(null)">＋ Planear training</button>
-        <button class="btn btn-ghost" onclick="openOffDayModal(null)" style="gap:6px;">🚫 Día OFF</button>
+        <button class="btn btn-ghost" onclick="openOffDayModal(null,'off')" style="gap:6px;">🚫 Día OFF</button>
+        <button class="btn btn-ghost" onclick="openOffDayModal(null,'home-office')" style="gap:6px;">🏠 Home Office</button>
       </div>
 
       <div class="cal-legend">
@@ -1334,6 +1336,7 @@ tbody td {
         <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#43A047;"></div> Andrea</div>
         <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#F9A825;"></div> Brenda</div>
         <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#ef5350;"></div> Día OFF</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#42A5F5;"></div> Home Office</div>
         <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#AB47BC;"></div> 🎂 Cumpleaños</div>
       </div>
 
@@ -2053,7 +2056,8 @@ tbody td {
     <hr class="section-divider">
     <div class="btn-row">
       <button class="btn btn-primary" onclick="document.getElementById('modal-day').classList.remove('open');openNewEventModal(currentDayDate)">＋ Planear training</button>
-      <button class="btn btn-ghost" onclick="document.getElementById('modal-day').classList.remove('open');openOffDayModal(currentDayDate)">🚫 Día OFF</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('modal-day').classList.remove('open');openOffDayModal(currentDayDate,'off')">🚫 Día OFF</button>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('modal-day').classList.remove('open');openOffDayModal(currentDayDate,'home-office')">🏠 Home Office</button>
     </div>
   </div>
 </div>
@@ -2065,27 +2069,67 @@ tbody td {
       <div class="modal-title" id="offday-modal-title">🚫 Registrar Día OFF</div>
       <button class="modal-close" onclick="closeOffDayModal()">✕</button>
     </div>
-    <div class="form-grid">
-      <div class="form-group">
-        <label class="form-label">Trainer <span class="req">*</span></label>
-        <select class="form-control" id="off-trainer" required>
-          <option value="">— Seleccionar —</option>
-          <option>Andrea Zendejas</option><option>Joham Burgos</option>
-          <option>Diego Romo</option><option>Brenda Domínguez</option>
-        </select>
+    <!-- Tipo selector -->
+    <div style="display:flex;gap:10px;margin-bottom:18px;">
+      <button type="button" id="off-tipo-off" onclick="setOffTipo('off')"
+        style="flex:1;padding:10px;border-radius:10px;border:2px solid #ef5350;background:#ef5350;color:#fff;font-weight:600;cursor:pointer;font-size:13px;transition:all .2s;">
+        🚫 Día OFF
+      </button>
+      <button type="button" id="off-tipo-ho" onclick="setOffTipo('home-office')"
+        style="flex:1;padding:10px;border-radius:10px;border:2px solid var(--border);background:#fff;color:var(--text-muted);font-weight:600;cursor:pointer;font-size:13px;transition:all .2s;">
+        🏠 Home Office
+      </button>
+    </div>
+    <input type="hidden" id="off-tipo" value="off">
+
+    <!-- Trainer selector: checkboxes + Todos -->
+    <div style="margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <label class="form-label" style="margin:0;">Trainer(s) <span class="req">*</span></label>
+        <button type="button" onclick="toggleAllOffTrainers()" id="off-todos-btn"
+          style="font-size:11px;padding:3px 10px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;color:var(--text-muted);font-family:var(--font-body);">
+          ☑ Todos
+        </button>
       </div>
-      <div class="form-group">
-        <label class="form-label">Motivo</label>
-        <input type="text" class="form-control" id="off-motivo" placeholder="Ej: Vacaciones, Personal...">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;" id="off-trainers-checks">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:#fff;user-select:none;" id="off-check-label-andrea">
+          <input type="checkbox" value="Andrea Zendejas" id="off-chk-andrea" onchange="updateOffTodosBtn()" style="accent-color:#43A047;">
+          <span style="width:10px;height:10px;border-radius:50%;background:#43A047;display:inline-block;"></span> Andrea
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:#fff;user-select:none;" id="off-check-label-joham">
+          <input type="checkbox" value="Joham Burgos" id="off-chk-joham" onchange="updateOffTodosBtn()" style="accent-color:#8E24AA;">
+          <span style="width:10px;height:10px;border-radius:50%;background:#8E24AA;display:inline-block;"></span> Joham
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:#fff;user-select:none;" id="off-check-label-diego">
+          <input type="checkbox" value="Diego Romo" id="off-chk-diego" onchange="updateOffTodosBtn()" style="accent-color:#00ACC1;">
+          <span style="width:10px;height:10px;border-radius:50%;background:#00ACC1;display:inline-block;"></span> Diego
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:#fff;user-select:none;" id="off-check-label-brenda">
+          <input type="checkbox" value="Brenda Domínguez" id="off-chk-brenda" onchange="updateOffTodosBtn()" style="accent-color:#F9A825;">
+          <span style="width:10px;height:10px;border-radius:50%;background:#F9A825;display:inline-block;"></span> Brenda
+        </label>
       </div>
-      <div class="form-group">
-        <label class="form-label">Fecha inicio <span class="req">*</span></label>
-        <input type="date" class="form-control" id="off-fecha-inicio" required>
+    </div>
+
+    <div class="form-group" style="margin-bottom:14px;">
+      <label class="form-label">Motivo / Nota</label>
+      <input type="text" class="form-control" id="off-motivo" placeholder="Ej: Vacaciones, Enfermedad...">
+    </div>
+
+    <div class="form-group full" style="margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <label class="form-label" style="margin:0;">Días <span class="req">*</span></label>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button type="button" onclick="offCalPrev()" style="width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:13px;">‹</button>
+          <span id="off-cal-label" style="font-size:13px;font-weight:600;color:var(--text);min-width:130px;text-align:center;"></span>
+          <button type="button" onclick="offCalNext()" style="width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:13px;">›</button>
+        </div>
+        <button type="button" onclick="clearOffDates()" style="font-size:11px;padding:3px 8px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;color:var(--text-muted);">✕ Limpiar</button>
       </div>
-      <div class="form-group">
-        <label class="form-label">Fecha fin <span style="color:var(--text-muted);font-weight:400;">(opcional)</span></label>
-        <input type="date" class="form-control" id="off-fecha-fin">
-      </div>
+      <!-- Mini calendar grid -->
+      <div id="off-cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;"></div>
+      <!-- Selected dates summary -->
+      <div id="off-dates-summary" style="margin-top:8px;font-size:12px;color:var(--text-muted);min-height:18px;"></div>
     </div>
     <hr class="section-divider">
     <div class="btn-row">
@@ -3599,15 +3643,158 @@ function expandOffDates(off) {
 
 let editingOffId = null;
 
-function openOffDayModal(dateStr) {
+// ── MINI CALENDAR FOR OFF DAYS ────────────────────────────
+let _offCalDate    = new Date();  // month being displayed
+let _offSelectedDates = new Set(); // Set of 'YYYY-MM-DD' strings
+
+const MES_NAMES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const DIA_ABBR  = ['Do','Lu','Ma','Mi','Ju','Vi','Sá'];
+
+function renderOffCal() {
+  const yr  = _offCalDate.getFullYear();
+  const mo  = _offCalDate.getMonth();
+  const lbl = document.getElementById('off-cal-label');
+  if (lbl) lbl.textContent = `${MES_NAMES[mo]} ${yr}`;
+
+  const grid = document.getElementById('off-cal-grid');
+  if (!grid) return;
+
+  const tipo    = document.getElementById('off-tipo')?.value || 'off';
+  const selColor = tipo === 'home-office' ? '#42A5F5' : '#ef5350';
+
+  // Day headers
+  let html = DIA_ABBR.map(d =>
+    `<div style="text-align:center;font-size:10px;font-weight:700;color:var(--text-muted);padding:3px 0;font-family:var(--font-condensed);letter-spacing:.5px;">${d}</div>`
+  ).join('');
+
+  const firstDay = new Date(yr, mo, 1).getDay(); // 0=Sun
+  const daysInMonth = new Date(yr, mo+1, 0).getDate();
+  const today = new Date().toISOString().split('T')[0];
+
+  // Empty cells before first day
+  for (let i=0; i<firstDay; i++) html += '<div></div>';
+
+  for (let day=1; day<=daysInMonth; day++) {
+    const ds    = `${yr}-${String(mo+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const isSelected = _offSelectedDates.has(ds);
+    const isToday    = ds === today;
+    const dow        = new Date(ds+'T12:00:00').getDay();
+    const isWeekend  = dow === 0 || dow === 6;
+    html += `<div onclick="toggleOffDate('${ds}')" title="${ds}"
+      style="text-align:center;padding:6px 2px;border-radius:8px;cursor:pointer;font-size:13px;
+        font-weight:${isSelected||isToday?'700':'400'};
+        background:${isSelected?selColor:'transparent'};
+        color:${isSelected?'#fff':isWeekend?'var(--text-muted)':isToday?selColor:'var(--text)'};
+        border:${isToday&&!isSelected?`2px solid ${selColor}`:'2px solid transparent'};
+        transition:all .15s;user-select:none;"
+      onmouseover="if(!this.classList.contains('sel'))this.style.background='rgba(0,0,0,0.05)'"
+      onmouseout="if(!this.classList.contains('sel'))this.style.background='${isSelected?selColor:'transparent'}'"
+      class="${isSelected?'sel':''}">
+      ${day}
+    </div>`;
+  }
+  grid.innerHTML = html;
+  updateOffDatesSummary();
+}
+
+function toggleOffDate(ds) {
+  if (_offSelectedDates.has(ds)) _offSelectedDates.delete(ds);
+  else _offSelectedDates.add(ds);
+  renderOffCal();
+}
+
+function clearOffDates() {
+  _offSelectedDates.clear();
+  renderOffCal();
+}
+
+function offCalPrev() {
+  _offCalDate = new Date(_offCalDate.getFullYear(), _offCalDate.getMonth()-1, 1);
+  renderOffCal();
+}
+
+function offCalNext() {
+  _offCalDate = new Date(_offCalDate.getFullYear(), _offCalDate.getMonth()+1, 1);
+  renderOffCal();
+}
+
+function updateOffDatesSummary() {
+  const el = document.getElementById('off-dates-summary');
+  if (!el) return;
+  const sorted = [..._offSelectedDates].sort();
+  if (!sorted.length) { el.textContent = 'Ningún día seleccionado'; return; }
+  el.textContent = `${sorted.length} día${sorted.length>1?'s':''} seleccionado${sorted.length>1?'s':''}: `
+    + sorted.map(d => { const [,m,dy] = d.split('-'); return `${parseInt(dy)}/${parseInt(m)}`; }).join(', ');
+}
+
+const OFF_TRAINERS = [
+  { id:'andrea', name:'Andrea Zendejas' },
+  { id:'joham',  name:'Joham Burgos'    },
+  { id:'diego',  name:'Diego Romo'      },
+  { id:'brenda', name:'Brenda Domínguez'},
+];
+
+function getOffCheckedTrainers() {
+  return OFF_TRAINERS.filter(t => document.getElementById('off-chk-'+t.id)?.checked)
+                     .map(t => t.name);
+}
+
+function setOffCheckedTrainers(trainers) {
+  OFF_TRAINERS.forEach(t => {
+    const chk = document.getElementById('off-chk-'+t.id);
+    if (chk) chk.checked = trainers.includes(t.name);
+  });
+  updateOffTodosBtn();
+}
+
+function toggleAllOffTrainers() {
+  const checked = getOffCheckedTrainers();
+  const allChecked = checked.length === OFF_TRAINERS.length;
+  setOffCheckedTrainers(allChecked ? [] : OFF_TRAINERS.map(t => t.name));
+}
+
+function updateOffTodosBtn() {
+  const checked = getOffCheckedTrainers();
+  const btn = document.getElementById('off-todos-btn');
+  if (!btn) return;
+  if (checked.length === OFF_TRAINERS.length) {
+    btn.textContent = '☑ Todos'; btn.style.background = 'var(--gold)'; btn.style.color = '#000';
+  } else {
+    btn.textContent = '☑ Todos'; btn.style.background = '#fff'; btn.style.color = 'var(--text-muted)';
+  }
+}
+
+function setOffTipo(tipo) {
+  document.getElementById('off-tipo').value = tipo;
+  const isOff = tipo === 'off';
+  const btnOff = document.getElementById('off-tipo-off');
+  const btnHO  = document.getElementById('off-tipo-ho');
+  btnOff.style.background  = isOff ? '#ef5350' : '#fff';
+  btnOff.style.color       = isOff ? '#fff'    : 'var(--text-muted)';
+  btnOff.style.borderColor = isOff ? '#ef5350' : 'var(--border)';
+  btnHO.style.background   = !isOff ? '#42A5F5' : '#fff';
+  btnHO.style.color        = !isOff ? '#fff'    : 'var(--text-muted)';
+  btnHO.style.borderColor  = !isOff ? '#42A5F5' : 'var(--border)';
+  document.getElementById('offday-modal-title').textContent =
+    isOff ? '🚫 Registrar Día OFF' : '🏠 Registrar Home Office';
+  document.getElementById('off-motivo').placeholder = isOff
+    ? 'Ej: Vacaciones, Enfermedad, Festivo...'
+    : 'Ej: Trabajo remoto, Reunión virtual...';
+  renderOffCal(); // update day selection colors
+}
+
+function openOffDayModal(dateStr, tipo='off') {
   editingOffId = null;
   document.getElementById('off-edit-id').value = '';
   document.getElementById('off-delete-btn').style.display = 'none';
-  document.getElementById('offday-modal-title').textContent = '🚫 Registrar Día OFF';
-  document.getElementById('off-trainer').value = '';
   document.getElementById('off-motivo').value = '';
-  document.getElementById('off-fecha-inicio').value = dateStr || new Date().toISOString().split('T')[0];
-  document.getElementById('off-fecha-fin').value = '';
+  setOffCheckedTrainers(tipo === 'off' ? OFF_TRAINERS.map(t=>t.name) : []);
+  setOffTipo(tipo);
+  // Init calendar to current month, pre-select dateStr if given
+  _offCalDate = dateStr ? new Date(dateStr+'T12:00:00') : new Date();
+  _offCalDate = new Date(_offCalDate.getFullYear(), _offCalDate.getMonth(), 1);
+  _offSelectedDates = new Set(dateStr ? [dateStr] : []);
+  renderOffCal();
   document.getElementById('modal-offday').classList.add('open');
 }
 
@@ -3617,11 +3804,21 @@ function openEditOffDayModal(id) {
   editingOffId = id;
   document.getElementById('off-edit-id').value = id;
   document.getElementById('off-delete-btn').style.display = 'flex';
-  document.getElementById('offday-modal-title').textContent = '🚫 Editar Día OFF';
-  document.getElementById('off-trainer').value = off.trainer;
   document.getElementById('off-motivo').value = off.motivo || '';
-  document.getElementById('off-fecha-inicio').value = off.fechaInicio;
-  document.getElementById('off-fecha-fin').value = off.fechaFin || '';
+  const trainers = Array.isArray(off.trainers) ? off.trainers : (off.trainer ? [off.trainer] : []);
+  setOffCheckedTrainers(trainers);
+  setOffTipo(off.tipo || 'off');
+  document.getElementById('offday-modal-title').textContent =
+    (off.tipo === 'home-office') ? '🏠 Editar Home Office' : '🚫 Editar Día OFF';
+  // Restore dates
+  const dates = Array.isArray(off.dates) ? off.dates
+    : (off.fechaInicio ? expandOffDates(off).map(d=>d) : []);
+  _offSelectedDates = new Set(dates);
+  _offCalDate = dates.length
+    ? new Date(dates[0]+'T12:00:00')
+    : new Date();
+  _offCalDate = new Date(_offCalDate.getFullYear(), _offCalDate.getMonth(), 1);
+  renderOffCal();
   document.getElementById('modal-day').classList.remove('open');
   document.getElementById('modal-offday').classList.add('open');
 }
@@ -3632,26 +3829,38 @@ function closeOffDayModal() {
 }
 
 function saveOffDay() {
-  const trainer    = document.getElementById('off-trainer').value;
-  const motivo     = document.getElementById('off-motivo').value;
-  const fechaInicio = document.getElementById('off-fecha-inicio').value;
-  const fechaFin   = document.getElementById('off-fecha-fin').value;
-  if (!trainer || !fechaInicio) { toast('Selecciona trainer y fecha', 'error'); return; }
-  if (fechaFin && fechaFin < fechaInicio) { toast('La fecha fin no puede ser anterior a la de inicio', 'error'); return; }
+  const trainers    = getOffCheckedTrainers();
+  const motivo      = document.getElementById('off-motivo').value;
+  const tipo        = document.getElementById('off-tipo').value || 'off';
+  const dates       = [..._offSelectedDates].sort();
+
+  if (!trainers.length) { toast('Selecciona al menos un trainer', 'error'); return; }
+  if (!dates.length)    { toast('Selecciona al menos un día en el calendario', 'error'); return; }
 
   const offs = loadOffDays();
-  const rec  = {
-    id: editingOffId || (Date.now().toString(36) + Math.random().toString(36).slice(2,5)),
-    trainer, motivo, fechaInicio, fechaFin
-  };
   if (editingOffId) {
     const idx = offs.findIndex(o => o.id === editingOffId);
+    const rec = {
+      id: editingOffId, trainers, trainer: trainers[0],
+      motivo, tipo, dates,
+      fechaInicio: dates[0], fechaFin: dates[dates.length-1]
+    };
     if (idx > -1) offs[idx] = rec; else offs.push(rec);
-    toast('Día OFF actualizado', 'success');
+    toast(`${tipo==='home-office'?'🏠 Home Office':'🚫 Día OFF'} actualizado`, 'success');
   } else {
-    offs.push(rec);
-    const dias = fechaFin ? expandOffDates(rec).length : 1;
-    toast(`Día OFF registrado${dias > 1 ? ` (${dias} días)` : ''}`, 'success');
+    trainers.forEach(tr => {
+      offs.push({
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2,5) + '_' + tr.slice(0,3),
+        trainers: [tr], trainer: tr,
+        motivo, tipo, dates,
+        fechaInicio: dates[0], fechaFin: dates[dates.length-1]
+      });
+    });
+    const label = tipo==='home-office' ? '🏠 Home Office' : '🚫 Día OFF';
+    const who   = trainers.length === OFF_TRAINERS.length ? 'todos'
+                : trainers.length > 1 ? `${trainers.length} trainers`
+                : trainers[0].split(' ')[0];
+    toast(`${label} registrado para ${who} · ${dates.length} día${dates.length>1?'s':''}`, 'success');
   }
   saveOffDays(offs);
   closeOffDayModal();
@@ -3711,13 +3920,38 @@ function buildAllEvents(trainerF, catF) {
 function buildByDate(allEvts, trainerF) {
   const byDate={};
   allEvts.forEach(e=>{ if(!byDate[e.fecha])byDate[e.fecha]=[]; byDate[e.fecha].push(e); });
+  // Group off events by date+tipo → one card per type per day
+  const offByDateTipo = {}; // key: 'YYYY-MM-DD__tipo'
   loadOffDays().forEach(off=>{
     if(trainerF && off.trainer!==trainerF) return;
-    expandOffDates(off).forEach(ds=>{
-      if(!byDate[ds])byDate[ds]=[];
-      byDate[ds].unshift({id:'off_'+off.id,_src:'off',_offId:off.id,trainer:off.trainer,
-        nombre:`🚫 OFF · ${off.trainer.split(' ')[0]}${off.motivo?' \u2013 '+off.motivo:''}`,
-        horaInicio:'',horaFin:'',categoria:'__off__',status:'off'});
+    const dates = Array.isArray(off.dates) && off.dates.length ? off.dates : expandOffDates(off);
+    const tipo  = off.tipo || 'off';
+    dates.forEach(ds=>{
+      const key = ds+'__'+tipo;
+      if (!offByDateTipo[key]) offByDateTipo[key] = { ds, tipo, motivo:off.motivo||'', trainers:[], ids:[] };
+      if (!offByDateTipo[key].trainers.includes(off.trainer)) {
+        offByDateTipo[key].trainers.push(off.trainer);
+        offByDateTipo[key].ids.push(off.id);
+      }
+    });
+  });
+  Object.values(offByDateTipo).forEach(group=>{
+    const {ds, tipo, trainers, ids} = group;
+    if(!byDate[ds])byDate[ds]=[];
+    const initials = trainers.map(t => trainerInit(t)).join(' ');
+    const names    = trainers.map(t => t.split(' ')[0]).join(', ');
+    const isHO     = tipo === 'home-office';
+    byDate[ds].unshift({
+      id:      'off_grp_'+ds+'_'+tipo,
+      _src:    'off',
+      _offIds: ids,   // all linked IDs for editing
+      _offId:  ids[0],
+      trainer: trainers[0],
+      trainers,
+      _groupInitials: initials,
+      _groupNames:    names,
+      nombre:  isHO ? '🏠 Home Office' : '🚫 Día OFF',
+      tipo,
     });
   });
   const yr = calCurrentDate.getFullYear();
@@ -3829,11 +4063,25 @@ function buildCard(e, ds, tall) {
   const isOff   = e._src==='off';
   const isBday  = e._src==='bday';
   const isReg   = e._src==='reg';
-  // A calendar event is considered "linked" (has registry record) if it has _regId
+  const isHomeOffice = isOff && e.tipo === 'home-office';
   const isLinked = e._src==='cal' && !!e._regId;
-  const isDraggable = e._src==='cal'; // all calendar events are draggable
-  const cls = isOff?'tc-offday': isBday?'tc-birthday': trainerCls(e.trainer);
-  const init = isOff?'🚫': isBday?'🎂': trainerInit(e.trainer);
+  const isDraggable = e._src==='cal';
+  const cls = isHomeOffice ? 'tc-homeoffice' : isOff ? 'tc-offday' : isBday ? 'tc-birthday' : trainerCls(e.trainer);
+
+  // Grouped off card (2+ trainers same tipo on same day)
+  if (isOff && e.trainers && e.trainers.length > 1) {
+    const dots = e.trainers.map(t => {
+      const bg = trainerBg(t);
+      return `<span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:${bg};font-size:10px;font-weight:700;color:#fff;border:1.5px solid rgba(255,255,255,0.5);">${trainerInit(t)}</span>`;
+    }).join('');
+    const names = e.trainers.map(t => t.split(' ')[0]).join(', ');
+    return `<div class="cal-card ${cls}" onclick="event.stopPropagation();openEditOffDayModal('${e._offId}')" title="${e.nombre} · ${names}">
+      <div style="display:flex;gap:2px;margin-bottom:3px;flex-wrap:wrap;">${dots}</div>
+      <div class="cal-card-title">${e.nombre}</div>
+    </div>`;
+  }
+
+  const init = isHomeOffice ? '🏠' : isOff ? '🚫' : isBday ? '🎂' : trainerInit(e.trainer);
   const trainerShort = (e.trainer||'').split(' ')[0];
   const nombre = (e.nombre||e.categoria||'').slice(0, tall?22:18);
   const timeLabel = e.horaInicio ? `${fmtTime(e.horaInicio)}${e.horaFin?' – '+fmtTime(e.horaFin):''}` : 'Todo el día';
@@ -3858,10 +4106,25 @@ function buildCard(e, ds, tall) {
 function buildCardDay(e, ds) {
   const isOff=e._src==='off', isBday=e._src==='bday', isReg=e._src==='reg';
   const isCal=e._src==='cal';
-  const bg=isOff?'#ef5350':isBday?'#AB47BC':trainerBg(e.trainer);
+  const isHO = isOff && e.tipo==='home-office';
+  const bg=isHO?'#42A5F5':isOff?'#ef5350':isBday?'#AB47BC':trainerBg(e.trainer);
   const txt=isOff||isBday?'#fff':trainerTxt(e.trainer);
-  const timeLabel=e.horaInicio?`${e.horaInicio}${e.horaFin?' \u2013 '+e.horaFin:''}`:'Todo el día';
   const clickFn=isOff?`openEditOffDayModal('${e._offId}')`:isCal?`openEventDetailModal('${e.id}','cal')`:`openEventDetailModal('${e.id}','reg')`;
+
+  // Grouped off card
+  if (isOff && e.trainers && e.trainers.length > 1) {
+    const dots = e.trainers.map(t=>{
+      const dotBg = trainerBg(t);
+      return `<span style="width:24px;height:24px;border-radius:50%;background:${dotBg};display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;border:2px solid rgba(255,255,255,0.4);">${trainerInit(t)}</span>`;
+    }).join('');
+    const names = e.trainers.map(t=>t.split(' ')[0]).join(' · ');
+    return `<div style="background:${bg};color:${txt};border-radius:10px;padding:12px 14px;margin-bottom:10px;cursor:pointer;" onclick="${clickFn}">
+      <div style="display:flex;gap:5px;margin-bottom:6px;flex-wrap:wrap;">${dots}</div>
+      <div style="font-size:14px;font-weight:700;">${e.nombre}</div>
+      <div style="font-size:12px;opacity:.85;margin-top:3px;">${names}</div>
+    </div>`;
+  }
+  const timeLabel=e.horaInicio?`${e.horaInicio}${e.horaFin?' \u2013 '+e.horaFin:''}`:'Todo el día';
   const horasLabel = e.horas ? ` · ${e.horas}h` : '';
   return `<div style="background:${bg};color:${txt};border-radius:10px;padding:12px 14px;margin-bottom:10px;cursor:pointer;" onclick="${clickFn}">
     <div style="font-size:11px;opacity:0.85;margin-bottom:4px;">${e.trainer||''} · ${timeLabel}${horasLabel}</div>
@@ -4536,7 +4799,7 @@ async function gasPost(url, body) {
 
 function getScriptUrl() {
   return localStorage.getItem(GAS_URL_KEY)
-    || 'https://script.google.com/macros/s/AKfycbxHnPdpTjptVBXtF0v__h_DPaSiEz2f49dP8pxnZgq7wsgYCvTOcoK_vNv0SVS4cYHe8w/exec';
+    || 'https://script.google.com/macros/s/AKfycbyUUmSbwzWDNGNABlteJn3AGMnMfzIEv25k15JKdPyEaDXC3BdtLBCv7hdxEwW2fBeRvA/exec';
 }
 
 function saveScriptUrl(url) {
@@ -4772,12 +5035,40 @@ function normalizeCalEvent(r) {
 }
 
 function normalizeOffDay(r) {
+  // Parse dates: may be JSON string from Sheets or already an array
+  let dates = r.dates || r.Fechas || [];
+  if (typeof dates === 'string') {
+    try { dates = JSON.parse(dates); } catch(_) { dates = []; }
+  }
+  if (!Array.isArray(dates) || !dates.length) {
+    // Fallback: expand from fechaInicio/fechaFin
+    const fi = normalizeDate(r.fechaInicio || r.FechaInicio || '');
+    const ff = normalizeDate(r.fechaFin    || r.FechaFin    || '');
+    if (fi) {
+      const obj = { fechaInicio: fi, fechaFin: ff || fi };
+      dates = expandOffDates(obj);
+    }
+  }
+
+  // trainers: may be JSON array or single trainer string
+  let trainers = r.trainers || [];
+  if (typeof trainers === 'string') {
+    try { trainers = JSON.parse(trainers); } catch(_) { trainers = []; }
+  }
+  if (!Array.isArray(trainers) || !trainers.length) {
+    const tr = r.trainer || r.Trainer || '';
+    if (tr) trainers = [tr];
+  }
+
   return {
-    id:          r.id          || genId(),
-    trainer:     r.trainer     || r.Trainer     || '',
-    fechaInicio: normalizeDate(r.fechaInicio || r.FechaInicio || ''),
-    fechaFin:    normalizeDate(r.fechaFin    || r.FechaFin    || ''),
+    id:          r.id          || r.ID          || genId(),
+    trainer:     trainers[0]   || r.trainer     || r.Trainer     || '',
+    trainers,
+    tipo:        r.tipo        || r.Tipo        || 'off',
     motivo:      r.motivo      || r.Motivo      || '',
+    dates,
+    fechaInicio: dates[0]      || normalizeDate(r.fechaInicio || r.FechaInicio || ''),
+    fechaFin:    dates[dates.length-1] || normalizeDate(r.fechaFin || r.FechaFin || ''),
   };
 }
 
