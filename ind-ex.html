@@ -1890,8 +1890,8 @@ tbody td {
             <button class="btn btn-ghost btn-sm" onclick="pingScript()">
               Verificar conexión
             </button>
-            <button class="btn btn-ghost btn-sm" onclick="repairSheets()" title="Actualiza los encabezados de las hojas al nuevo esquema">
-              🔧 Reparar hojas
+            <button class="btn btn-ghost btn-sm" onclick="repairSheets()" title="Descarga los datos más recientes de Sheets y actualiza todas las vistas">
+              🔄 Actualizar información
             </button>
             <button class="btn btn-ghost btn-sm" onclick="reconcileAllDates()" title="Sincroniza fechas entre calendario y registros">
               🔄 Reconciliar fechas
@@ -2530,16 +2530,35 @@ function updateHoursTracker() {
   const goalHrs  = document.getElementById('ht-goal-hrs');
   if (goalHrs) goalHrs.textContent = goal + 'h';
 
-  // Hours already saved — only show when a trainer is selected
-  const saved = trainer
-    ? loadData()
-        .filter(r => r.fecha === fecha && r.trainer === trainer)
-        .reduce((s,r) => s + parseFloat(r.horas||0), 0)
-    : 0;
+  // Si no hay trainer seleccionado, mostrar ceros
+  if (!trainer) {
+    document.getElementById('ht-saved').textContent   = '0h';
+    document.getElementById('ht-pending').textContent = '0h';
+    document.getElementById('ht-total').textContent   = '—';
+    document.getElementById('ht-bar').style.width = '0%';
+    document.getElementById('ht-total').style.color = 'var(--text-muted)';
+    const msgEl = document.getElementById('ht-msg');
+    if (msgEl) { msgEl.textContent = 'Selecciona un trainer para ver sus horas'; msgEl.style.color = 'var(--text-muted)'; }
+    renderDayRecords(fecha, trainer);
+    return;
+  }
+  const trainerKey = trainer ? trainer.trim().toLowerCase() : '';
+  const regRecords = loadData().filter(r =>
+    r.fecha === fecha && (!trainer || (r.trainer && r.trainer.trim().toLowerCase() === trainerKey))
+  );
+  const savedFromReg = regRecords.reduce((s,r) => s + parseFloat(r.horas||0), 0);
 
-  // Hours in pending batch — only count for selected trainer
+  // Eventos de calendario sin _regId (no tienen registro vinculado — evita doble conteo)
+  const calEventsUnlinked = loadCalEvents().filter(e =>
+    e.fecha === fecha && (!trainer || (e.trainer && e.trainer.trim().toLowerCase() === trainerKey)) && !e._regId
+  );
+  const savedFromCal = calEventsUnlinked.reduce((s,e) => s + parseFloat(e.horas||0), 0);
+
+  const saved = Math.round((savedFromReg + savedFromCal) * 100) / 100;
+
+  // Horas en la lista pendiente actual
   const pending = batchRows
-    .filter(r => !trainer || r.trainer === trainer)
+    .filter(r => !trainer || (r.trainer && r.trainer.trim().toLowerCase() === trainerKey))
     .reduce((s,r) => s + parseFloat(r.horas||0), 0);
 
   const total = Math.round((saved + pending) * 100) / 100;
@@ -2547,17 +2566,7 @@ function updateHoursTracker() {
 
   document.getElementById('ht-saved').textContent   = saved   + 'h';
   document.getElementById('ht-pending').textContent = pending + 'h';
-  document.getElementById('ht-total').textContent   = trainer ? total + 'h' : '—';
-
-  // If no trainer selected, show hint and reset bar
-  const msg = document.getElementById('ht-msg');
-  if (!trainer) {
-    document.getElementById('ht-bar').style.width = '0%';
-    document.getElementById('ht-total').style.color = 'var(--text-muted)';
-    msg.textContent = 'Selecciona un trainer para ver sus horas';
-    msg.style.color = 'var(--text-muted)';
-    return;
-  }
+  document.getElementById('ht-total').textContent   = total   + 'h';
 
   // Bar color
   const bar = document.getElementById('ht-bar');
@@ -2571,16 +2580,19 @@ function updateHoursTracker() {
 
   // Message
   const diff = Math.round(Math.abs(goal - total) * 100) / 100;
-  if (goal === 0) {
-    msg.textContent = ''; msg.style.color = '';
-  } else if (total === 0) {
-    msg.textContent = `Meta: ${goal}h`; msg.style.color = 'var(--text-muted)';
-  } else if (total < goal) {
-    msg.textContent = `Faltan ${diff}h para la meta`; msg.style.color = 'var(--text-muted)';
-  } else if (total === goal) {
-    msg.textContent = '✓ Jornada completa'; msg.style.color = 'var(--success)';
-  } else {
-    msg.textContent = `${diff}h adicionales sobre la jornada`; msg.style.color = 'var(--danger)';
+  const msg = document.getElementById('ht-msg');
+  if (msg) {
+    if (goal === 0) {
+      msg.textContent = ''; msg.style.color = '';
+    } else if (total === 0) {
+      msg.textContent = `Meta: ${goal}h`; msg.style.color = 'var(--text-muted)';
+    } else if (total < goal) {
+      msg.textContent = `Faltan ${diff}h para la meta`; msg.style.color = 'var(--text-muted)';
+    } else if (total === goal) {
+      msg.textContent = '✓ Jornada completa'; msg.style.color = 'var(--success)';
+    } else {
+      msg.textContent = `${diff}h adicionales sobre la jornada`; msg.style.color = 'var(--danger)';
+    }
   }
 
   // Render actividades del día
@@ -2593,7 +2605,10 @@ function renderDayRecords(fecha, trainer) {
   const panel = document.getElementById('day-records-panel');
   if (!panel) return;
   if (!fecha || !trainer) { panel.style.display = 'none'; return; }
-  const recs = loadData().filter(r => r.fecha === fecha && r.trainer === trainer);
+  const trainerClean = trainer.trim().toLowerCase();
+  const recs = loadData().filter(r =>
+    r.fecha === fecha && r.trainer && r.trainer.trim().toLowerCase() === trainerClean
+  );
   const title = document.getElementById('day-records-title');
   const count = document.getElementById('day-records-count');
   if (title) title.textContent = `Actividades de ${trainer.split(' ')[0]} — ${fmtDate(fecha)}`;
@@ -2877,7 +2892,9 @@ function saveEditMode() {
     descripcion:    document.getElementById('f-descripcion-edit').value,
   };
   updateRecord(id, rec);
-  pushRecordToSheet('updateRecord', { record:{...rec,id} });
+  // Push el registro COMPLETO (merged con campos existentes como createdAt, status)
+  const fullRec = loadAllData().find(r => r.id === id) || {...rec, id};
+  pushRecordToSheet('updateRecord', { record: fullRec });
   toast('Registro actualizado ✓', 'success');
   cancelEditMode();
   _lastFingerprint = dataFingerprint();
@@ -4874,6 +4891,7 @@ function refreshCurrentView() {
   try {
     if (active === 'home')           renderHome();
     else if (active === 'calendario')  renderCalendar();
+    else if (active === 'registro')    updateHoursTracker(); // refresca horas y panel de actividades del día
     else if (active === 'dashboard')   renderDashboard();
     else if (active === 'trainer' && selectedTrainer) { renderTrainerSelector(); renderTrainerReport(); }
     else if (active === 'trainer')     renderTrainerSelector();
@@ -4899,9 +4917,8 @@ function setLiveLabel(text, temporary) {
 // Si el timestamp cambió → trae los datos completos
 async function pollRemoteChanges() {
   const url = getScriptUrl();
-  if (!url || _isSyncing) return;
 
-  // También chequea cambios en localStorage (otras pestañas)
+  // Chequea cambios en localStorage (otras pestañas del mismo navegador)
   const fp = dataFingerprint();
   if (fp !== _lastFingerprint && _lastFingerprint !== '') {
     _lastFingerprint = fp;
@@ -4910,19 +4927,26 @@ async function pollRemoteChanges() {
     _lastFingerprint = fp;
   }
 
+  if (!url || _isSyncing) return;
+  _syncCounter++;
+
+  // Cada 3 ciclos (12s): pull completo desde Sheets sin importar timestamp
+  // Garantiza que cualquier cambio en Sheets (manual o de otro trainer) siempre aparezca
+  if (_syncCounter % 3 === 0) {
+    await pullFromSheets(true);
+    return;
+  }
+
+  // Ciclos intermedios: chequeo ligero de timestamp
   try {
     const data = await gasGet(url, { action: 'getLastModified' });
     if (!data?.ok) return;
-
     const remoteTs = data.data?.ts || '0';
     if (remoteTs !== '0' && remoteTs !== _lastRemoteTs) {
-      if (_lastRemoteTs !== '0') {
-        // Hay cambios remotos nuevos — sincronizar datos
-        await pullFromSheets(true); // silent=true, no toast
-      }
       _lastRemoteTs = remoteTs;
+      await pullFromSheets(true);
     }
-  } catch(_) { /* silent — funciona offline con localStorage */ }
+  } catch(_) { /* silent */ }
 }
 
 // ── PASO 2: trae los datos completos desde Sheets ──
@@ -4933,79 +4957,69 @@ async function pullFromSheets(silent = false) {
 
   try {
     const data = await gasGet(url, { action: 'getAll' });
-    if (!data?.ok) return;
+    if (!data?.ok) { _isSyncing = false; return; }
 
     const { registros, calendario, diasoff } = data.data;
     let changed = false;
 
+    // IDs eliminados localmente — preservar ese status aunque Sheet diga activo
     const localDelReg = new Set(loadAllData().filter(r=>r.status==='eliminado').map(r=>r.id));
     const localDelCal = new Set(loadAllCalEvents().filter(e=>e.status==='eliminado').map(e=>e.id));
 
-    if (registros?.length > 0) {
+    // ── LA SHEET ES SIEMPRE LA FUENTE DE VERDAD ────────────────────
+
+    if (Array.isArray(registros) && registros.length > 0) {
       const normalized = deduplicateById(
-        registros.map(normalizeRecord).filter(r=>r.fecha&&r.trainer)
-          .map(r => localDelReg.has(r.id) ? {...r,status:'eliminado'} : r)
+        registros.map(normalizeRecord).filter(r => r.fecha && r.trainer)
+          .map(r => localDelReg.has(r.id) ? {...r, status:'eliminado'} : r)
       );
-      const local = loadAllData();
-      const lids  = local.map(r=>r.id).sort().join(',');
-      const rids  = normalized.map(r=>r.id).sort().join(',');
-      if (lids !== rids || local.length !== normalized.length) { saveData(normalized); changed = true; }
+      if (normalized.length > 0) { saveData(normalized); changed = true; }
     }
 
-    if (calendario?.length > 0) {
+    if (Array.isArray(calendario) && calendario.length > 0) {
       const normalized = deduplicateById(
-        calendario.map(normalizeCalEvent).filter(e=>e.fecha&&e.trainer)
-          .map(e => localDelCal.has(e.id) ? {...e,status:'eliminado'} : e)
+        calendario.map(normalizeCalEvent).filter(e => e.fecha && e.trainer)
+          .map(e => localDelCal.has(e.id) ? {...e, status:'eliminado'} : e)
       );
-      const local = loadAllCalEvents();
-      // Compare by ID+fecha to detect actual changes (not just count)
-      const remoteKey = normalized.map(e=>e.id+'|'+e.fecha).sort().join(',');
-      const localKey  = local.map(e=>e.id+'|'+e.fecha).sort().join(',');
-      if (remoteKey !== localKey) { saveCalEvents(normalized); changed = true; }
+      if (normalized.length > 0) { saveCalEvents(normalized); changed = true; }
     }
 
-    if (diasoff?.length > 0) {
-      const normalized = deduplicateById(diasoff.map(normalizeOffDay).filter(o=>o.trainer));
-      if (normalized.length !== loadOffDays().length) { saveOffDays(normalized); changed = true; }
+    // DíasOff: solo reemplaza si hay datos válidos con trainer Y fechas
+    if (Array.isArray(diasoff) && diasoff.length > 0) {
+      const normalized = deduplicateById(
+        diasoff.map(normalizeOffDay).filter(o => {
+          const hasDates = (Array.isArray(o.dates) && o.dates.length > 0) || o.fechaInicio;
+          return o.trainer && hasDates;
+        })
+      );
+      if (normalized.length > 0) { saveOffDays(normalized); changed = true; }
+      // Si Sheet devuelve filas pero ninguna es válida, conservar localStorage
     }
 
-    // ── RECONCILIAR FECHAS ─────────────────────────────────────────
-    // Si un evento de calendario tiene fecha diferente a su registro vinculado,
-    // la fecha del calendario es la autoridad (puede haber sido movido con drag-drop)
-    const allCal  = loadAllCalEvents();
-    const allData = loadAllData();
-    let reconciled = false;
-
-    allCal.forEach(ev => {
+    // ── RECONCILIAR FECHAS (calendario → registros) ─────────────────
+    loadAllCalEvents().forEach(ev => {
       if (!ev._regId || !ev.fecha) return;
-      const reg = allData.find(r => r.id === ev._regId);
+      const reg = loadAllData().find(r => r.id === ev._regId);
       if (reg && reg.fecha !== ev.fecha) {
         updateRecord(ev._regId, { fecha: ev.fecha });
-        // También actualizar en Sheets
         const updated = loadAllData().find(r => r.id === ev._regId);
         if (updated) pushRecordToSheet('updateRecord', { record: updated });
-        reconciled = true;
+        changed = true;
       }
     });
-
-    if (reconciled) {
-      _lastFingerprint = dataFingerprint();
-      changed = true;
-    }
-    // ── FIN RECONCILIACIÓN ─────────────────────────────────────────
 
     if (changed) {
       _lastFingerprint = dataFingerprint();
       refreshCurrentView();
-      if (!silent) {
-        setLiveLabel('Actualizado', true);
-        toast('📡 Datos sincronizados', 'info');
-      } else {
-        setLiveLabel('Actualizado', true);
-      }
+      setLiveLabel('Actualizado', true);
+      if (!silent) toast('📡 Datos actualizados desde Sheets', 'info');
     }
-  } catch(_) { /* silent */ }
-  finally { _isSyncing = false; }
+
+  } catch(e) {
+    // Error silencioso — app funciona con localStorage mientras Sheets no esté disponible
+    const dot = document.getElementById('live-dot');
+    if (dot) dot.classList.add('stale');
+  } finally { _isSyncing = false; }
 }
 
 // Alias para compatibilidad con llamadas existentes
@@ -5031,40 +5045,54 @@ function fetchJSONP(url, params = {}) {
   return new Promise((resolve, reject) => {
     const cbName = '_tmlf_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
     const timeout = setTimeout(() => {
-      delete window[cbName];
-      script.remove();
-      reject(new Error('Timeout'));
-    }, 12000);
-    window[cbName] = function(data) {
+      cleanup();
+      reject(new Error('JSONP timeout'));
+    }, 15000);
+
+    function cleanup() {
       clearTimeout(timeout);
       delete window[cbName];
-      script.remove();
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+
+    window[cbName] = function(data) {
+      cleanup();
       resolve(data);
     };
+
     const qs = new URLSearchParams({...params, callback: cbName}).toString();
     const script = document.createElement('script');
     script.src = `${url}?${qs}`;
-    script.onerror = () => {
-      clearTimeout(timeout);
-      delete window[cbName];
-      reject(new Error('JSONP script error'));
-    };
+    script.onerror = () => { cleanup(); reject(new Error('JSONP script error')); };
     document.head.appendChild(script);
   });
 }
 
-// ── gasGet: intenta fetch, cae en JSONP automáticamente ──
+// ── gasGet: fetch → JSONP → retry ──
 async function gasGet(url, params = {}) {
-  const qs  = params.action ? `?action=${params.action}` : '';
+  const qs = params.action ? `?action=${params.action}` : '';
+
+  // Intento 1: fetch normal (HTTPS/HTTP)
   try {
-    // Fetch normal (funciona desde HTTP/HTTPS)
-    const res = await fetch(`${url}${qs}`, { method:'GET', redirect:'follow' });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.json();
-  } catch(_) {
-    // Fallback JSONP (funciona desde file://)
+    const res = await fetch(`${url}${qs}`, {
+      method: 'GET',
+      redirect: 'follow',
+      cache: 'no-store'
+    });
+    if (res.ok) return await res.json();
+  } catch(_) {}
+
+  // Intento 2: JSONP (funciona desde file://)
+  try {
     return await fetchJSONP(url, params);
-  }
+  } catch(_) {}
+
+  // Intento 3: fetch con mode no-cors (último recurso — solo para ping)
+  if (params.action === 'ping') return { ok: false, error: 'offline' };
+
+  // Intento 4: retry JSONP después de 1 segundo
+  await new Promise(r => setTimeout(r, 1000));
+  return await fetchJSONP(url, params);
 }
 
 // ── gasPost: POST con fallback a JSONP GET para datos pequeños ──
@@ -5092,7 +5120,7 @@ async function gasPost(url, body) {
 
 function getScriptUrl() {
   return localStorage.getItem(GAS_URL_KEY)
-    || 'https://script.google.com/macros/s/AKfycbxZmvz-BjKx2l9lD48FOhWoaJYzdJW3UsPjbZQ9vprELlEV549fxhkxEyA9Ikb1219e5Q/exec';
+    || 'https://script.google.com/macros/s/AKfycbxejZE6u5UzLgagJGRAr5F9DWXhocDEH26nJ7C1demKYzxlM6JJwlk8_vaYVrIN0d9ddA/exec';
 }
 
 function saveScriptUrl(url) {
@@ -5154,6 +5182,24 @@ async function pingScript() {
 }
 
 
+
+// Convierte registro de Sheets al formato del app
+function normalizeRecord(r) {
+  const horas = r.horas || r.Horas || r.horas || '';
+  return {
+    id:             r.id             || r.ID             || genId(),
+    fecha:          normalizeDate(r.fecha          || r.Fecha          || ''),
+    trainer:        r.trainer        || r.Trainer        || '',
+    categoria:      r.categoria      || r.Categoría      || r.Categoria || '',
+    especificacion: r.especificacion || r.Especificación  || r.Especificacion || '',
+    area:           r.area           || r.Área            || r.Area || '',
+    horas:          String(horas).replace(',','.'),
+    descripcion:    r.descripcion    || r.Descripción     || r.Descripcion || '',
+    createdAt:      r.createdAt      || r.Creado          || '',
+    status:         r.status         || r.Status          || 'activo',
+    deletedAt:      r.deletedAt      || '',
+  };
+}
 
 function normalizeCalEvent(r) {
   return {
@@ -5318,19 +5364,15 @@ async function reconcileAllDates() {
 async function repairSheets() {
   const url = getScriptUrl();
   if (!url) { toast('Configura la URL del Apps Script primero', 'error'); return; }
-  setSheetsStatus('syncing'); setSyncLog('Reparando estructura de hojas…');
+  setSheetsStatus('syncing'); setSyncLog('Actualizando información desde Sheets…');
   try {
-    // ping triggers initSheets which migrates headers
-    const ping = await gasGet(url, { action: 'ping' });
-    if (!ping.ok) throw new Error(ping.error || 'Error');
-    // Now do a full sync to rewrite data with correct columns
-    await syncToSheets();
+    await pullFromSheets(false);
     setSheetsStatus('ok');
-    setSyncLog('✓ Hojas reparadas y datos re-sincronizados');
-    toast('✓ Hojas reparadas correctamente', 'success');
+    setSyncLog('✓ Información actualizada correctamente');
+    toast('✓ Datos actualizados desde Google Sheets', 'success');
   } catch(err) {
     setSheetsStatus('error'); setSyncLog('Error: ' + err.message);
-    toast('Error al reparar: ' + err.message, 'error');
+    toast('Error al actualizar: ' + err.message, 'error');
   }
 }
 
@@ -5381,11 +5423,10 @@ document.addEventListener('DOMContentLoaded', function() {
   _lastFingerprint = dataFingerprint();
   initScriptUrl();
 
-  // Carga inicial desde Sheets
-  setTimeout(() => pullFromSheets(false), 800);
+  // Cargar desde Sheets inmediatamente — Sheets es la fuente de verdad
+  pullFromSheets(false);
 
-  // Polling en tiempo real: chequeo ligero cada 4 segundos
-  // Solo trae datos completos si el timestamp remoto cambió
+  // Polling cada 4s: full sync cada 12s, timestamp check en los demás
   _liveIntervalId = setInterval(pollRemoteChanges, 4000);
 
   // Mobile sidebar toggle
