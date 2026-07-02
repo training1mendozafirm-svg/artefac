@@ -2080,6 +2080,39 @@ tbody td {
 </div>
 
 <!-- ===== MODAL DAY OFF ===== -->
+<!-- ===== MODAL DETALLE DÍA OFF / HOME OFFICE ===== -->
+<div class="modal-overlay" id="modal-offday-detail">
+  <div class="event-modal" style="max-width:440px;">
+    <div class="modal-header">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div id="odd-icon" style="font-size:30px;line-height:1;"></div>
+        <div>
+          <div id="odd-tipo-label" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;"></div>
+          <div id="odd-trainers-label" style="font-family:var(--font-heading);font-size:19px;font-weight:600;color:var(--text);line-height:1.2;"></div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeOffDayDetailModal()">✕</button>
+    </div>
+
+    <div id="odd-trainer-dots" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;"></div>
+
+    <div id="odd-detail-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;"></div>
+
+    <div id="odd-motivo-row" style="display:none;padding:10px 14px;background:#f7f8fc;border-radius:8px;font-size:13px;color:var(--text);margin-bottom:16px;">
+      <span style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:4px;">Motivo / Nota</span>
+      <span id="odd-motivo-text"></span>
+    </div>
+
+    <hr class="section-divider">
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="editFromOffDayDetail()">✎ Editar</button>
+      <button class="btn btn-ghost" onclick="closeOffDayDetailModal()">Cerrar</button>
+      <button class="btn btn-danger btn-sm" style="margin-left:auto;" onclick="deleteFromOffDayDetail()">✕ Eliminar</button>
+    </div>
+    <input type="hidden" id="odd-edit-id" value="">
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-offday">
   <div class="event-modal" style="max-width:460px;">
     <div class="modal-header">
@@ -3722,7 +3755,109 @@ function expandOffDates(off) {
 
 let editingOffId = null;
 
-// ── MINI CALENDAR FOR OFF DAYS ────────────────────────────
+// ── OFF DAY DETAIL MODAL ──────────────────────────────────
+function openOffDayDetailModal(offId) {
+  const off = loadOffDays().find(o => o.id === offId);
+  if (!off) return;
+
+  document.getElementById('modal-day').classList.remove('open');
+
+  const isHO    = off.tipo === 'home-office';
+  const color   = isHO ? '#42A5F5' : '#ef5350';
+  const tipo    = off.tipo || 'off';
+  const dates   = Array.isArray(off.dates) && off.dates.length ? off.dates : expandOffDates(off);
+
+  // Buscar TODOS los registros del mismo tipo con fechas solapadas (agrupados)
+  // Para mostrar todos los trainers que comparten ese día OFF/HO
+  const allOffs = loadOffDays();
+  const relatedIds = new Set([offId]);
+  const allTrainers = [];
+
+  allOffs.forEach(o => {
+    if ((o.tipo || 'off') !== tipo) return;
+    const oDates = Array.isArray(o.dates) && o.dates.length ? o.dates : expandOffDates(o);
+    // Comparte al menos una fecha con el registro seleccionado
+    const overlaps = dates.some(d => oDates.includes(d));
+    if (overlaps) {
+      relatedIds.add(o.id);
+      const tr = Array.isArray(o.trainers) && o.trainers.length ? o.trainers : [o.trainer];
+      tr.forEach(t => { if (t && !allTrainers.includes(t)) allTrainers.push(t); });
+    }
+  });
+
+  const allTrainerNames = Object.keys(TRAINER_COLORS);
+  const isAll = allTrainerNames.every(t => allTrainers.includes(t));
+
+  // Header
+  document.getElementById('odd-icon').textContent = isHO ? '🏠' : '🚫';
+  document.getElementById('odd-tipo-label').textContent = isHO ? 'Home Office' : 'Día OFF';
+  document.getElementById('odd-tipo-label').style.color = color;
+  document.getElementById('odd-trainers-label').textContent = isAll
+    ? 'Todos los trainers'
+    : allTrainers.length === 1 ? allTrainers[0]
+    : allTrainers.map(t => t.split(' ')[0]).join(', ');
+
+  // Trainer pills — solo si no son todos
+  const dotsEl = document.getElementById('odd-trainer-dots');
+  if (isAll || allTrainers.length === 1) {
+    dotsEl.style.display = 'none';
+  } else {
+    dotsEl.style.display = 'flex';
+    dotsEl.innerHTML = allTrainers.map(t => `
+      <div style="display:flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid var(--border);border-radius:20px;font-size:12px;">
+        <span style="width:10px;height:10px;border-radius:50%;background:${trainerBg(t)};display:inline-block;flex-shrink:0;"></span>
+        ${t.split(' ')[0]}
+      </div>`).join('');
+  }
+
+  // Dates grid
+  const sorted = dates.sort();
+  const datesDisplay = sorted.length <= 3
+    ? sorted.map(d => fmtDate(d)).join(', ')
+    : `${fmtDate(sorted[0])} … ${fmtDate(sorted[sorted.length-1])} (${sorted.length} días)`;
+
+  document.getElementById('odd-detail-grid').innerHTML = `
+    <div>
+      <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;">Días</div>
+      <div style="font-size:14px;font-weight:500;color:var(--text);">${datesDisplay}</div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;">Total</div>
+      <div style="font-size:22px;font-weight:700;font-family:var(--font-condensed);color:${color};">${sorted.length} día${sorted.length>1?'s':''}</div>
+    </div>`;
+
+  // Motivo
+  const motivoRow = document.getElementById('odd-motivo-row');
+  if (off.motivo) {
+    motivoRow.style.display = 'block';
+    document.getElementById('odd-motivo-text').textContent = off.motivo;
+  } else {
+    motivoRow.style.display = 'none';
+  }
+
+  document.getElementById('odd-edit-id').value = offId;
+  document.getElementById('modal-offday-detail').classList.add('open');
+}
+
+function closeOffDayDetailModal() {
+  document.getElementById('modal-offday-detail').classList.remove('open');
+}
+
+function editFromOffDayDetail() {
+  const id = document.getElementById('odd-edit-id').value;
+  closeOffDayDetailModal();
+  openEditOffDayModal(id);
+}
+
+function deleteFromOffDayDetail() {
+  const id = document.getElementById('odd-edit-id').value;
+  closeOffDayDetailModal();
+  // Set editingOffId and call deleteOffDay
+  editingOffId = id;
+  deleteOffDay();
+}
+
+
 let _offCalDate    = new Date();  // month being displayed
 let _offSelectedDates = new Set(); // Set of 'YYYY-MM-DD' strings
 
@@ -4164,13 +4299,20 @@ function buildCard(e, ds, tall) {
 
   // Grouped off card (2+ trainers same tipo on same day)
   if (isOff && e.trainers && e.trainers.length > 1) {
-    const dots = e.trainers.map(t => {
-      const bg = trainerBg(t);
-      return `<span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:${bg};font-size:10px;font-weight:700;color:#fff;border:1.5px solid rgba(255,255,255,0.5);">${trainerInit(t)}</span>`;
-    }).join('');
-    const names = e.trainers.map(t => t.split(' ')[0]).join(', ');
-    return `<div class="cal-card ${cls}" onclick="event.stopPropagation();openEditOffDayModal('${e._offId}')" title="${e.nombre} · ${names}">
-      <div style="display:flex;gap:2px;margin-bottom:3px;flex-wrap:wrap;">${dots}</div>
+    const allTrainers = Object.keys(TRAINER_COLORS);
+    const isAll = allTrainers.every(t => e.trainers.includes(t));
+    let inner;
+    if (isAll) {
+      inner = `<div style="font-size:10px;font-weight:700;letter-spacing:.5px;opacity:.9;margin-bottom:2px;">TODOS</div>`;
+    } else {
+      const dots = e.trainers.map(t => {
+        const bg = trainerBg(t);
+        return `<span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:${bg};font-size:10px;font-weight:700;color:#fff;border:1.5px solid rgba(255,255,255,0.5);">${trainerInit(t)}</span>`;
+      }).join('');
+      inner = `<div style="display:flex;gap:2px;margin-bottom:2px;flex-wrap:wrap;">${dots}</div>`;
+    }
+    return `<div class="cal-card ${cls}" onclick="event.stopPropagation();openOffDayDetailModal('${e._offId}')" title="${e.nombre}">
+      ${inner}
       <div class="cal-card-title">${e.nombre}</div>
     </div>`;
   }
@@ -4183,7 +4325,7 @@ function buildCard(e, ds, tall) {
     ? `draggable="true" ondragstart="calDragStart(event,'${e.id}')" ondragend="calDragEnd(event)"`
     : '';
   const clickFn = isOff
-    ? `event.stopPropagation();openEditOffDayModal('${e._offId}')`
+    ? `event.stopPropagation();openOffDayDetailModal('${e._offId}')`
     : e._src==='cal'
     ? `event.stopPropagation();openEventDetailModal('${e.id}','cal')`
     : `event.stopPropagation();openEventDetailModal('${e.id}','reg')`;
@@ -4203,19 +4345,27 @@ function buildCardDay(e, ds) {
   const isHO = isOff && e.tipo==='home-office';
   const bg=isHO?'#42A5F5':isOff?'#ef5350':isBday?'#AB47BC':trainerBg(e.trainer);
   const txt=isOff||isBday?'#fff':trainerTxt(e.trainer);
-  const clickFn=isOff?`openEditOffDayModal('${e._offId}')`:isCal?`openEventDetailModal('${e.id}','cal')`:`openEventDetailModal('${e.id}','reg')`;
+  const clickFn=isOff?`openOffDayDetailModal('${e._offId}')`:isCal?`openEventDetailModal('${e.id}','cal')`:`openEventDetailModal('${e.id}','reg')`;
 
   // Grouped off card
   if (isOff && e.trainers && e.trainers.length > 1) {
-    const dots = e.trainers.map(t=>{
-      const dotBg = trainerBg(t);
-      return `<span style="width:24px;height:24px;border-radius:50%;background:${dotBg};display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;border:2px solid rgba(255,255,255,0.4);">${trainerInit(t)}</span>`;
-    }).join('');
-    const names = e.trainers.map(t=>t.split(' ')[0]).join(' · ');
-    return `<div style="background:${bg};color:${txt};border-radius:10px;padding:12px 14px;margin-bottom:10px;cursor:pointer;" onclick="${clickFn}">
-      <div style="display:flex;gap:5px;margin-bottom:6px;flex-wrap:wrap;">${dots}</div>
-      <div style="font-size:14px;font-weight:700;">${e.nombre}</div>
-      <div style="font-size:12px;opacity:.85;margin-top:3px;">${names}</div>
+    const allTrainers = Object.keys(TRAINER_COLORS);
+    const isAll = allTrainers.every(t => e.trainers.includes(t));
+    let topRow;
+    if (isAll) {
+      topRow = `<div style="font-size:13px;font-weight:700;opacity:.95;margin-bottom:4px;letter-spacing:.3px;">Todos los trainers</div>`;
+    } else {
+      const dots = e.trainers.map(t=>{
+        const dotBg = trainerBg(t);
+        return `<span style="width:24px;height:24px;border-radius:50%;background:${dotBg};display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;border:2px solid rgba(255,255,255,0.4);">${trainerInit(t)}</span>`;
+      }).join('');
+      const names = e.trainers.map(t=>t.split(' ')[0]).join(' · ');
+      topRow = `<div style="display:flex;gap:5px;margin-bottom:4px;flex-wrap:wrap;">${dots}</div>
+        <div style="font-size:12px;opacity:.85;">${names}</div>`;
+    }
+    return `<div style="background:${bg};color:${txt};border-radius:10px;padding:12px 14px;margin-bottom:10px;cursor:pointer;" onclick="openOffDayDetailModal('${e._offId}')">
+      ${topRow}
+      <div style="font-size:14px;font-weight:700;margin-top:4px;">${e.nombre}</div>
     </div>`;
   }
   const timeLabel=e.horaInicio?`${e.horaInicio}${e.horaFin?' \u2013 '+e.horaFin:''}`:'Todo el día';
@@ -4442,7 +4592,7 @@ function openDayModal(dateStr) {
         <div style="font-size:13px;font-weight:600;color:${tc};">${label}</div>
         ${off.motivo ? `<div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${off.motivo}</div>` : ''}
       </div>
-      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('modal-day').classList.remove('open');openEditOffDayModal('${off._offId}')">✎ Editar</button>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('modal-day').classList.remove('open');openOffDayDetailModal('${off._offId}')">Ver detalle ›</button>
     </div>`;
   });
 
