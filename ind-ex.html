@@ -75,52 +75,45 @@ input, select, textarea { font-family: var(--font-body); }
   transition: width 0.25s ease;
 }
 .sidebar.collapsed {
-  width: 52px;
+  width: 56px;
 }
-.sidebar.collapsed .nav-item span:not(.nav-icon),
+/* Oculta todo el texto cuando colapsado */
+.sidebar.collapsed .nav-label,
 .sidebar.collapsed .nav-section,
 .sidebar.collapsed .nav-badge,
-.sidebar.collapsed .sidebar-footer,
-.sidebar.collapsed .sidebar-logo .title,
-.sidebar.collapsed .sidebar-logo .brand {
-  display: none;
+.sidebar.collapsed .sidebar-text {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+  white-space: nowrap;
 }
-.sidebar.collapsed .sidebar-logo {
-  padding: 16px 0;
-  display: flex;
-  justify-content: center;
-}
-.sidebar.collapsed .sidebar-logo .year {
-  font-size: 13px;
-  letter-spacing: 1px;
-}
+.sidebar.collapsed .sidebar-logo { padding: 18px 0; align-items: center; }
 .sidebar.collapsed .nav-item {
   padding: 10px 0;
   margin: 2px 4px;
   justify-content: center;
-  border-radius: 8px;
 }
-.sidebar.collapsed .nav-icon {
-  width: auto;
-  font-size: 17px;
-}
+.sidebar.collapsed .nav-icon { font-size: 18px; }
+.sidebar.collapsed .sidebar-footer { display: none; }
+/* Toggle button — fixed in topbar area */
 .sidebar-toggle {
-  position: absolute;
-  top: 14px;
-  right: -13px;
-  width: 26px; height: 26px;
-  background: #1e3060;
-  border: 1px solid rgba(255,255,255,0.12);
+  position: fixed;
+  top: 15px;
+  left: 224px;
+  width: 28px; height: 28px;
+  background: #152040;
+  border: 1px solid rgba(255,255,255,0.15);
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
-  font-size: 11px; color: rgba(200,215,235,0.8);
-  z-index: 101;
-  transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  font-size: 13px; color: rgba(200,215,235,0.85);
+  z-index: 200;
+  transition: left 0.25s ease, background 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  line-height: 1;
 }
-.sidebar-toggle:hover { background: var(--gold); color: #000; }
-.main.expanded { margin-left: 52px; }
+.sidebar-toggle:hover { background: var(--gold); color: #000; border-color: var(--gold); }
+.sidebar-toggle.is-collapsed { left: 40px; }
 .sidebar-logo {
   padding: 24px 20px 20px;
   border-bottom: 1px solid var(--border);
@@ -1153,6 +1146,35 @@ tbody td {
 }
 .sync-flash { animation: syncFlash 0.8s ease; }
 
+/* ===== PRINT / PDF ===== */
+@media print {
+  body { background: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .sidebar, .topbar, .page-header, .filters-bar, .btn-row,
+  button, .btn, #pdf-close-btn { display: none !important; }
+  .main { margin-left: 0 !important; }
+  .content { padding: 8px !important; }
+  .card { box-shadow: none !important; border: 1px solid #e0e0e0 !important; break-inside: avoid; margin-bottom: 12px !important; }
+  .stats-row { break-inside: avoid; }
+  .view:not(#view-coordinacion) { display: none !important; }
+  #view-coordinacion { display: block !important; }
+  table { font-size: 11px !important; }
+  th, td { padding: 5px 8px !important; }
+  #pdf-header { display: block !important; }
+  .exec-summary { border: 1px solid #ddd !important; background: #f9f9f9 !important; }
+  thead { background: #152040 !important; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+}
+#pdf-header {
+  display: none;
+  text-align: center;
+  padding: 12px 0 20px;
+  border-bottom: 3px solid #c9a84c;
+  margin-bottom: 18px;
+}
+#pdf-header .pdf-brand { font-size: 10px; letter-spacing: 3px; color: #c9a84c; text-transform: uppercase; font-family: sans-serif; }
+#pdf-header .pdf-title { font-size: 20px; font-weight: 700; color: #0e1a30; margin-top: 4px; font-family: Georgia,serif; }
+#pdf-header .pdf-date  { font-size: 11px; color: #6e7f96; margin-top: 3px; font-family: sans-serif; }
+
 @media (max-width: 900px) {
   :root { --sidebar-w: 0px; }
   .sidebar { transform: translateX(-240px); transition: transform 0.3s; }
@@ -1169,39 +1191,37 @@ tbody td {
 
 <!-- ===== SIDEBAR ===== -->
 <aside class="sidebar" id="sidebar">
-  <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()" title="Colapsar menú">‹</button>
   <div class="sidebar-logo">
-    <span class="brand">TMLF · Training</span>
-    <div class="title">Centro de<br>Registro</div>
+    <span class="brand sidebar-text">TMLF · Training</span>
+    <div class="title sidebar-text">Centro de<br>Registro</div>
     <div class="year">2026</div>
   </div>
   <div class="nav-section">Principal</div>
   <div class="nav-item active" onclick="navigate('home')" id="nav-home">
-    <span class="nav-icon">⊞</span> Dashboard
+    <span class="nav-icon">⊞</span><span class="nav-label">Dashboard</span>
   </div>
   <div class="nav-item" onclick="navigate('calendario')" id="nav-calendario">
-    <span class="nav-icon">📅</span> Calendario
+    <span class="nav-icon">📅</span><span class="nav-label">Calendario</span>
   </div>
   <div class="nav-item" onclick="navigate('registro')" id="nav-registro">
-    <span class="nav-icon">＋</span> Registrar Actividad
+    <span class="nav-icon">＋</span><span class="nav-label">Registrar Actividad</span>
   </div>
   <div class="nav-section">Reportes</div>
   <div class="nav-item" onclick="navigate('dashboard')" id="nav-dashboard">
-    <span class="nav-icon">◈</span> Dashboard General
+    <span class="nav-icon">◈</span><span class="nav-label">Dashboard General</span>
   </div>
   <div class="nav-item" onclick="navigate('trainer')" id="nav-trainer">
-    <span class="nav-icon">◎</span> Por Trainer
+    <span class="nav-icon">◎</span><span class="nav-label">Por Trainer</span>
   </div>
   <div class="nav-item" onclick="navigate('periodos')" id="nav-periodos">
-    <span class="nav-icon">◷</span> Semanal / Mensual
+    <span class="nav-icon">◷</span><span class="nav-label">Semanal / Mensual</span>
   </div>
   <div class="nav-item" onclick="navigate('coordinacion')" id="nav-coordinacion">
-    <span class="nav-icon">⬇</span> Para Coordinación
-    <span class="nav-badge">↓</span>
-  </div>
+    <span class="nav-icon">⬇</span><span class="nav-label">Para Coordinación</span>
+    <span class="nav-badge">↓</span><span class="nav-label"></span></div>
   <div class="nav-section">Datos</div>
   <div class="nav-item" onclick="navigate('gestion')" id="nav-gestion">
-    <span class="nav-icon">⚙</span> Gestión de Datos
+    <span class="nav-icon">⚙</span><span class="nav-label">Gestión de Datos</span>
   </div>
   <div class="sidebar-footer">
     <div class="coord">Coord: Karen Reyna</div>
@@ -1302,6 +1322,7 @@ tbody td {
           <option>Training</option><option>Desarrollo</option>
           <option>Acompañamiento / Shadowing</option><option>Llamadas</option>
         <option>Gestión</option>
+                <option>Documentación</option>
         </select>
         <button class="btn btn-primary" onclick="openNewEventModal(null)">＋ Planear training</button>
         <button class="btn btn-ghost" onclick="openOffDayModal(null)" style="gap:6px;">🚫 Día OFF</button>
@@ -1414,6 +1435,7 @@ tbody td {
                 <option value="">— Seleccionar —</option>
                 <option>Training</option><option>Desarrollo</option>
                 <option>Acompañamiento / Shadowing</option><option>Llamadas</option><option>Gestión</option>
+                <option>Documentación</option>
               </select>
             </div>
             <div class="form-group">
@@ -1509,7 +1531,7 @@ tbody td {
           <option>Impartición</option><option>Sombra trainee</option><option>Actualizaciones</option>
           <option>Materiales</option><option>Scripts</option><option>Training (SCORM)</option><option>Actualización de Material</option>
           <option>1 to 1</option><option>Habilitación</option><option>Shadowing</option><option>Apoyo training</option>
-          <option>Área</option>
+          <option>Búsqueda de Material</option><option>Auditoría</option>
           <option>Informativa</option><option>Planeación</option><option>Coordinación</option>
         </select>
         <select class="filter-select" id="dash-area" onchange="renderDashboard()">
@@ -1601,6 +1623,7 @@ tbody td {
                 <option>Training</option><option>Desarrollo</option>
                 <option>Acompañamiento / Shadowing</option><option>Llamadas</option>
               <option>Gestión</option>
+                <option>Documentación</option>
               </select>
               <select class="filter-select" id="trainer-filter-area" onchange="renderTrainerReport()">
                 <option value="">Todas las áreas</option>
@@ -1652,6 +1675,7 @@ tbody td {
           <option>Training</option><option>Desarrollo</option>
           <option>Acompañamiento / Shadowing</option><option>Llamadas</option>
         <option>Gestión</option>
+                <option>Documentación</option>
         </select>
         <select class="filter-select" id="period-area" onchange="renderPeriodReport()">
           <option value="">Todas las áreas</option>
@@ -1672,6 +1696,12 @@ tbody td {
     </div>
 
     <!-- ========================= VIEW: COORDINACIÓN ========================= -->
+    <!-- PDF Header (solo visible al imprimir) -->
+    <div id="pdf-header">
+      <div class="pdf-brand">TMLF Training · 2026</div>
+      <div class="pdf-title">Reporte para Coordinación</div>
+      <div class="pdf-date" id="pdf-header-date"></div>
+    </div>
     <div class="view" id="view-coordinacion">
       <div class="page-header">
         <h1>Reporte para Coordinación</h1>
@@ -1705,13 +1735,14 @@ tbody td {
             <option>Training</option><option>Desarrollo</option>
             <option>Acompañamiento / Shadowing</option><option>Llamadas</option>
           <option>Gestión</option>
+                <option>Documentación</option>
           </select>
           <select class="filter-select" id="coord-esp" onchange="renderCoordReport()">
             <option value="">Todas las especificaciones</option>
             <option>Impartición</option><option>Sombra trainee</option><option>Actualizaciones</option>
             <option>Materiales</option><option>Scripts</option><option>Training (SCORM)</option><option>Actualización de Material</option>
             <option>1 to 1</option><option>Habilitación</option><option>Shadowing</option><option>Apoyo training</option>
-            <option>Área</option>
+            <option>Búsqueda de Material</option><option>Auditoría</option>
           <option>Informativa</option><option>Planeación</option><option>Coordinación</option>
           </select>
           <select class="filter-select" id="coord-area" onchange="renderCoordReport()">
@@ -1727,31 +1758,11 @@ tbody td {
         </div>
       </div>
 
-      <div class="download-grid">
-        <div class="download-card">
-          <div class="download-icon">📄</div>
-          <div class="download-title">Descargar CSV</div>
-          <div class="download-desc">Reporte completo con todos los campos</div>
-          <button class="btn btn-primary btn-sm" onclick="downloadCSV()">⬇ Descargar CSV</button>
-        </div>
-        <div class="download-card">
-          <div class="download-icon">📝</div>
-          <div class="download-title">Resumen en TXT</div>
-          <div class="download-desc">Resumen ejecutivo para compartir</div>
-          <button class="btn btn-blue btn-sm" onclick="downloadTXT()">⬇ Descargar TXT</button>
-        </div>
-        <div class="download-card">
-          <div class="download-icon">📋</div>
-          <div class="download-title">Copiar Resumen</div>
-          <div class="download-desc">Copia el resumen ejecutivo al portapapeles</div>
-          <button class="btn btn-ghost btn-sm" onclick="copySummary()">⎘ Copiar</button>
-        </div>
-        <div class="download-card">
-          <div class="download-icon">🖨</div>
-          <div class="download-title">Imprimir Dashboard</div>
-          <div class="download-desc">Vista de impresión del reporte</div>
-          <button class="btn btn-ghost btn-sm" onclick="printDashboard()">⎙ Imprimir</button>
-        </div>
+      <div style="margin-bottom:20px;">
+        <button class="btn btn-primary btn-lg" onclick="downloadCoordPDF()" style="gap:10px;padding:12px 28px;font-size:15px;">
+          📄 Descargar PDF
+        </button>
+        <span style="font-size:12px;color:var(--text-muted);margin-left:14px;">Genera un PDF del reporte con los filtros activos</span>
       </div>
 
       <div class="card">
@@ -1825,27 +1836,7 @@ tbody td {
         </div>
       </div>
 
-      <div class="grid-2" style="margin-bottom:20px;">
-        <div class="card">
-          <div class="card-header"><div class="card-title">Importar datos JSON</div></div>
-          <div class="import-area" onclick="document.getElementById('import-file').click()">
-            <label>
-              <div style="font-size:28px;margin-bottom:8px;">📂</div>
-              <div style="font-size:13px;font-weight:500;">Haz clic para seleccionar archivo JSON</div>
-              <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Solo archivos .json exportados desde este sistema</div>
-            </label>
-            <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importJSON(event)">
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-header"><div class="card-title">Datos de prueba</div></div>
-          <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;">Carga registros de ejemplo para explorar el sistema antes de conectar con Sheets.</p>
-          <div class="btn-row">
-            <button class="btn btn-success btn-lg" onclick="loadDemoData()">🎲 Cargar datos demo</button>
-            <button class="btn btn-ghost" onclick="clearDemoData()">✕ Borrar demo</button>
-          </div>
-        </div>
-      </div>
+
 
       <div class="card">
         <div class="card-header">
@@ -2164,14 +2155,15 @@ function filterRecords(filters = {}) {
 const TRAINERS = ['Andrea Zendejas','Joham Burgos','Diego Romo','Brenda Domínguez'];
 const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
-const CATEGORIAS = ['Training','Desarrollo','Acompañamiento / Shadowing','Llamadas','Gestión'];
+const CATEGORIAS = ['Training','Desarrollo','Acompañamiento / Shadowing','Llamadas','Gestión','Documentación'];
 
 const CATEGORIAS_MAP = {
   'Training':                    ['Impartición', 'Sombra trainee', 'Actualizaciones'],
   'Desarrollo':                  ['Materiales', 'Scripts', 'Training (SCORM)', 'Actualización de Material'],
   'Acompañamiento / Shadowing':  ['1 to 1', 'Habilitación', 'Shadowing', 'Apoyo training'],
-  'Llamadas':                    ['Área'],
-  'Gestión':                     ['Informativa', 'Planeación', 'Coordinación']
+  'Llamadas':                    ['Búsqueda de Material', 'Auditoría'],
+  'Gestión':                     ['Informativa', 'Planeación', 'Coordinación'],
+  'Documentación':               ['Actividades', 'Reportes']
 };
 
 function toggleAreaManual() {
@@ -2317,7 +2309,7 @@ function trainerOptions(sel='') {
     .map(t=>`<option${sel===t?' selected':''}>${t}</option>`).join('');
 }
 function catOptions(sel='') {
-  return ['Training','Desarrollo','Acompañamiento / Shadowing','Llamadas','Gestión']
+  return ['Training','Desarrollo','Acompañamiento / Shadowing','Llamadas','Gestión','Documentación']
     .map(v=>`<option${sel===v?' selected':''}>${v}</option>`).join('');
 }
 function espOptions(cat, sel='') {
@@ -2831,7 +2823,7 @@ function cascadeDashEsp() {
       <option>Impartición</option><option>Sombra trainee</option><option>Actualizaciones</option>
       <option>Materiales</option><option>Scripts</option><option>Training (SCORM)</option><option>Actualización de Material</option>
       <option>1 to 1</option><option>Habilitación</option><option>Shadowing</option><option>Apoyo training</option>
-      <option>Área</option><option>Informativa</option><option>Planeación</option><option>Coordinación</option>`;
+      <option>Búsqueda de Material</option><option>Auditoría</option><option>Informativa</option><option>Planeación</option><option>Coordinación</option><option>Actividades</option><option>Reportes</option>`;
   }
   esp.value = '';
 }
@@ -3282,9 +3274,24 @@ function copySummary() {
   navigator.clipboard.writeText(el.innerText).then(() => toast('Resumen copiado al portapapeles', 'success')).catch(() => toast('Error al copiar', 'error'));
 }
 
-function printDashboard() {
-  window.print();
+function downloadCoordPDF() {
+  // Actualizar fecha en el header del PDF
+  const dateEl = document.getElementById('pdf-header-date');
+  if (dateEl) {
+    dateEl.textContent = 'Generado el ' + new Date().toLocaleDateString('es-MX', {
+      weekday:'long', day:'2-digit', month:'long', year:'numeric'
+    });
+  }
+  // Navegar a coordinación si no estamos ahí
+  if (!document.getElementById('view-coordinacion').classList.contains('active')) {
+    navigate('coordinacion');
+    setTimeout(() => window.print(), 400);
+  } else {
+    window.print();
+  }
 }
+
+function printDashboard() { downloadCoordPDF(); }
 
 function exportJSON() {
   const arr = loadData();
@@ -3395,7 +3402,7 @@ function loadDemoData() {
     {fecha:'2026-05-06',trainer:'Andrea Zendejas',categoria:'Desarrollo',especificacion:'Materiales',area:'Psych',horas:'2',descripcion:'Elaboración de guías rápidas de operación para equipo PSYCH',resultado:'3 guías entregadas: Visa T, VAWA, screening inicial',evidencia:'Guías PDF',observaciones:''},
     {fecha:'2026-05-05',trainer:'Diego Romo',categoria:'Training',especificacion:'Impartición',area:'Training',horas:'4',descripcion:'Sesión práctica Common Core - módulo documentación',resultado:'Sesión completada. 10 colaboradoras participaron activamente.',evidencia:'Capturas Canva',observaciones:'Solicitar sala de capacitación más grande'},
     {fecha:'2026-04-30',trainer:'Joham Burgos',categoria:'Desarrollo',especificacion:'Training (SCORM)',area:'DI',horas:'6',descripcion:'Desarrollo del simulador Visa T EMP para DI',resultado:'Simulador entregado con scoring automático y retroalimentación',evidencia:'VISA_T_EMP.html',observaciones:''},
-    {fecha:'2026-04-28',trainer:'Brenda Domínguez',categoria:'Llamadas',especificacion:'Área',area:'Operación',horas:'1',descripcion:'Llamada con equipo de Operación para identificar necesidades de capacitación',resultado:'Listado de 5 necesidades identificadas y priorizadas',evidencia:'',observaciones:'Seguimiento en semana siguiente'},
+    {fecha:'2026-04-28',trainer:'Brenda Domínguez',categoria:'Llamadas',especificacion:'Búsqueda de Material',area:'Operación',horas:'1',descripcion:'Llamada con equipo de Operación para identificar necesidades de capacitación',resultado:'Listado de 5 necesidades identificadas y priorizadas',evidencia:'',observaciones:'Seguimiento en semana siguiente'},
     {fecha:'2026-04-25',trainer:'Andrea Zendejas',categoria:'Desarrollo',especificacion:'Actualización de Material',area:'Training',horas:'5',descripcion:'Actualización del training VAWA con nuevas rutas de elegibilidad',resultado:'Módulo actualizado, validado por abogada supervisora',evidencia:'VAWA_V3.html',observaciones:''},
     {fecha:'2026-04-24',trainer:'Diego Romo',categoria:'Training',especificacion:'Impartición',area:'Operación',horas:'2',descripcion:'Training completo de TramCase Updates para equipo de operación',resultado:'12 colaboradoras habilitadas en la nueva versión de TramCase',evidencia:'Lista asistencia',observaciones:''},
     {fecha:'2026-04-23',trainer:'Joham Burgos',categoria:'Training',especificacion:'Sombra trainee',area:'Compliance',horas:'3',descripcion:'Observación como sombra en sesión de Compliance 2026',resultado:'8 escenarios nuevos documentados para próxima versión del training',evidencia:'COMPLIANCE_ESCENARIOS.xlsx',observaciones:''},
@@ -4729,14 +4736,16 @@ function toggleSidebar() {
   const btn     = document.getElementById('sidebar-toggle');
   const collapsed = sidebar.classList.toggle('collapsed');
   if (collapsed) {
-    main.style.marginLeft = '52px';
+    main.style.marginLeft = '56px';
     btn.textContent = '›';
     btn.title = 'Expandir menú';
+    btn.classList.add('is-collapsed');
     localStorage.setItem('tmlf_sidebar_collapsed', '1');
   } else {
     main.style.marginLeft = 'var(--sidebar-w)';
     btn.textContent = '‹';
     btn.title = 'Colapsar menú';
+    btn.classList.remove('is-collapsed');
     localStorage.setItem('tmlf_sidebar_collapsed', '0');
   }
 }
@@ -4750,9 +4759,9 @@ document.addEventListener('DOMContentLoaded', function() {
   // Restore sidebar state
   if (localStorage.getItem('tmlf_sidebar_collapsed') === '1') {
     document.getElementById('sidebar').classList.add('collapsed');
-    document.querySelector('.main').style.marginLeft = '52px';
+    document.querySelector('.main').style.marginLeft = '56px';
     const btn = document.getElementById('sidebar-toggle');
-    if (btn) { btn.textContent = '›'; btn.title = 'Expandir menú'; }
+    if (btn) { btn.textContent = '›'; btn.title = 'Expandir menú'; btn.classList.add('is-collapsed'); }
   }
   _lastFingerprint = dataFingerprint();
   initScriptUrl();
@@ -4770,5 +4779,6 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 </script>
+<button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()" title="Colapsar menú">‹</button>
 </body>
 </html>
