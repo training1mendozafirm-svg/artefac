@@ -2721,10 +2721,16 @@ function renderBatchTable() {
           <option value="">${r.categoria?'— Especificación —':'— Selecciona categoría —'}</option>${espOpts}
         </select>
       </td>
-      <td style="width:155px;">
-        <select class="batch-select" onchange="batchUpdate('${r.id}','area',this.value)">
-          <option value="">— Área —</option>${areaOptions(r.area)}
+      <td style="width:170px;">
+        <select class="batch-select" id="barea-${r.id}" onchange="batchAreaChange('${r.id}',this.value)">
+          <option value="">— Área —</option>${areaOptions(r.area==='__otra__'?'__otra__':r.area)}
         </select>
+        <input type="text" id="barea-manual-${r.id}" class="batch-input"
+          placeholder="Escribe el área..."
+          value="${r.area==='__otra__'?r.areaManual||'':''}"
+          style="display:${r.area==='__otra__'?'block':'none'};margin-top:3px;text-transform:uppercase;"
+          oninput="this.value=this.value.toUpperCase();batchUpdate('${r.id}','areaManual',this.value)"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();addBatchRow();}">
       </td>
       <td style="width:80px;">
         <select class="batch-select" onchange="batchUpdate('${r.id}','horas',this.value)">
@@ -2742,6 +2748,16 @@ function renderBatchTable() {
       </td>
     </tr>`;
   }).join('');
+}
+
+function batchAreaChange(id, value) {
+  batchUpdate(id, 'area', value);
+  const manualInput = document.getElementById('barea-manual-'+id);
+  if (manualInput) {
+    manualInput.style.display = value === '__otra__' ? 'block' : 'none';
+    if (value === '__otra__') { manualInput.focus(); }
+    else { batchUpdate(id, 'areaManual', ''); }
+  }
 }
 
 function batchUpdate(id, field, value) {
@@ -2788,7 +2804,10 @@ async function saveAllBatch() {
   if (!fecha) { toast('Selecciona una fecha primero', 'error'); return; }
 
   // Validate all rows
-  const invalid = batchRows.filter(r => !r.trainer||!r.categoria||!r.especificacion||!r.area||!r.horas);
+  const invalid = batchRows.filter(r => {
+    const areaOk = r.area && r.area !== '' && (r.area !== '__otra__' || (r.areaManual && r.areaManual.trim()));
+    return !r.trainer || !r.categoria || !r.especificacion || !areaOk || !r.horas;
+  });
   if (invalid.length) {
     const plural = invalid.length > 1 ? 's' : '';
     toast(`${invalid.length} fila${plural} sin completar — revisa Trainer, Categoría, Especificación, Área y Horas`, 'error');
@@ -2806,7 +2825,8 @@ async function saveAllBatch() {
   const saved = [];
   for (const r of batchRows) {
     const rec = { fecha, trainer:r.trainer, categoria:r.categoria,
-      especificacion:r.especificacion, area:r.area==='__otra__'?r.areaManual||r.area:r.area,
+      especificacion:r.especificacion,
+      area: r.area === '__otra__' ? (r.areaManual||'').trim().toUpperCase() || r.area : r.area,
       horas:r.horas, descripcion:r.descripcion||'' };
     const result = addRecord(rec);
     saved.push(result);
