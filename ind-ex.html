@@ -1879,6 +1879,9 @@ tbody td {
             <button class="btn btn-ghost btn-sm" onclick="pingScript()">
               Verificar conexión
             </button>
+            <button class="btn btn-ghost btn-sm" onclick="repairSheets()" title="Actualiza los encabezados de las hojas al nuevo esquema">
+              🔧 Reparar hojas
+            </button>
           </div>
           <div id="sync-log" style="font-size:11px;color:var(--text-muted);margin-top:8px;"></div>
         </div>
@@ -3837,7 +3840,9 @@ function saveOffDay() {
   if (!trainers.length) { toast('Selecciona al menos un trainer', 'error'); return; }
   if (!dates.length)    { toast('Selecciona al menos un día en el calendario', 'error'); return; }
 
-  const offs = loadOffDays();
+  const offs    = loadOffDays();
+  const newRecs = [];
+
   if (editingOffId) {
     const idx = offs.findIndex(o => o.id === editingOffId);
     const rec = {
@@ -3846,15 +3851,18 @@ function saveOffDay() {
       fechaInicio: dates[0], fechaFin: dates[dates.length-1]
     };
     if (idx > -1) offs[idx] = rec; else offs.push(rec);
+    newRecs.push(rec);
     toast(`${tipo==='home-office'?'🏠 Home Office':'🚫 Día OFF'} actualizado`, 'success');
   } else {
     trainers.forEach(tr => {
-      offs.push({
+      const rec = {
         id: Date.now().toString(36) + Math.random().toString(36).slice(2,5) + '_' + tr.slice(0,3),
         trainers: [tr], trainer: tr,
         motivo, tipo, dates,
         fechaInicio: dates[0], fechaFin: dates[dates.length-1]
-      });
+      };
+      offs.push(rec);
+      newRecs.push(rec);
     });
     const label = tipo==='home-office' ? '🏠 Home Office' : '🚫 Día OFF';
     const who   = trainers.length === OFF_TRAINERS.length ? 'todos'
@@ -3862,7 +3870,16 @@ function saveOffDay() {
                 : trainers[0].split(' ')[0];
     toast(`${label} registrado para ${who} · ${dates.length} día${dates.length>1?'s':''}`, 'success');
   }
+
   saveOffDays(offs);
+
+  // Sincronizar con Google Sheets
+  if (editingOffId) {
+    pushRecordToSheet('updateOffDay', { offday: newRecs[0] });
+  } else {
+    newRecs.forEach(rec => pushRecordToSheet('addOffDay', { offday: rec }));
+  }
+
   closeOffDayModal();
   _lastFingerprint = dataFingerprint();
   refreshCurrentView();
@@ -3871,10 +3888,11 @@ function saveOffDay() {
 function deleteOffDay() {
   if (!editingOffId) return;
   saveOffDays(loadOffDays().filter(o => o.id !== editingOffId));
+  pushRecordToSheet('deleteOffDay', { id: editingOffId });
   closeOffDayModal();
   _lastFingerprint = dataFingerprint();
   refreshCurrentView();
-  toast('Día OFF eliminado', 'info');
+  toast('Día OFF / Home Office eliminado', 'info');
 }
 
 
@@ -5152,6 +5170,25 @@ async function loadFromSheets() {
 }
 
 // ── AUTO-SYNC: push a single record/event after any save ──
+async function repairSheets() {
+  const url = getScriptUrl();
+  if (!url) { toast('Configura la URL del Apps Script primero', 'error'); return; }
+  setSheetsStatus('syncing'); setSyncLog('Reparando estructura de hojas…');
+  try {
+    // ping triggers initSheets which migrates headers
+    const ping = await gasGet(url, { action: 'ping' });
+    if (!ping.ok) throw new Error(ping.error || 'Error');
+    // Now do a full sync to rewrite data with correct columns
+    await syncToSheets();
+    setSheetsStatus('ok');
+    setSyncLog('✓ Hojas reparadas y datos re-sincronizados');
+    toast('✓ Hojas reparadas correctamente', 'success');
+  } catch(err) {
+    setSheetsStatus('error'); setSyncLog('Error: ' + err.message);
+    toast('Error al reparar: ' + err.message, 'error');
+  }
+}
+
 async function pushRecordToSheet(action, payload) {
   const url = getScriptUrl();
   if (!url) return;
