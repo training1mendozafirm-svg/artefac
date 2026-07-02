@@ -4172,23 +4172,39 @@ function calDragStart(evt,id){ _dragEventId=id; evt.dataTransfer.effectAllowed='
 function calDragEnd(evt){ evt.target.classList.remove('dragging'); document.querySelectorAll('.drag-over').forEach(el=>el.classList.remove('drag-over')); }
 function calDragOver(evt){ evt.preventDefault(); evt.dataTransfer.dropEffect='move'; if(!evt.currentTarget.classList.contains('drag-over'))evt.currentTarget.classList.add('drag-over'); }
 function calDragLeave(evt){ evt.currentTarget.classList.remove('drag-over'); }
-function calDrop(evt,newDate){
+function calDrop(evt, newDate) {
   evt.preventDefault(); evt.currentTarget.classList.remove('drag-over');
-  const id=_dragEventId||evt.dataTransfer.getData('text/plain');
-  if(!id||!newDate)return;
-  const evts=loadCalEvents(); const idx=evts.findIndex(e=>e.id===id);
-  if(idx===-1){toast('Solo se pueden mover trainings planeados','info');_dragEventId=null;return;}
-  if(evts[idx].fecha===newDate){_dragEventId=null;return;}
-  evts[idx].fecha=newDate; saveCalEvents(evts);
+  const id = _dragEventId || evt.dataTransfer.getData('text/plain');
+  if (!id || !newDate) return;
+
+  const evts = loadAllCalEvents();
+  const idx  = evts.findIndex(e => e.id === id);
+  if (idx === -1) { toast('Solo se pueden mover trainings planeados','info'); _dragEventId=null; return; }
+  if (evts[idx].fecha === newDate) { _dragEventId=null; return; }
+
+  const oldDate = evts[idx].fecha;
+  evts[idx].fecha = newDate;
+  saveCalEvents(evts);
+
+  // Actualizar también el registro vinculado en localStorage
   if (evts[idx]._regId) {
     updateRecord(evts[idx]._regId, { fecha: newDate });
-    pushRecordToSheet('updateRecord', { record: { id: evts[idx]._regId, fecha: newDate } });
+    // Push registro completo (no solo la fecha) para evitar sobrescritura parcial en Sheet
+    const updatedReg = loadAllData().find(r => r.id === evts[idx]._regId);
+    if (updatedReg) pushRecordToSheet('updateRecord', { record: updatedReg });
   }
-  pushRecordToSheet('updateCalEventDate', { id: evts[idx].id, fecha: newDate, regId: evts[idx]._regId || '' });
-  _dragEventId=null;
-  const [,m,d]=newDate.split('-');
-  const MN=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  toast(`Training movido al ${parseInt(d)} de ${MN[parseInt(m)-1]}`,'success');
+
+  // Push evento de calendario completo (upsert, no solo campo fecha)
+  pushRecordToSheet('updateCalEvent', { event: evts[idx] });
+
+  _dragEventId = null;
+
+  // Marcar timestamp local como authoritative para que el próximo poll no revierta
+  _lastRemoteTs = Date.now().toString(); // fuerza diferencia con Sheets hasta que Sheets confirme
+
+  const [,m,d] = newDate.split('-');
+  const MN = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  toast(`Training movido al ${parseInt(d)} de ${MN[parseInt(m)-1]}`, 'success');
   _lastFingerprint = dataFingerprint();
   refreshCurrentView();
 }
@@ -4553,8 +4569,8 @@ function saveEvent() {
   }
 
   saveCalEvents(evts);
-  // Push to Sheets (incremental)
-  pushRecordToSheet(isEdit ? 'updateRecord' : 'addRecord', { record: regRec.id ? {...regRec, id: regId} : regRec });
+  // Push completo a Sheets (no solo fecha): garantiza que cambios de edición persisten
+  pushRecordToSheet(isEdit ? 'updateRecord' : 'addRecord', { record: { ...regRec, id: regId } });
   pushRecordToSheet(isEdit ? 'updateCalEvent' : 'addCalEvent', { event: calEv });
   closeEventModal();
   _lastFingerprint = dataFingerprint();
@@ -4695,9 +4711,10 @@ async function pullFromSheets(silent = false) {
           .map(e => localDelCal.has(e.id) ? {...e,status:'eliminado'} : e)
       );
       const local = loadAllCalEvents();
-      const lids  = local.map(e=>e.id).sort().join(',');
-      const rids  = normalized.map(e=>e.id).sort().join(',');
-      if (lids !== rids || local.length !== normalized.length) { saveCalEvents(normalized); changed = true; }
+      // Compare by ID+fecha to detect actual changes (not just count)
+      const remoteKey = normalized.map(e=>e.id+'|'+e.fecha).sort().join(',');
+      const localKey  = local.map(e=>e.id+'|'+e.fecha).sort().join(',');
+      if (remoteKey !== localKey) { saveCalEvents(normalized); changed = true; }
     }
 
     if (diasoff?.length > 0) {
