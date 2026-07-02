@@ -71,7 +71,56 @@ input, select, textarea { font-family: var(--font-body); }
   left: 0; top: 0; bottom: 0;
   z-index: 100;
   overflow-y: auto;
+  overflow-x: hidden;
+  transition: width 0.25s ease;
 }
+.sidebar.collapsed {
+  width: 52px;
+}
+.sidebar.collapsed .nav-item span:not(.nav-icon),
+.sidebar.collapsed .nav-section,
+.sidebar.collapsed .nav-badge,
+.sidebar.collapsed .sidebar-footer,
+.sidebar.collapsed .sidebar-logo .title,
+.sidebar.collapsed .sidebar-logo .brand {
+  display: none;
+}
+.sidebar.collapsed .sidebar-logo {
+  padding: 16px 0;
+  display: flex;
+  justify-content: center;
+}
+.sidebar.collapsed .sidebar-logo .year {
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+.sidebar.collapsed .nav-item {
+  padding: 10px 0;
+  margin: 2px 4px;
+  justify-content: center;
+  border-radius: 8px;
+}
+.sidebar.collapsed .nav-icon {
+  width: auto;
+  font-size: 17px;
+}
+.sidebar-toggle {
+  position: absolute;
+  top: 14px;
+  right: -13px;
+  width: 26px; height: 26px;
+  background: #1e3060;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 11px; color: rgba(200,215,235,0.8);
+  z-index: 101;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+.sidebar-toggle:hover { background: var(--gold); color: #000; }
+.main.expanded { margin-left: 52px; }
 .sidebar-logo {
   padding: 24px 20px 20px;
   border-bottom: 1px solid var(--border);
@@ -156,6 +205,7 @@ input, select, textarea { font-family: var(--font-body); }
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  transition: margin-left 0.25s ease;
 }
 .topbar {
   background: #ffffff;
@@ -1119,6 +1169,7 @@ tbody td {
 
 <!-- ===== SIDEBAR ===== -->
 <aside class="sidebar" id="sidebar">
+  <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()" title="Colapsar menú">‹</button>
   <div class="sidebar-logo">
     <span class="brand">TMLF · Training</span>
     <div class="title">Centro de<br>Registro</div>
@@ -4670,11 +4721,39 @@ async function pushRecordToSheet(action, payload) {
 }
 
 // ======================================================
+//  SIDEBAR TOGGLE
+// ======================================================
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const main    = document.querySelector('.main');
+  const btn     = document.getElementById('sidebar-toggle');
+  const collapsed = sidebar.classList.toggle('collapsed');
+  if (collapsed) {
+    main.style.marginLeft = '52px';
+    btn.textContent = '›';
+    btn.title = 'Expandir menú';
+    localStorage.setItem('tmlf_sidebar_collapsed', '1');
+  } else {
+    main.style.marginLeft = 'var(--sidebar-w)';
+    btn.textContent = '‹';
+    btn.title = 'Colapsar menú';
+    localStorage.setItem('tmlf_sidebar_collapsed', '0');
+  }
+}
+
+// ======================================================
 //  INIT
 // ======================================================
 document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('f-fecha').value = new Date().toISOString().split('T')[0];
   renderHome();
+  // Restore sidebar state
+  if (localStorage.getItem('tmlf_sidebar_collapsed') === '1') {
+    document.getElementById('sidebar').classList.add('collapsed');
+    document.querySelector('.main').style.marginLeft = '52px';
+    const btn = document.getElementById('sidebar-toggle');
+    if (btn) { btn.textContent = '›'; btn.title = 'Expandir menú'; }
+  }
   _lastFingerprint = dataFingerprint();
   initScriptUrl();
 
