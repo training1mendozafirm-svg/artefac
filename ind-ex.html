@@ -1368,11 +1368,56 @@ tbody td {
         <div class="divider"></div>
       </div>
 
+      <!-- CONTADOR DE HORAS DEL DÍA -->
+      <div id="hours-tracker" style="margin-bottom:16px;display:none;">
+        <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 20px;">
+          <!-- Row 1: Trainer + Date info -->
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px;flex-wrap:wrap;">
+            <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;white-space:nowrap;">⏱ Horas del día</div>
+            <select id="ht-trainer" class="form-control" style="width:180px;font-size:13px;padding:5px 10px;"
+              onchange="updateHoursTracker()">
+              <option value="">— Seleccionar trainer —</option>
+              <option>Andrea Zendejas</option>
+              <option>Joham Burgos</option>
+              <option>Diego Romo</option>
+              <option>Brenda Domínguez</option>
+            </select>
+            <div id="ht-dayname" style="font-size:12px;color:var(--text-muted);font-style:italic;"></div>
+          </div>
+          <!-- Row 2: Counters + bar -->
+          <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:baseline;gap:5px;">
+              <span id="ht-saved" style="font-family:var(--font-condensed);font-size:26px;font-weight:700;color:var(--navy);">0h</span>
+              <span style="font-size:11px;color:var(--text-muted);">guardadas</span>
+            </div>
+            <div style="color:var(--border);font-size:16px;font-weight:300;">＋</div>
+            <div style="display:flex;align-items:baseline;gap:5px;">
+              <span id="ht-pending" style="font-family:var(--font-condensed);font-size:26px;font-weight:700;color:var(--gold);">0h</span>
+              <span style="font-size:11px;color:var(--text-muted);">en lista</span>
+            </div>
+            <div style="color:var(--border);font-size:16px;font-weight:300;">＝</div>
+            <div style="display:flex;align-items:baseline;gap:5px;">
+              <span id="ht-total" style="font-family:var(--font-condensed);font-size:30px;font-weight:700;color:var(--success);">0h</span>
+              <span style="font-size:11px;color:var(--text-muted);">total</span>
+            </div>
+            <div style="flex:1;min-width:180px;">
+              <div style="display:flex;justify-content:flex-end;align-items:center;margin-bottom:5px;">
+                <span id="ht-goal-hrs" style="font-size:12px;font-weight:600;color:var(--text);"></span>
+              </div>
+              <div style="background:#f0f2f7;border-radius:20px;height:9px;overflow:hidden;">
+                <div id="ht-bar" style="height:100%;border-radius:20px;background:var(--blue-light);transition:width .4s ease,background .3s;width:0%;"></div>
+              </div>
+              <div id="ht-msg" style="font-size:11px;margin-top:5px;text-align:right;font-weight:600;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- FECHA COMPARTIDA + ACCIONES -->
       <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:16px;">
         <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 16px;">
           <span style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;">📅 Fecha</span>
-          <input type="date" id="f-fecha" class="form-control" style="width:160px;border:none;background:transparent;padding:0;font-size:14px;font-weight:600;color:var(--text);" required>
+          <input type="date" id="f-fecha" class="form-control" style="width:160px;border:none;background:transparent;padding:0;font-size:14px;font-weight:600;color:var(--text);" required oninput="updateHoursTracker()">
         </div>
         <button class="btn btn-primary" onclick="addBatchRow()">＋ Añadir fila</button>
         <button class="btn btn-ghost" onclick="clearBatchRows()">↺ Limpiar todo</button>
@@ -2278,6 +2323,7 @@ function navigate(view) {
   });
   document.getElementById(`view-${view}`).classList.add('active');
   document.getElementById(`nav-${view}`)?.classList.add('active');
+  if (view === 'registro') setTimeout(updateHoursTracker, 50);
   document.getElementById('topbar-title').textContent = TITLES[view] || view;
 
   if (view === 'home') renderHome();
@@ -2292,7 +2338,85 @@ function navigate(view) {
 // ======================================================
 //  FORM
 // ======================================================
-// ── BATCH INLINE REGISTRATION ────────────────────────────────
+// ── HOURS TRACKER ─────────────────────────────────────────
+function getGoalForDate(dateStr) {
+  // Jornada: Lun-Vie 8:00-16:00 = 8h (descanso de 45min opcional)
+  //          Sábado  8:00-12:00 = 4h
+  //          Domingo = 0h
+  if (!dateStr) return 8;
+  const d = new Date(dateStr + 'T12:00:00');
+  const day = d.getDay(); // 0=Dom, 1=Lun, ..., 6=Sáb
+  if (day === 0) return 0;
+  if (day === 6) return 4;
+  return 8; // Lun-Vie
+}
+
+function updateHoursTracker() {
+  const fecha    = document.getElementById('f-fecha')?.value;
+  const trainer  = document.getElementById('ht-trainer')?.value;
+  const tracker  = document.getElementById('hours-tracker');
+  if (!tracker) return;
+
+  // Show tracker only when date is set
+  tracker.style.display = fecha ? 'block' : 'none';
+  if (!fecha) return;
+
+  // Day name
+  const DAY_NAMES = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const d = new Date(fecha + 'T12:00:00');
+  const dayName = DAY_NAMES[d.getDay()];
+  const dayEl = document.getElementById('ht-dayname');
+  if (dayEl) dayEl.textContent = dayName;
+
+  // Auto goal based on day
+  const goal = getGoalForDate(fecha);
+  const goalHrs  = document.getElementById('ht-goal-hrs');
+  if (goalHrs) goalHrs.textContent = goal + 'h';
+
+  // Hours already saved for this date (filtered by trainer if selected)
+  const saved = loadData()
+    .filter(r => r.fecha === fecha && (!trainer || r.trainer === trainer))
+    .reduce((s,r) => s + parseFloat(r.horas||0), 0);
+
+  // Hours in pending batch (filtered by trainer if selected)
+  const pending = batchRows
+    .filter(r => !trainer || r.trainer === trainer)
+    .reduce((s,r) => s + parseFloat(r.horas||0), 0);
+
+  const total = Math.round((saved + pending) * 100) / 100;
+  const pct   = goal > 0 ? Math.min((total / goal) * 100, 100) : 0;
+
+  document.getElementById('ht-saved').textContent   = saved   + 'h';
+  document.getElementById('ht-pending').textContent = pending + 'h';
+  document.getElementById('ht-total').textContent   = total   + 'h';
+
+  // Bar color
+  const bar = document.getElementById('ht-bar');
+  bar.style.width = pct + '%';
+  const totalColor = total > goal && goal > 0 ? 'var(--danger)'
+    : total === goal && goal > 0              ? 'var(--success)'
+    : pct >= 75                               ? 'var(--gold)'
+    : 'var(--blue-light)';
+  bar.style.background  = totalColor;
+  document.getElementById('ht-total').style.color = totalColor;
+
+  // Message
+  const msg  = document.getElementById('ht-msg');
+  const diff = Math.round(Math.abs(goal - total) * 100) / 100;
+  if (goal === 0) {
+    msg.textContent = ''; msg.style.color = '';
+  } else if (total === 0) {
+    msg.textContent = `Meta: ${goal}h`; msg.style.color = 'var(--text-muted)';
+  } else if (total < goal) {
+    msg.textContent = `Faltan ${diff}h para la meta`; msg.style.color = 'var(--text-muted)';
+  } else if (total === goal) {
+    msg.textContent = '✓ Jornada completa'; msg.style.color = 'var(--success)';
+  } else {
+    msg.textContent = `${diff}h adicionales sobre la jornada`; msg.style.color = 'var(--danger)';
+  }
+}
+
+
 let batchRows = [];       // filas inline pendientes
 let _batchRowSeq = 0;
 
@@ -2327,11 +2451,14 @@ function horasOptions(sel='') {
 function addBatchRow(prefill={}) {
   _batchRowSeq++;
   const id = 'br_' + _batchRowSeq;
-  // Copy last row's trainer if available
+  // Priority: prefill → ht-trainer selector → last row's trainer
+  const htTrainer  = document.getElementById('ht-trainer')?.value || '';
   const lastTrainer = batchRows.length ? batchRows[batchRows.length-1].trainer : '';
-  batchRows.push({ id, trainer:prefill.trainer||lastTrainer, categoria:prefill.categoria||'',
+  const defaultTrainer = prefill.trainer || htTrainer || lastTrainer;
+  batchRows.push({ id, trainer: defaultTrainer, categoria: prefill.categoria||'',
     especificacion:prefill.especificacion||'', area:prefill.area||'', horas:prefill.horas||'', descripcion:prefill.descripcion||'' });
   renderBatchTable();
+  updateHoursTracker();
   // Focus first empty cell of new row
   setTimeout(() => {
     const sel = document.querySelector(`#brow-${id} .batch-select`);
@@ -2415,6 +2542,7 @@ function batchUpdate(id, field, value) {
     }
   }
   updateBatchSummary();
+  if (field === 'horas') updateHoursTracker();
 }
 
 function updateBatchSummary() {
@@ -2428,12 +2556,14 @@ function updateBatchSummary() {
 function removeBatchRow(id) {
   batchRows = batchRows.filter(r=>r.id!==id);
   renderBatchTable();
+  updateHoursTracker();
 }
 
 function clearBatchRows() {
   if (!batchRows.length) return;
   batchRows = [];
   renderBatchTable();
+  updateHoursTracker();
 }
 
 async function saveAllBatch() {
@@ -2468,6 +2598,7 @@ async function saveAllBatch() {
 
   batchRows = [];
   renderBatchTable();
+  updateHoursTracker();
   _lastFingerprint = dataFingerprint();
   refreshCurrentView();
   updateNavBadge();
