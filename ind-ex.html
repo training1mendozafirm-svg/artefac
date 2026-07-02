@@ -1416,6 +1416,17 @@ tbody td {
         </div>
       </div>
 
+      <!-- ACTIVIDADES DEL DÍA (cuando se selecciona trainer + fecha) -->
+      <div id="day-records-panel" style="display:none;margin-bottom:16px;">
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div class="card-header" style="padding:12px 16px;border-bottom:1px solid var(--border);">
+            <div class="card-title" style="font-size:13px;" id="day-records-title">Actividades del día</div>
+            <span id="day-records-count" class="nav-badge" style="font-size:11px;"></span>
+          </div>
+          <div id="day-records-body" style="padding:0;"></div>
+        </div>
+      </div>
+
       <!-- FECHA COMPARTIDA + ACCIONES -->
       <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:16px;">
         <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 16px;">
@@ -1882,6 +1893,9 @@ tbody td {
             <button class="btn btn-ghost btn-sm" onclick="repairSheets()" title="Actualiza los encabezados de las hojas al nuevo esquema">
               🔧 Reparar hojas
             </button>
+            <button class="btn btn-ghost btn-sm" onclick="reconcileAllDates()" title="Sincroniza fechas entre calendario y registros">
+              🔄 Reconciliar fechas
+            </button>
           </div>
           <div id="sync-log" style="font-size:11px;color:var(--text-muted);margin-top:8px;"></div>
         </div>
@@ -2302,6 +2316,69 @@ function fmtHrs(h) {
   return isNaN(n) ? '0' : (n % 1 === 0 ? n + 'h' : n + 'h');
 }
 
+// Normaliza cualquier formato de fecha a "YYYY-MM-DD"
+function normalizeDate(d) {
+  if (!d || d === '' || d === 'undefined') return '';
+  const s = String(d).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) {
+    const p = s.split('/');
+    return parseInt(p[0]) > 12
+      ? `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`
+      : `${p[2]}-${p[0].padStart(2,'0')}-${p[1].padStart(2,'0')}`;
+  }
+  try {
+    const parsed = new Date(s);
+    if (!isNaN(parsed.getTime())) {
+      const yr = parsed.getFullYear();
+      const mo = String(parsed.getMonth()+1).padStart(2,'0');
+      const dy = String(parsed.getDate()).padStart(2,'0');
+      return `${yr}-${mo}-${dy}`;
+    }
+  } catch(_) {}
+  return '';
+}
+
+// Normaliza cualquier formato de hora a "HH:MM"
+function normalizeTime(t) {
+  if (!t || t === '' || t === 'undefined') return '';
+  const s = String(t).trim();
+  if (/^\d{1,2}:\d{2}$/.test(s)) return s;
+  try {
+    const d = new Date(s);
+    if (!isNaN(d.getTime())) {
+      return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+    }
+  } catch(_) {}
+  return '';
+}
+
+// Convierte hora "13:00" → "1:00 PM"
+function fmtTime(t) {
+  if (!t) return '';
+  const clean = normalizeTime(String(t));
+  if (!clean) return String(t);
+  const [h, m] = clean.split(':').map(Number);
+  const period = h >= 12 ? 'PM' : 'AM';
+  const h12    = h % 12 || 12;
+  return `${h12}:${String(m).padStart(2,'0')} ${period}`;
+}
+
+// Deduplica un array de registros por ID
+function deduplicateById(arr) {
+  const seen = new Set();
+  return arr.filter(r => {
+    const key = r.id || '';
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function genId() {
+  return 'gs_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+}
+
 function getWeekKey(dateStr) {
   const d = new Date(dateStr + 'T12:00:00');
   const jan1 = new Date(d.getFullYear(), 0, 1);
@@ -2472,8 +2549,57 @@ function updateHoursTracker() {
   } else {
     msg.textContent = `${diff}h adicionales sobre la jornada`; msg.style.color = 'var(--danger)';
   }
+
+  // Render actividades del día
+  renderDayRecords(fecha, trainer);
 }
 
+
+// Muestra los registros existentes del día para el trainer seleccionado
+function renderDayRecords(fecha, trainer) {
+  const panel = document.getElementById('day-records-panel');
+  if (!panel) return;
+  if (!fecha || !trainer) { panel.style.display = 'none'; return; }
+  const recs = loadData().filter(r => r.fecha === fecha && r.trainer === trainer);
+  const title = document.getElementById('day-records-title');
+  const count = document.getElementById('day-records-count');
+  if (title) title.textContent = `Actividades de ${trainer.split(' ')[0]} — ${fmtDate(fecha)}`;
+  if (count) count.textContent = recs.length;
+  if (!recs.length) { panel.style.display = 'none'; return; }
+  panel.style.display = 'block';
+  const body = document.getElementById('day-records-body');
+  if (!body) return;
+  body.innerHTML = `<table style="width:100%;">
+    <thead><tr style="background:#f7f8fc;">
+      <th style="padding:8px 12px;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;font-weight:600;">Categoría</th>
+      <th style="padding:8px 12px;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;font-weight:600;">Especificación</th>
+      <th style="padding:8px 12px;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;font-weight:600;">Área</th>
+      <th style="padding:8px 12px;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;font-weight:600;">Hrs</th>
+      <th style="padding:8px 12px;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;font-weight:600;">Descripción</th>
+      <th style="width:72px;"></th>
+    </tr></thead>
+    <tbody>
+      ${recs.map(r => `<tr style="border-top:1px solid var(--border);">
+        <td style="padding:9px 12px;"><span class="badge ${getTypeBadge(r.categoria)}">${r.categoria}</span></td>
+        <td style="padding:9px 12px;font-size:13px;">${r.especificacion||'—'}</td>
+        <td style="padding:9px 12px;font-size:13px;">${r.area}</td>
+        <td style="padding:9px 12px;font-size:13px;font-weight:600;color:var(--navy);">${fmtHrs(r.horas)}</td>
+        <td style="padding:9px 12px;font-size:12px;color:var(--text-muted);">${(r.descripcion||'—').slice(0,50)}${(r.descripcion||'').length>50?'…':''}</td>
+        <td style="padding:9px 8px;">
+          <div style="display:flex;gap:5px;">
+            <button class="btn btn-ghost btn-sm" onclick="loadForEdit('${r.id}')" style="padding:3px 8px;font-size:12px;" title="Editar">✎</button>
+            <button class="btn btn-danger btn-sm" onclick="confirmDeleteDay('${r.id}')" style="padding:3px 8px;font-size:12px;" title="Eliminar">✕</button>
+          </div>
+        </td>
+      </tr>`).join('')}
+    </tbody></table>`;
+}
+
+// Eliminar desde el panel del día y refrescar
+function confirmDeleteDay(id) {
+  confirmDelete(id);
+  setTimeout(() => updateHoursTracker(), 300);
+}
 
 let batchRows = [];       // filas inline pendientes
 let _batchRowSeq = 0;
@@ -2656,7 +2782,7 @@ async function saveAllBatch() {
 
   batchRows = [];
   renderBatchTable();
-  updateHoursTracker();
+  updateHoursTracker(); // also refreshes day records panel
   _lastFingerprint = dataFingerprint();
   refreshCurrentView();
   updateNavBadge();
@@ -2703,6 +2829,7 @@ function saveEditMode() {
   cancelEditMode();
   _lastFingerprint = dataFingerprint();
   refreshCurrentView();
+  updateHoursTracker(); // refresh day records panel
 }
 
 function cancelEditMode() {
@@ -2738,59 +2865,8 @@ function loadForEdit(id) {
   },80);
 }
 
-// Legacy compatibility stubs
 function submitForm(e) { if(e) e.preventDefault(); }
 function resetForm() { clearBatchRows(); document.getElementById('f-fecha').value = new Date().toISOString().split('T')[0]; }
-function getAreaValue() { return ''; }
-function toggleAreaManual() {}
-function updateEspecificacion() {}
-function resetForm() {
-  document.getElementById('activity-form').reset();
-  document.getElementById('f-edit-id').value = '';
-  document.getElementById('submit-btn').textContent = '＋ Añadir a la lista';
-  document.getElementById('f-especificacion').innerHTML = '<option value="">— Selecciona una categoría primero —</option>';
-  document.getElementById('f-especificacion').disabled = true;
-  document.getElementById('f-area-manual').style.display = 'none';
-  document.getElementById('f-area-manual').required = false;
-  editingId = null;
-  document.getElementById('f-fecha').value = new Date().toISOString().split('T')[0];
-}
-
-function loadForEdit(id) {
-  const arr = loadData();
-  const rec = arr.find(r => r.id === id);
-  if (!rec) return;
-  navigate('registro');
-  setTimeout(() => {
-    document.getElementById('f-fecha').value = rec.fecha;
-    document.getElementById('f-trainer').value = rec.trainer;
-    document.getElementById('f-categoria').value = rec.categoria;
-    updateEspecificacion(rec.especificacion || '');
-    // Restore area: check if it's a known option or manual
-    const areaSelect = document.getElementById('f-area');
-    const knownAreas = Array.from(areaSelect.options).map(o => o.value);
-    if (rec.area && !knownAreas.includes(rec.area)) {
-      areaSelect.value = '__otra__';
-      document.getElementById('f-area-manual').style.display = 'block';
-      document.getElementById('f-area-manual').value = rec.area;
-    } else {
-      areaSelect.value = rec.area || '';
-      document.getElementById('f-area-manual').style.display = 'none';
-    }
-    document.getElementById('f-horas').value = rec.horas;
-    document.getElementById('f-descripcion').value = rec.descripcion || '';
-    document.getElementById('f-edit-id').value = id;
-    document.getElementById('submit-btn').textContent = '✓ Actualizar actividad';
-    editingId = id;
-    // Scroll to form
-    document.getElementById('activity-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, 50);
-}
-
-function goEditInForm() {
-  closeModal();
-  if (editingId) loadForEdit(editingId);
-}
 
 // ======================================================
 //  HOME
@@ -4322,27 +4398,22 @@ function openDayModal(dateStr) {
   const MN = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   document.getElementById('day-modal-title').textContent = `${parseInt(d)} de ${MN[parseInt(m)-1]} ${y}`;
 
-  // Calendar events
-  let calEvts = loadCalEvents().filter(e => e.fecha === dateStr);
-  let regEvts = loadData().filter(r => r.fecha === dateStr).map(r => ({
-    id: 'reg_' + r.id, fecha: r.fecha, trainer: r.trainer,
-    categoria: r.categoria, especificacion: r.especificacion,
-    area: r.area, horas: r.horas,
-    nombre: r.descripcion || `${r.categoria}`, status: 'completado', _src: 'reg', _regId: r.id
-  }));
-  const linkedIds = new Set(calEvts.filter(e=>e._regId).map(e=>e._regId));
-  regEvts = regEvts.filter(r => !linkedIds.has(r._regId));
+  // Solo trainings del calendario (no registros de actividad)
+  const calEvts = loadCalEvents().filter(e => e.fecha === dateStr);
 
-  // Off days for this date
-  const offItems = loadOffDays().filter(off => expandOffDates(off).includes(dateStr))
-    .map(off => ({ _src:'off', _offId: off.id, trainer: off.trainer, motivo: off.motivo||'' }));
+  // Off days para esta fecha
+  const offItems = loadOffDays().filter(off => {
+    const dates = Array.isArray(off.dates) && off.dates.length ? off.dates : expandOffDates(off);
+    return dates.includes(dateStr);
+  }).map(off => ({ _src:'off', _offId: off.id, trainer: off.trainer,
+    motivo: off.motivo||'', tipo: off.tipo||'off' }));
 
-  // Birthdays for this date
+  // Birthdays
   const bdayItems = BIRTHDAYS.filter(b =>
     parseInt(m) === b.month && parseInt(d) === b.day
   );
 
-  const all = [...calEvts, ...regEvts];
+  const all = calEvts; // solo eventos del calendario
   const hasOff  = offItems.length > 0;
   const hasBday = bdayItems.length > 0;
 
@@ -4357,12 +4428,18 @@ function openDayModal(dateStr) {
     </div>`;
   });
 
-  // Off days
+  // Off days y Home Office
   offItems.forEach(off => {
-    html += `<div style="background:rgba(224,80,80,0.07);border:1px solid rgba(224,80,80,0.2);border-radius:10px;padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;">
-      <span style="font-size:18px;">🚫</span>
+    const isHO = off.tipo === 'home-office';
+    const bg   = isHO ? 'rgba(66,165,245,0.07)' : 'rgba(224,80,80,0.07)';
+    const bc   = isHO ? 'rgba(66,165,245,0.25)'  : 'rgba(224,80,80,0.2)';
+    const tc   = isHO ? '#1565C0'                 : '#a03030';
+    const icon = isHO ? '🏠' : '🚫';
+    const label = isHO ? `Home Office · ${off.trainer}` : `Día OFF · ${off.trainer}`;
+    html += `<div style="background:${bg};border:1px solid ${bc};border-radius:10px;padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;">
+      <span style="font-size:18px;">${icon}</span>
       <div style="flex:1;">
-        <div style="font-size:13px;font-weight:600;color:#a03030;">Día OFF · ${off.trainer}</div>
+        <div style="font-size:13px;font-weight:600;color:${tc};">${label}</div>
         ${off.motivo ? `<div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${off.motivo}</div>` : ''}
       </div>
       <button class="btn btn-ghost btn-sm" onclick="document.getElementById('modal-day').classList.remove('open');openEditOffDayModal('${off._offId}')">✎ Editar</button>
@@ -4722,6 +4799,31 @@ async function pullFromSheets(silent = false) {
       if (normalized.length !== loadOffDays().length) { saveOffDays(normalized); changed = true; }
     }
 
+    // ── RECONCILIAR FECHAS ─────────────────────────────────────────
+    // Si un evento de calendario tiene fecha diferente a su registro vinculado,
+    // la fecha del calendario es la autoridad (puede haber sido movido con drag-drop)
+    const allCal  = loadAllCalEvents();
+    const allData = loadAllData();
+    let reconciled = false;
+
+    allCal.forEach(ev => {
+      if (!ev._regId || !ev.fecha) return;
+      const reg = allData.find(r => r.id === ev._regId);
+      if (reg && reg.fecha !== ev.fecha) {
+        updateRecord(ev._regId, { fecha: ev.fecha });
+        // También actualizar en Sheets
+        const updated = loadAllData().find(r => r.id === ev._regId);
+        if (updated) pushRecordToSheet('updateRecord', { record: updated });
+        reconciled = true;
+      }
+    });
+
+    if (reconciled) {
+      _lastFingerprint = dataFingerprint();
+      changed = true;
+    }
+    // ── FIN RECONCILIACIÓN ─────────────────────────────────────────
+
     if (changed) {
       _lastFingerprint = dataFingerprint();
       refreshCurrentView();
@@ -4739,21 +4841,7 @@ async function pullFromSheets(silent = false) {
 // Alias para compatibilidad con llamadas existentes
 async function autoLoadFromSheets() { await pullFromSheets(false); }
 async function silentSyncFromSheets() { await pullFromSheets(true); }
-async function loadFromSheets() {
-  const btn = document.getElementById('btn-sync-down');
-  if (btn) { btn.disabled=true; btn.textContent='⟳ Descargando…'; }
-  setSheetsStatus('syncing'); setSyncLog('Descargando datos desde Google Sheets…');
-  try {
-    await pullFromSheets(false);
-    setSheetsStatus('ok'); setSyncLog('↓ Datos descargados correctamente');
-    toast('✓ Datos descargados desde Google Sheets', 'success');
-  } catch(err) {
-    setSheetsStatus('error'); setSyncLog(`Error: ${err.message}`);
-    toast('Error al descargar: ' + err.message, 'error');
-  } finally {
-    if (btn) { btn.disabled=false; btn.textContent='↓ Bajar de Sheets'; }
-  }
-}
+
 
 // Storage event: cambios desde otra pestaña del mismo navegador
 window.addEventListener('storage', function(e) {
@@ -4895,160 +4983,7 @@ async function pingScript() {
   }
 }
 
-// ── AUTO-LOAD ON STARTUP ──────────────────────────────────
-async function autoLoadFromSheets() {
-  const url = getScriptUrl();
-  if (!url) return;
 
-  const dot = document.getElementById('live-dot');
-  const lbl = document.getElementById('live-label');
-  if (dot) dot.classList.add('stale');
-  if (lbl) lbl.textContent = 'Cargando desde Sheets…';
-
-  try {
-    const data = await gasGet(url, { action: 'getAll' });
-    if (!data.ok) throw new Error(data.error || 'Error del servidor');
-
-    const { registros, calendario, diasoff } = data.data;
-    let loaded = 0;
-
-    // Sheet es fuente de verdad, PERO respeta los status 'eliminado' locales
-    // (evita que un delete pendiente de sincronizar sea revertido al cargar)
-
-    // IDs eliminados localmente (para Registros)
-    const localDeletedReg = new Set(
-      loadAllData().filter(r => r.status === 'eliminado').map(r => r.id)
-    );
-    // IDs eliminados localmente (para Calendario)
-    const localDeletedCal = new Set(
-      loadAllCalEvents().filter(e => e.status === 'eliminado').map(e => e.id)
-    );
-
-    if (registros && Array.isArray(registros) && registros.length > 0) {
-      const normalized = deduplicateById(
-        registros.map(normalizeRecord).filter(r => r.fecha && r.trainer)
-        // Si está eliminado localmente, conservar ese status aunque Sheets diga activo
-        .map(r => localDeletedReg.has(r.id) ? {...r, status:'eliminado'} : r)
-      );
-      saveData(normalized);
-      loaded += normalized.filter(r => r.status !== 'eliminado').length;
-    }
-
-    if (calendario && Array.isArray(calendario) && calendario.length > 0) {
-      const normalized = deduplicateById(
-        calendario.map(normalizeCalEvent).filter(e => e.fecha && e.trainer)
-        .map(e => localDeletedCal.has(e.id) ? {...e, status:'eliminado'} : e)
-      );
-      saveCalEvents(normalized);
-      loaded += normalized.filter(e => e.status !== 'eliminado').length;
-    }
-
-    if (diasoff && Array.isArray(diasoff) && diasoff.length > 0) {
-      const normalized = deduplicateById(
-        diasoff.map(normalizeOffDay).filter(o => o.trainer)
-      );
-      saveOffDays(normalized);
-    }
-
-    _lastFingerprint = dataFingerprint();
-    refreshCurrentView();
-
-    if (lbl) lbl.textContent = loaded > 0 ? `${loaded} registros cargados` : 'En vivo';
-    if (dot) dot.classList.remove('stale');
-    setSheetsStatus('ok');
-    setTimeout(() => { if (lbl) lbl.textContent = 'En vivo'; }, 5000);
-
-  } catch(_) {
-    if (lbl) lbl.textContent = 'Sheets no disponible · usando local';
-    if (dot) dot.classList.add('stale');
-    // El app sigue funcionando con localStorage
-  }
-}
-
-// Normaliza cualquier formato de fecha a "YYYY-MM-DD"
-function normalizeDate(d) {
-  if (!d || d === '' || d === 'undefined') return '';
-  const s = String(d).trim();
-  // Ya está en formato correcto
-  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-  // Formato DD/MM/YYYY o MM/DD/YYYY
-  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) {
-    const p = s.split('/');
-    // Detectar si es DD/MM o MM/DD por el valor del primer número
-    if (parseInt(p[0]) > 12) {
-      // DD/MM/YYYY
-      return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
-    } else {
-      // MM/DD/YYYY (formato americano de Sheets)
-      return `${p[2]}-${p[0].padStart(2,'0')}-${p[1].padStart(2,'0')}`;
-    }
-  }
-  // Cualquier otro formato — intentar parsear como Date
-  try {
-    const parsed = new Date(s);
-    if (!isNaN(parsed.getTime())) {
-      const yr = parsed.getFullYear();
-      const mo = String(parsed.getMonth()+1).padStart(2,'0');
-      const dy = String(parsed.getDate()).padStart(2,'0');
-      return `${yr}-${mo}-${dy}`;
-    }
-  } catch(_) {}
-  return '';
-}
-
-// Normaliza cualquier formato de hora a "HH:MM"
-function normalizeTime(t) {
-  if (!t || t === '' || t === 'undefined') return '';
-  const s = String(t).trim();
-  // Ya en formato HH:MM o H:MM
-  if (/^\d{1,2}:\d{2}$/.test(s)) return s;
-  // Objeto Date serializado desde Sheets ("Sat Dec 30 1899 13:00:00 GMT...")
-  // o cualquier string que contenga una hora
-  try {
-    const d = new Date(s);
-    if (!isNaN(d.getTime())) {
-      return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
-    }
-  } catch(_) {}
-  return '';
-}
-
-// Convierte hora "13:00" → "1:00 PM", "08:30" → "8:30 AM"
-function fmtTime(t) {
-  if (!t) return '';
-  const clean = normalizeTime(t);
-  if (!clean) return t;
-  const [h, m] = clean.split(':').map(Number);
-  const period = h >= 12 ? 'PM' : 'AM';
-  const h12    = h % 12 || 12;
-  return `${h12}:${String(m).padStart(2,'0')} ${period}`;
-}
-function deduplicateById(arr) {
-  const seen = new Set();
-  return arr.filter(r => {
-    const key = r.id || '';
-    if (!key || seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-}
-
-// Normaliza un registro de la Sheet al formato del app
-function normalizeRecord(r) {
-  return {
-    id:             r.id             || genId(),
-    fecha:          normalizeDate(r.fecha          || r.Fecha          || ''),
-    trainer:        r.trainer        || r.Trainer        || '',
-    categoria:      r.categoria      || r.Categoría      || '',
-    especificacion: r.especificacion || r.Especificación  || '',
-    area:           r.area           || r.Área            || '',
-    horas:          r.horas          || r.Horas           || '',
-    descripcion:    r.descripcion    || r.Descripción     || '',
-    createdAt:      r.createdAt      || r.Creado          || new Date().toISOString(),
-    status:         r.status         || r.Status          || 'activo',  // preserva 'eliminado'
-    deletedAt:      r.deletedAt      || '',
-  };
-}
 
 function normalizeCalEvent(r) {
   return {
@@ -5107,9 +5042,7 @@ function normalizeOffDay(r) {
   };
 }
 
-function genId() {
-  return 'gs_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
-}
+
 
 // ── UPLOAD: localStorage → Google Sheets ─────────────────
 async function syncToSheets() {
@@ -5187,6 +5120,31 @@ async function loadFromSheets() {
 }
 
 // ── AUTO-SYNC: push a single record/event after any save ──
+async function reconcileAllDates() {
+  const allCal  = loadAllCalEvents();
+  const allData = loadAllData();
+  let count = 0;
+
+  allCal.forEach(ev => {
+    if (!ev._regId || !ev.fecha) return;
+    const reg = allData.find(r => r.id === ev._regId);
+    if (reg && reg.fecha !== ev.fecha) {
+      updateRecord(ev._regId, { fecha: ev.fecha });
+      const updated = loadAllData().find(r => r.id === ev._regId);
+      if (updated) pushRecordToSheet('updateRecord', { record: updated });
+      count++;
+    }
+  });
+
+  if (count > 0) {
+    _lastFingerprint = dataFingerprint();
+    refreshCurrentView();
+    toast(`✓ ${count} fecha${count>1?'s':''} reconciliada${count>1?'s':''} · Sheets actualizado`, 'success');
+  } else {
+    toast('✓ Todas las fechas ya están sincronizadas', 'info');
+  }
+}
+
 async function repairSheets() {
   const url = getScriptUrl();
   if (!url) { toast('Configura la URL del Apps Script primero', 'error'); return; }
