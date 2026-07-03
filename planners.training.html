@@ -655,7 +655,7 @@ const Store = (function(){
       topicColors: Object.assign({}, DEFAULT_TOPIC_COLORS),
       teamColors: Object.assign({}, DEFAULT_TEAM_COLORS),
       dayStatus: {},
-      settings: { workStart:"8:00", workEnd:"17:00", theme:"light", gasUrl:"" },
+      settings: { workStart:"8:00", workEnd:"17:00", theme:"light", gasUrl:"https://script.google.com/macros/s/AKfycbx_iCg94iDSx2hC_0nQ6PCxHSYVQ1rfg1zjCO2dobtsNLTSPK8O4jT8MjlWQf3WHSWJ/exec" },
       filters: { trainers:[], teams:[], topics:[], statuses:[] },
       currentWeekStart: fmtDate(mondayOf(new Date())),
       weeksToShow: 3,
@@ -675,6 +675,7 @@ const Store = (function(){
       state.teamColors = Object.assign({}, def.teamColors, state.teamColors);
       state.dayStatus = Object.assign({}, def.dayStatus, state.dayStatus);
       state.settings = Object.assign({}, def.settings, state.settings);
+      if(!state.settings.gasUrl){ state.settings.gasUrl = def.settings.gasUrl; } // nunca perder la URL de fábrica por un valor vacío guardado
       state.filters = Object.assign({}, def.filters, state.filters);
     }catch(e){
       state = defaultState();
