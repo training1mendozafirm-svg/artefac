@@ -1207,6 +1207,10 @@ tbody td {
   <div class="nav-item" onclick="navigate('registro')" id="nav-registro">
     <span class="nav-icon">＋</span><span class="nav-label">Registrar Actividad</span>
   </div>
+  <div class="nav-section">Planner</div>
+  <div class="nav-item" onclick="navigate('planner')" id="nav-planner">
+    <span class="nav-icon">📋</span><span class="nav-label">Planner Training</span>
+  </div>
   <div class="nav-section">Reportes</div>
   <div class="nav-item" onclick="navigate('dashboard')" id="nav-dashboard">
     <span class="nav-icon">◈</span><span class="nav-label">Dashboard General</span>
@@ -1224,6 +1228,7 @@ tbody td {
   <div class="nav-item" onclick="navigate('gestion')" id="nav-gestion">
     <span class="nav-icon">⚙</span><span class="nav-label">Gestión de Datos</span>
   </div>
+
   <div class="sidebar-footer">
     <div class="coord">Coord: Karen Reyna</div>
     <div style="margin-top:4px;">Training · TMLF Academy</div>
@@ -1921,6 +1926,22 @@ tbody td {
       </div>
     </div>
 
+    <!-- ========================= VIEW: PLANNER ========================= -->
+    <div class="view" id="view-planner" style="padding:0;height:calc(100vh - 60px);display:flex;flex-direction:column;">
+      <iframe
+        id="planner-iframe"
+        src="about:blank"
+        data-src="https://training1mendozafirm-svg.github.io/artefac/planners.training.html"
+        style="width:100%;flex:1;border:none;display:block;background:#f7f8fc;"
+        allowfullscreen
+        title="Planner Training">
+      </iframe>
+      <div id="planner-loading" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;color:var(--text-muted);pointer-events:none;">
+        <div style="font-size:32px;margin-bottom:12px;">📋</div>
+        <div style="font-size:14px;">Cargando Planner Training...</div>
+      </div>
+    </div>
+
   </div><!-- /content -->
 </main>
 
@@ -2461,7 +2482,7 @@ function toast(msg, type='success') {
 // ======================================================
 //  NAVIGATION
 // ======================================================
-const VIEWS = ['home','calendario','registro','dashboard','trainer','periodos','coordinacion','gestion'];
+const VIEWS = ['home','calendario','registro','dashboard','trainer','periodos','coordinacion','gestion','planner'];
 const TITLES = {
   home: 'Dashboard Principal',
   calendario: 'Calendario de Trainings',
@@ -2470,7 +2491,8 @@ const TITLES = {
   trainer: 'Reporte por Trainer',
   periodos: 'Reporte por Período',
   coordinacion: 'Para Coordinación',
-  gestion: 'Gestión de Datos'
+  gestion: 'Gestión de Datos',
+  planner: 'Planner Training'
 };
 
 function navigate(view) {
@@ -2481,6 +2503,19 @@ function navigate(view) {
   document.getElementById(`view-${view}`).classList.add('active');
   document.getElementById(`nav-${view}`)?.classList.add('active');
   if (view === 'registro') setTimeout(updateHoursTracker, 50);
+  if (view === 'planner') {
+    const iframe = document.getElementById('planner-iframe');
+    if (iframe && (iframe.src === 'about:blank' || !iframe.src || iframe.src.endsWith('blank'))) {
+      const src = iframe.getAttribute('data-src');
+      if (src) {
+        iframe.src = src;
+        iframe.addEventListener('load', () => {
+          const loader = document.getElementById('planner-loading');
+          if (loader) loader.style.display = 'none';
+        }, { once: true });
+      }
+    }
+  }
   document.getElementById('topbar-title').textContent = TITLES[view] || view;
 
   if (view === 'home') renderHome();
