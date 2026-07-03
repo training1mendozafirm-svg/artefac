@@ -1927,19 +1927,19 @@ tbody td {
     </div>
 
     <!-- ========================= VIEW: PLANNER ========================= -->
-    <div class="view" id="view-planner" style="padding:0;height:calc(100vh - 60px);display:flex;flex-direction:column;">
+    <div class="view" id="view-planner" style="padding:0;position:relative;">
+      <div id="planner-loading" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f7f8fc;z-index:1;color:var(--text-muted);">
+        <div style="font-size:36px;margin-bottom:12px;">📋</div>
+        <div style="font-size:14px;font-weight:500;">Cargando Planner Training...</div>
+      </div>
       <iframe
         id="planner-iframe"
         src="about:blank"
         data-src="https://training1mendozafirm-svg.github.io/artefac/planners.training.html"
-        style="width:100%;flex:1;border:none;display:block;background:#f7f8fc;"
+        style="width:100%;height:calc(100vh - 60px);border:none;display:block;position:relative;z-index:2;"
         allowfullscreen
         title="Planner Training">
       </iframe>
-      <div id="planner-loading" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;color:var(--text-muted);pointer-events:none;">
-        <div style="font-size:32px;margin-bottom:12px;">📋</div>
-        <div style="font-size:14px;">Cargando Planner Training...</div>
-      </div>
     </div>
 
   </div><!-- /content -->
