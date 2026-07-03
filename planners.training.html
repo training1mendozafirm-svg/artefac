@@ -215,6 +215,11 @@ button{font-family:inherit;}
 .week-grid-table thead th.weekend-h{background:linear-gradient(135deg,#5b6b85,#42506b);}
 .week-grid-table thead th.today-h{background:linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%); box-shadow:inset 0 0 0 2px var(--gold);}
 .week-grid-table thead th.label-h{background:var(--navy-dark); width:76px;}
+.week-grid-table thead th.blocknum-h{background:var(--navy-dark); width:26px;}
+.blocknum-cell{
+  background:var(--gray-100); color:var(--gray-500); font-family:var(--font-cond); font-weight:700; font-size:12px; text-align:center;
+  vertical-align:middle; width:26px;
+}
 .wk-date{font-family:var(--font-display); font-size:19px; font-weight:700; line-height:1;}
 .wk-dayname{font-family:var(--font-cond); font-size:10.5px; letter-spacing:1.8px; margin-top:2px; opacity:.9;}
 .off-toggle{
@@ -228,16 +233,24 @@ button{font-family:inherit;}
   background:var(--gray-50); font-family:var(--font-cond); font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--gray-500);
   padding:6px 10px; vertical-align:middle; white-space:nowrap;
 }
-.block-first-row .label-cell{border-top:3px solid var(--navy-light);}
+.block-new-team td{border-top:3px solid var(--navy-light) !important;}
+.block-same-team td{border-top:1px dashed var(--gray-300) !important;}
 .field-cell{padding:6px 8px; vertical-align:middle; background:var(--white); min-width:150px; text-align:center;}
 .field-cell.weekend-col{background:var(--gray-50);}
 .field-cell .topic-field{
   width:100%; border:none; background:transparent; font-family:var(--font-display); font-weight:700; font-size:15px; color:var(--navy);
-  padding:2px 30px; border-radius:5px; cursor:text; text-align:center;
+  padding:2px 30px 2px 40px; border-radius:5px; cursor:text; text-align:center;
 }
 [data-theme="dark"] .field-cell .topic-field{color:var(--ink);}
 .field-cell .topic-field:hover{background:var(--gray-50);}
 .field-cell .topic-field:focus{outline:2px solid var(--gold); background:var(--white);}
+.drag-handle{
+  position:absolute; top:4px; left:4px; width:14px; font-size:11px; line-height:16px; color:var(--gray-300); cursor:grab; user-select:none;
+  opacity:.55; transition:var(--transition);
+}
+.drag-handle:hover{opacity:1; color:var(--navy-light);}
+.drag-handle:active{cursor:grabbing;}
+.empty-cell.drag-over-target{outline:2px dashed var(--gold); outline-offset:-2px; background:var(--blue-light);}
 .field-cell .sched-field{
   width:100%; border:none; background:transparent; font-family:var(--font-cond); letter-spacing:.3px; font-size:13px; font-weight:600; color:var(--navy-light);
   padding:2px 4px; border-radius:5px; text-align:center;
@@ -250,8 +263,14 @@ button{font-family:inherit;}
 }
 .field-cell input.trainer-field:focus, .field-cell input.equipo-field:focus{outline:2px solid var(--gold); background:var(--white);}
 .field-cell.equipo-cell input.equipo-field{color:#fff; font-family:var(--font-cond); letter-spacing:.5px; text-shadow:0 1px 1px rgba(0,0,0,.15); padding:6px 26px;}
+.field-cell.equipo-cell input.equipo-field:focus{background:var(--white); color:var(--navy); text-shadow:none;}
+[data-theme="dark"] .field-cell.equipo-cell input.equipo-field:focus{color:var(--ink);}
 .field-cell.equipo-cell{padding:0;}
 .field-cell.trainer-cell{background:var(--white);}
+.conflict-warn{
+  position:absolute; top:2px; right:3px; font-size:11px; color:var(--red-ink); cursor:help; animation:conflict-pulse 1.6s infinite;
+}
+@keyframes conflict-pulse{0%,100%{opacity:.7;}50%{opacity:1;}}
 .field-row-status{position:relative;}
 .mini-status{position:absolute; top:2px; right:3px; width:7px; height:7px; border-radius:50%; cursor:pointer;}
 .color-swatch{
@@ -590,6 +609,7 @@ const DEFAULT_TEAM_COLORS = {
   "PR":"#3B82F6","DVS":"#EC4899","Customer":"#F59E0B","CR":"#10B981","LSU":"#8B5CF6",
   "AO":"#06B6D4","PWI":"#F43F5E","Legal":"#334155","Otro":"#6B7280"
 };
+const TRAINER_COLOR_PALETTE = ["#2563EB","#EA580C","#16A34A","#7C3AED","#DB2777","#0891B2","#B45309","#4338CA","#059669","#DC2626","#0D9488","#9333EA"];
 const DEFAULT_TOPIC_COLORS = {
   "VAWA":"#2563EB","VISA T":"#16A34A","Case Review":"#DC2626","Customer Service":"#EA580C",
   "RFE":"#7C3AED","MGM":"#6B7280","CB":"#0EA5E9","CIMT":"#B45309","AO":"#0891B2","PWI":"#DB2777",
@@ -654,6 +674,7 @@ const Store = (function(){
       },
       topicColors: Object.assign({}, DEFAULT_TOPIC_COLORS),
       teamColors: Object.assign({}, DEFAULT_TEAM_COLORS),
+      trainerColors: {},
       dayStatus: {},
       settings: { workStart:"8:00", workEnd:"17:00", theme:"light", gasUrl:"https://script.google.com/macros/s/AKfycbx_iCg94iDSx2hC_0nQ6PCxHSYVQ1rfg1zjCO2dobtsNLTSPK8O4jT8MjlWQf3WHSWJ/exec" },
       filters: { trainers:[], teams:[], topics:[], statuses:[] },
@@ -673,6 +694,7 @@ const Store = (function(){
       state.catalogs = Object.assign({}, def.catalogs, state.catalogs);
       state.topicColors = Object.assign({}, def.topicColors, state.topicColors);
       state.teamColors = Object.assign({}, def.teamColors, state.teamColors);
+      state.trainerColors = Object.assign({}, def.trainerColors, state.trainerColors);
       state.dayStatus = Object.assign({}, def.dayStatus, state.dayStatus);
       state.settings = Object.assign({}, def.settings, state.settings);
       if(!state.settings.gasUrl){ state.settings.gasUrl = def.settings.gasUrl; } // nunca perder la URL de fábrica por un valor vacío guardado
@@ -741,6 +763,17 @@ const Catalog = {
   teamColor(team){
     const s = Store.get();
     return s.teamColors[team] || "#0F2B5B";
+  },
+  trainerColor(name){
+    if(!name) return "#4B5563";
+    const s = Store.get();
+    if(s.trainerColors[name]) return s.trainerColors[name];
+    // Asigna un color determinístico y estable la primera vez que se ve a este trainer.
+    let hash = 0;
+    for(let i=0;i<name.length;i++){ hash = (hash*31 + name.charCodeAt(i)) >>> 0; }
+    const color = TRAINER_COLOR_PALETTE[hash % TRAINER_COLOR_PALETTE.length];
+    s.trainerColors[name] = color;
+    return color;
   },
   ensureUnique(arr, val){
     return arr.some(x => x.toLowerCase() === val.toLowerCase());
@@ -954,6 +987,7 @@ const App = (function(){
 
       html += `<div class="week-range-label">${shortDate(days[0])} — ${shortDate(days[5])} · ${days[0].getFullYear()}</div>
         <table class="week-grid-table"><thead><tr>
+          <th class="blocknum-h"></th>
           <th class="label-h"></th>`;
       days.forEach((d,idx)=>{
         const dateStr = fmtDate(d);
@@ -966,11 +1000,16 @@ const App = (function(){
       });
       html += `</tr></thead>`;
 
+      let prevTeam = null;
       blocks.forEach((block, bIdx)=>{
+        const isNewTeam = block.team !== prevTeam;
+        prevTeam = block.team;
         html += `<tbody>`;
         FIELD_ROWS.forEach((fr, rIdx)=>{
           const isFirstRowOfBlock = rIdx===0;
-          html += `<tr class="${isFirstRowOfBlock?'block-first-row':''}"><td class="label-cell">${fr.label}</td>`;
+          const rowClass = isFirstRowOfBlock ? (isNewTeam ? 'block-first-row block-new-team' : 'block-first-row block-same-team') : '';
+          const blockNumCell = isFirstRowOfBlock ? `<td class="blocknum-cell" rowspan="${FIELD_ROWS.length}">${bIdx+1}</td>` : '';
+          html += `<tr class="${rowClass}">${blockNumCell}<td class="label-cell">${fr.label}</td>`;
           days.forEach((d,idx)=>{
             const dateStr = fmtDate(d);
             const isOff = s.dayStatus[dateStr] === "off";
@@ -997,6 +1036,15 @@ const App = (function(){
     updateWeekLabel([allDaysFirst, allDaysLast]);
   }
 
+  // Devuelve los entrenamientos (distintos al actual) donde ese trainer ya está
+  // asignado ese mismo día — para avisar de empalmes de horario.
+  function trainerConflicts(trainerName, dateStr, excludeId){
+    if(!trainerName) return [];
+    return Store.get().trainings.filter(t =>
+      t.id !== excludeId && t.date === dateStr && (t.trainer1 === trainerName || t.trainer2 === trainerName)
+    );
+  }
+
   function fieldCellHtml(fr, tr, block, dateStr, isWeekendCol){
     if(!tr){
       // empty slot — click to quick-create one training at a time, prefilled with this block's team
@@ -1010,9 +1058,10 @@ const App = (function(){
       const color = tr.topicColorOverride || Catalog.topicColor(tr.topic);
       const st = STATUS_COLORS[tr.status] || STATUS_COLORS["Programado"];
       return `<td class="field-cell ${isWeekendCol?'weekend-col':''} field-row-status" style="position:relative;">
+        <span class="drag-handle" draggable="true" data-drag-id="${tr.id}" data-tip="Arrastrar a otro día">⠿</span>
+        <input type="color" class="color-swatch" data-colorfield="topicColorOverride" data-id="${tr.id}" value="${toHex(color)}" data-tip="Color del tema" style="position:absolute; top:4px; left:20px;">
         <input class="topic-field" list="dl_topics" data-field="topic" data-id="${tr.id}" value="${escapeHtml(tr.topic)}" style="color:${color}">
         <span class="mini-status" data-action="cyclestatus" data-id="${tr.id}" data-tip="${tr.status}" style="background:${st.ink}"></span>
-        <input type="color" class="color-swatch" data-colorfield="topicColorOverride" data-id="${tr.id}" value="${toHex(color)}" data-tip="Color del tema" style="position:absolute; top:4px; right:34px;">
         <span class="row-hover-actions" style="position:absolute; top:2px; right:14px; display:flex; gap:3px; opacity:.55; transition:.15s;">
           <button data-action="dup" data-id="${tr.id}" data-tip="Duplicar" style="border:none;background:var(--gray-100);border-radius:4px;font-size:9px;cursor:pointer;width:16px;height:16px;">⧉</button>
           <button data-action="del" data-id="${tr.id}" data-tip="Quitar información" style="border:none;background:var(--red);color:var(--red-ink);border-radius:4px;font-size:9px;cursor:pointer;width:16px;height:16px;">✕</button>
@@ -1030,10 +1079,16 @@ const App = (function(){
       </td>`;
     }
     if(fr.key === "trainer1"){
-      return `<td class="field-cell trainer-cell ${isWeekendCol?'weekend-col':''}"><input class="trainer-field" list="dl_trainers" data-field="trainer1" data-id="${tr.id}" value="${escapeHtml(tr.trainer1||"")}"></td>`;
+      const tcol = tr.trainer1 ? (tr.trainer1ColorOverride || Catalog.trainerColor(tr.trainer1)) : "var(--gray-700)";
+      const conflicts1 = trainerConflicts(tr.trainer1, dateStr, tr.id);
+      const warn1 = conflicts1.length ? `<span class="conflict-warn" data-tip="${escapeHtml(tr.trainer1)} también está en: ${escapeHtml(conflicts1.map(c=>c.topic).join(', '))}">⚠</span>` : "";
+      return `<td class="field-cell trainer-cell ${isWeekendCol?'weekend-col':''}" style="position:relative;"><input class="trainer-field" list="dl_trainers" data-field="trainer1" data-id="${tr.id}" value="${escapeHtml(tr.trainer1||"")}" style="color:${tcol}">${warn1}</td>`;
     }
     // trainer2
-    return `<td class="field-cell trainer-cell ${isWeekendCol?'weekend-col':''}"><input class="trainer-field" list="dl_trainers" data-field="trainer2" data-id="${tr.id}" value="${escapeHtml(tr.trainer2||"")}" placeholder="—"></td>`;
+    const tcol2 = tr.trainer2 ? (tr.trainer2ColorOverride || Catalog.trainerColor(tr.trainer2)) : "var(--gray-300)";
+    const conflicts2 = trainerConflicts(tr.trainer2, dateStr, tr.id);
+    const warn2 = conflicts2.length ? `<span class="conflict-warn" data-tip="${escapeHtml(tr.trainer2)} también está en: ${escapeHtml(conflicts2.map(c=>c.topic).join(', '))}">⚠</span>` : "";
+    return `<td class="field-cell trainer-cell ${isWeekendCol?'weekend-col':''}" style="position:relative;"><input class="trainer-field" list="dl_trainers" data-field="trainer2" data-id="${tr.id}" value="${escapeHtml(tr.trainer2||"")}" placeholder="—" style="color:${tcol2}">${warn2}</td>`;
   }
 
   function toHex(c){
@@ -1072,6 +1127,37 @@ const App = (function(){
         tr[el.getAttribute("data-colorfield")] = el.value;
         Store.commit();
         renderAll();
+      });
+    });
+    // drag & drop: mover un entrenamiento a otro día usando el mango de arrastre
+    wrap.querySelectorAll(".drag-handle").forEach(handle=>{
+      handle.addEventListener("dragstart", (e)=>{
+        e.dataTransfer.setData("text/plain", handle.getAttribute("data-drag-id"));
+        e.dataTransfer.effectAllowed = "move";
+      });
+    });
+    wrap.querySelectorAll(".empty-cell").forEach(cell=>{
+      cell.addEventListener("dragover", (e)=>{ e.preventDefault(); cell.classList.add("drag-over-target"); });
+      cell.addEventListener("dragleave", ()=> cell.classList.remove("drag-over-target"));
+      cell.addEventListener("drop", (e)=>{
+        e.preventDefault();
+        cell.classList.remove("drag-over-target");
+        const draggedId = e.dataTransfer.getData("text/plain");
+        if(!draggedId) return;
+        const s = Store.get();
+        const tr = s.trainings.find(t=>t.id===draggedId);
+        if(!tr) return;
+        tr.date = cell.getAttribute("data-date");
+        tr.team = cell.getAttribute("data-team") || tr.team;
+        tr.order = Date.now();
+        Store.commit();
+        renderAll();
+        const conflicts = [...trainerConflicts(tr.trainer1, tr.date, tr.id), ...trainerConflicts(tr.trainer2, tr.date, tr.id)];
+        if(conflicts.length){
+          toast(`⚠ Empalme: ya hay otro entrenamiento ese día con ${tr.trainer1 && conflicts.some(c=>c.trainer1===tr.trainer1||c.trainer2===tr.trainer1) ? tr.trainer1 : tr.trainer2}`);
+        } else {
+          toast("Entrenamiento movido");
+        }
       });
     });
     // action buttons
@@ -1169,7 +1255,14 @@ const App = (function(){
     if((field === "trainer1" || field === "trainer2") && value && !s.catalogs.trainers.includes(value)) s.catalogs.trainers.push(value);
     Store.commit();
     if(field === "topic" || field === "team"){ renderAll(); } // colors/blocks may change
-    else { renderStats(); } // keep inline focus, just update stats
+    else if(field === "trainer1" || field === "trainer2"){
+      const conflicts = trainerConflicts(value, tr.date, tr.id);
+      if(conflicts.length){
+        toast(`⚠ ${value} ya tiene otro entrenamiento ese día: ${conflicts.map(c=>c.topic).join(", ")}`);
+      }
+      renderAll(); // para que se muestre/oculte el ícono de aviso en las celdas afectadas
+    }
+    else { renderStats(); }
   }
 
   function deleteTraining(id){
@@ -1544,9 +1637,43 @@ document.getElementById("cloudPullBtn").addEventListener("click", ()=>{
 
 function renderCatalogLists(){
   const s = Store.get();
-  renderSimpleCatalog("list_trainers", s.catalogs.trainers, "trainers");
+  renderTrainerCatalog();
   renderTeamCatalog();
   renderTopicCatalog();
+}
+function renderTrainerCatalog(){
+  const s = Store.get();
+  const el = document.getElementById("list_trainers");
+  el.innerHTML = s.catalogs.trainers.map((v,i)=>`
+    <div class="catalog-row">
+      <input type="color" value="${Catalog.trainerColor(v)}" data-trainer="${escapeHtml(v)}">
+      <input type="text" value="${escapeHtml(v)}" data-idx="${i}">
+      <button data-idx="${i}" data-del="1">✕</button>
+    </div>`).join("");
+  el.querySelectorAll("input[type=color]").forEach(inp=>{
+    inp.addEventListener("input", ()=>{
+      Store.get().trainerColors[inp.getAttribute("data-trainer")] = inp.value;
+      Store.commit(); App.renderAll();
+    });
+  });
+  el.querySelectorAll("input[type=text]").forEach(inp=>{
+    inp.addEventListener("change", ()=>{
+      const s2 = Store.get();
+      const oldVal = s2.catalogs.trainers[inp.getAttribute("data-idx")];
+      const newVal = inp.value;
+      s2.catalogs.trainers[inp.getAttribute("data-idx")] = newVal;
+      if(s2.trainerColors[oldVal]){ s2.trainerColors[newVal] = s2.trainerColors[oldVal]; delete s2.trainerColors[oldVal]; }
+      s2.trainings.forEach(t=>{ if(t.trainer1===oldVal) t.trainer1 = newVal; if(t.trainer2===oldVal) t.trainer2 = newVal; });
+      Store.commit(); renderCatalogLists(); App.renderAll();
+    });
+  });
+  el.querySelectorAll("button[data-del]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const s2 = Store.get();
+      s2.catalogs.trainers.splice(btn.getAttribute("data-idx"),1);
+      Store.commit(); renderCatalogLists(); App.renderAll();
+    });
+  });
 }
 function renderTeamCatalog(){
   const s = Store.get();
