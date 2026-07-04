@@ -1885,6 +1885,17 @@ function init(){
   if((Store.get().settings.gasUrl||"").trim()){
     Cloud.pull();
   }
+  // Revisión periódica: para que todo el equipo vea los mismos cambios sin
+  // tener que recargar la página manualmente. Se salta el refresco si la
+  // persona está escribiendo algo en ese momento, para no interrumpirla.
+  setInterval(function(){
+    const gasUrl = (Store.get().settings.gasUrl||"").trim();
+    if(!gasUrl) return;
+    const active = document.activeElement;
+    const isEditing = active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA" || active.tagName === "SELECT");
+    if(isEditing) return;
+    Cloud.pull();
+  }, 20000);
 }
 init();
 
