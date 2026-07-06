@@ -978,6 +978,7 @@ tbody td {
 .tc-brenda   { background: var(--tr-brenda);  color: var(--tr-brenda-t);  }
 .tc-offday      { background: #ef5350; color: #fff; }
 .tc-homeoffice  { background: #42A5F5; color: #fff; }
+.tc-juanita     { background: #E67C73; color: #fff; }
 .tc-birthday { background: #AB47BC; color: #fff; }
 .tc-gestion  { background: #546E7A; color: #fff; }
 .badge-gestion { background: rgba(84,110,122,0.12); color: #37474F; border: 1px solid rgba(84,110,122,0.25); }
@@ -1322,6 +1323,7 @@ tbody td {
           <option value="">Todos los trainers</option>
           <option>Andrea Zendejas</option><option>Joham Burgos</option><option>Diego Romo</option>
           <option>Brenda Domínguez</option>
+                <option>Juanita Olivares</option>
         </select>
         <select class="filter-select" id="cal-filter-cat" onchange="renderCalendar()">
           <option value="">Todas las categorías</option>
@@ -1340,6 +1342,7 @@ tbody td {
         <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#8E24AA;"></div> Joham</div>
         <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#43A047;"></div> Andrea</div>
         <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#F9A825;"></div> Brenda</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#E67C73;"></div> Juanita</div>
         <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#ef5350;"></div> Día OFF</div>
         <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#42A5F5;"></div> Home Office</div>
         <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#AB47BC;"></div> 🎂 Cumpleaños</div>
@@ -1389,6 +1392,7 @@ tbody td {
               <option>Joham Burgos</option>
               <option>Diego Romo</option>
               <option>Brenda Domínguez</option>
+                <option>Juanita Olivares</option>
             </select>
             <div id="ht-dayname" style="font-size:12px;color:var(--text-muted);font-style:italic;"></div>
           </div>
@@ -1491,6 +1495,7 @@ tbody td {
                 <option value="">— Seleccionar —</option>
                 <option>Andrea Zendejas</option><option>Joham Burgos</option>
                 <option>Diego Romo</option><option>Brenda Domínguez</option>
+                <option>Juanita Olivares</option>
               </select>
             </div>
             <div class="form-group">
@@ -1575,6 +1580,7 @@ tbody td {
           <option>Joham Burgos</option>
           <option>Diego Romo</option>
           <option>Brenda Domínguez</option>
+                <option>Juanita Olivares</option>
         </select>
         <select class="filter-select" id="dash-mes" onchange="renderDashboard()">
           <option value="">Todos los meses</option>
@@ -1733,6 +1739,7 @@ tbody td {
           <option value="">Todos los trainers</option>
           <option>Andrea Zendejas</option><option>Joham Burgos</option><option>Diego Romo</option>
           <option>Brenda Domínguez</option>
+                <option>Juanita Olivares</option>
         </select>
         <select class="filter-select" id="period-cat" onchange="renderPeriodReport()">
           <option value="">Todas las categorías</option>
@@ -1786,6 +1793,7 @@ tbody td {
             <option value="">Todos los trainers</option>
             <option>Andrea Zendejas</option><option>Joham Burgos</option><option>Diego Romo</option>
             <option>Brenda Domínguez</option>
+                <option>Juanita Olivares</option>
           </select>
           <select class="filter-select" id="coord-mes" onchange="renderCoordReport()">
             <option value="">Todos los meses</option>
@@ -2003,6 +2011,7 @@ tbody td {
           <option value="">— Seleccionar —</option>
           <option>Andrea Zendejas</option><option>Joham Burgos</option>
           <option>Diego Romo</option><option>Brenda Domínguez</option>
+                <option>Juanita Olivares</option>
         </select>
       </div>
       <div class="form-group">
@@ -2179,6 +2188,10 @@ tbody td {
           <input type="checkbox" value="Brenda Domínguez" id="off-chk-brenda" onchange="updateOffTodosBtn()" style="accent-color:#F9A825;">
           <span style="width:10px;height:10px;border-radius:50%;background:#F9A825;display:inline-block;"></span> Brenda
         </label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:#fff;user-select:none;" id="off-check-label-juanita">
+          <input type="checkbox" value="Juanita Olivares" id="off-chk-juanita" onchange="updateOffTodosBtn()" style="accent-color:#E67C73;">
+          <span style="width:10px;height:10px;border-radius:50%;background:#E67C73;display:inline-block;"></span> Juanita
+        </label>
       </div>
     </div>
 
@@ -2312,7 +2325,7 @@ function filterRecords(filters = {}) {
 // ======================================================
 //  UTILS
 // ======================================================
-const TRAINERS = ['Andrea Zendejas','Joham Burgos','Diego Romo','Brenda Domínguez'];
+const TRAINERS = ['Andrea Zendejas','Joham Burgos','Diego Romo','Brenda Domínguez','Juanita Olivares'];
 const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
 const CATEGORIAS = ['Training','Desarrollo','Acompañamiento / Shadowing','Llamadas','Gestión','Documentación'];
@@ -2696,7 +2709,7 @@ const HORAS_OPTIONS = ['0.5','1','1.5','2','2.5','3','3.5','4','4.5','5','5.5','
   '6.5','7','7.5','8','8.5','9','9.5','10','10.5','11','11.5','12'];
 
 function trainerOptions(sel='') {
-  return ['Andrea Zendejas','Joham Burgos','Diego Romo','Brenda Domínguez']
+  return ['Andrea Zendejas','Joham Burgos','Diego Romo','Brenda Domínguez','Juanita Olivares']
     .map(t=>`<option${sel===t?' selected':''}>${t}</option>`).join('');
 }
 function catOptions(sel='') {
@@ -4017,7 +4030,8 @@ const OFF_TRAINERS = [
   { id:'andrea', name:'Andrea Zendejas' },
   { id:'joham',  name:'Joham Burgos'    },
   { id:'diego',  name:'Diego Romo'      },
-  { id:'brenda', name:'Brenda Domínguez'},
+  { id:'brenda',   name:'Brenda Domínguez'},
+  { id:'juanita', name:'Juanita Olivares' },
 ];
 
 function getOffCheckedTrainers() {
@@ -4186,6 +4200,7 @@ const TRAINER_COLORS = {
   'Joham Burgos':      { cls:'tc-joham',   bg:'#8E24AA', init:'J', textDark:false },
   'Andrea Zendejas':   { cls:'tc-andrea',  bg:'#43A047', init:'A', textDark:false },
   'Brenda Domínguez':  { cls:'tc-brenda',  bg:'#F9A825', init:'B', textDark:true  },
+  'Juanita Olivares':   { cls:'tc-juanita', bg:'#E67C73', init:'J', textDark:false },
 };
 function trainerCls(name)  { return TRAINER_COLORS[name]?.cls  || 'tc-mariana'; }
 function trainerInit(name) { return TRAINER_COLORS[name]?.init || (name||'?')[0]; }
