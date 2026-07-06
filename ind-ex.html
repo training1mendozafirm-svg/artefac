@@ -3310,22 +3310,80 @@ function renderTrainerReport() {
   document.getElementById('trainer-table-title').textContent = `Actividades de ${selectedTrainer} (${arr.length})`;
   const sorted = [...arr].sort((a,b) => b.fecha.localeCompare(a.fecha));
   document.getElementById('trainer-table-body').innerHTML = sorted.length
-    ? sorted.map(r => `
-      <tr>
-        <td class="td-main">${fmtDate(r.fecha)}</td>
-        <td><span class="badge ${getTypeBadge(r.categoria)}">${r.categoria}</span></td>
-        <td>${r.especificacion || '—'}</td>
-        <td>${r.area}</td>
-        <td class="td-main">${fmtHrs(r.horas)}</td>
-        <td title="${r.descripcion||''}">${(r.descripcion||'—').slice(0,60)}${(r.descripcion||'').length>60?'…':''}</td>
-        <td>
-          <div class="btn-row">
-            <button class="btn btn-ghost btn-sm" onclick="loadForEdit('${r.id}')">✎</button>
-            <button class="btn btn-danger btn-sm" onclick="confirmDelete('${r.id}')">✕</button>
+    ? renderTableByDay(sorted, true)
+    : `<tr><td colspan="7"><div class="empty-state"><p>Sin actividades para los filtros seleccionados</p></div></td></tr>`;
+}
+
+// ── HELPER: Renderiza tabla de actividades agrupadas por día ──
+function renderTableByDay(records, showActions = false) {
+  if (!records.length) return '';
+
+  // Paleta alternante por día: claro y ligeramente tintado
+  const DAY_COLORS = ['#ffffff', '#f7f8fc'];
+  let html = '';
+  let lastFecha = null;
+  let dayIndex  = -1;
+  let dayHrs    = 0;
+
+  records.forEach((r, i) => {
+    const isNewDay = r.fecha !== lastFecha;
+    if (isNewDay) {
+      // Cerrar día anterior con subtotal
+      if (lastFecha !== null) {
+        html += `<tr style="background:${DAY_COLORS[dayIndex%2]};border-top:1px solid var(--border);">
+          <td colspan="4" style="padding:4px 12px;font-size:11px;color:var(--text-muted);text-align:right;font-style:italic;">Subtotal del día</td>
+          <td style="padding:4px 8px;font-weight:700;font-size:12px;color:var(--navy);">${dayHrs}h</td>
+          <td colspan="${showActions?2:1}"></td>
+        </tr>`;
+      }
+      dayIndex++;
+      dayHrs = 0;
+      lastFecha = r.fecha;
+      const bg = DAY_COLORS[dayIndex % 2];
+
+      // Separador con fecha del día
+      const d = new Date(r.fecha + 'T12:00:00');
+      const dayNames = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+      const dayName  = dayNames[d.getDay()];
+
+      html += `<tr>
+        <td colspan="${showActions?7:6}" style="padding:7px 12px;background:var(--navy);border-top:2px solid var(--gold);">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-family:var(--font-condensed);font-size:13px;font-weight:700;color:var(--gold-light);letter-spacing:.5px;">${dayName} ${fmtDate(r.fecha)}</span>
           </div>
         </td>
-      </tr>`).join('')
-    : `<tr><td colspan="7"><div class="empty-state"><p>Sin actividades para los filtros seleccionados</p></div></td></tr>`;
+      </tr>`;
+    }
+
+    const bg = DAY_COLORS[dayIndex % 2];
+    dayHrs = Math.round((dayHrs + parseFloat(r.horas||0)) * 100) / 100;
+
+    html += `<tr style="background:${bg};">
+      <td class="td-main" style="padding:9px 12px;color:var(--text-muted);font-size:12px;">—</td>
+      <td style="padding:9px 12px;"><span class="badge ${getTypeBadge(r.categoria)}">${r.categoria}</span></td>
+      <td style="padding:9px 12px;font-size:13px;">${r.especificacion || '—'}</td>
+      <td style="padding:9px 12px;font-size:13px;">${r.area}</td>
+      <td style="padding:9px 8px;font-size:13px;font-weight:600;color:var(--navy);">${fmtHrs(r.horas)}</td>
+      <td style="padding:9px 12px;font-size:12px;color:var(--text-muted);" title="${r.descripcion||''}">${(r.descripcion||'—').slice(0,60)}${(r.descripcion||'').length>60?'…':''}</td>
+      ${showActions ? `<td style="padding:9px 8px;">
+        <div class="btn-row">
+          <button class="btn btn-ghost btn-sm" onclick="loadForEdit('${r.id}')">✎</button>
+          <button class="btn btn-danger btn-sm" onclick="confirmDelete('${r.id}')">✕</button>
+        </div>
+      </td>` : '<td></td>'}
+    </tr>`;
+  });
+
+  // Subtotal del último día
+  if (lastFecha !== null) {
+    html += `<tr style="background:${DAY_COLORS[dayIndex%2]};border-top:1px solid var(--border);">
+      <td colspan="4" style="padding:4px 12px;font-size:11px;color:var(--text-muted);text-align:right;font-style:italic;">Subtotal del día</td>
+      <td style="padding:4px 8px;font-weight:700;font-size:12px;color:var(--navy);">${dayHrs}h</td>
+      <td colspan="${showActions?2:1}"></td>
+    </tr>`;
+  }
+
+  return html;
 }
 
 // ======================================================
@@ -3525,17 +3583,52 @@ function renderCoordReport() {
 
   const sorted = [...arr].sort((a,b) => b.fecha.localeCompare(a.fecha));
   document.getElementById('coord-table-body').innerHTML = sorted.length
-    ? sorted.map(r => `
-      <tr>
-        <td>${fmtDate(r.fecha)}</td>
-        <td class="td-main">${r.trainer}</td>
-        <td><span class="badge ${getTypeBadge(r.categoria)}">${r.categoria}</span></td>
-        <td>${r.especificacion || '—'}</td>
-        <td>${r.area}</td>
-        <td>${fmtHrs(r.horas)}</td>
-        <td title="${r.descripcion||''}">${(r.descripcion||'—').slice(0,65)}${(r.descripcion||'').length>65?'…':''}</td>
-      </tr>`).join('')
+    ? renderTableByDayCoord(sorted)
     : `<tr><td colspan="7"><div class="empty-state"><p>Sin registros para los filtros seleccionados</p></div></td></tr>`;
+}
+
+function renderTableByDayCoord(records) {
+  if (!records.length) return '';
+  const DAY_COLORS = ['#ffffff', '#f7f8fc'];
+  let html = '', lastFecha = null, dayIndex = -1, dayHrs = 0;
+
+  records.forEach(r => {
+    const isNewDay = r.fecha !== lastFecha;
+    if (isNewDay) {
+      if (lastFecha !== null) {
+        html += `<tr style="background:${DAY_COLORS[dayIndex%2]};border-top:1px solid var(--border);">
+          <td colspan="5" style="padding:4px 12px;font-size:11px;color:var(--text-muted);text-align:right;font-style:italic;">Subtotal del día</td>
+          <td style="padding:4px 8px;font-weight:700;font-size:12px;color:var(--navy);">${dayHrs}h</td>
+          <td></td>
+        </tr>`;
+      }
+      dayIndex++; dayHrs = 0; lastFecha = r.fecha;
+      const d = new Date(r.fecha + 'T12:00:00');
+      const dayNames = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+      html += `<tr><td colspan="7" style="padding:7px 12px;background:var(--navy);border-top:2px solid var(--gold);">
+        <span style="font-family:var(--font-condensed);font-size:13px;font-weight:700;color:var(--gold-light);letter-spacing:.5px;">${dayNames[d.getDay()]} ${fmtDate(r.fecha)}</span>
+      </td></tr>`;
+    }
+    const bg = DAY_COLORS[dayIndex % 2];
+    dayHrs = Math.round((dayHrs + parseFloat(r.horas||0)) * 100) / 100;
+    html += `<tr style="background:${bg};">
+      <td style="padding:9px 12px;color:var(--text-muted);font-size:12px;">—</td>
+      <td class="td-main" style="padding:9px 12px;">${r.trainer}</td>
+      <td style="padding:9px 12px;"><span class="badge ${getTypeBadge(r.categoria)}">${r.categoria}</span></td>
+      <td style="padding:9px 12px;font-size:13px;">${r.especificacion || '—'}</td>
+      <td style="padding:9px 12px;font-size:13px;">${r.area}</td>
+      <td style="padding:9px 8px;font-weight:600;font-size:13px;color:var(--navy);">${fmtHrs(r.horas)}</td>
+      <td style="padding:9px 12px;font-size:12px;color:var(--text-muted);" title="${r.descripcion||''}">${(r.descripcion||'—').slice(0,65)}${(r.descripcion||'').length>65?'…':''}</td>
+    </tr>`;
+  });
+  if (lastFecha !== null) {
+    html += `<tr style="background:${DAY_COLORS[dayIndex%2]};border-top:1px solid var(--border);">
+      <td colspan="5" style="padding:4px 12px;font-size:11px;color:var(--text-muted);text-align:right;font-style:italic;">Subtotal del día</td>
+      <td style="padding:4px 8px;font-weight:700;font-size:12px;color:var(--navy);">${dayHrs}h</td>
+      <td></td>
+    </tr>`;
+  }
+  return html;
 }
 
 // ======================================================
