@@ -1973,9 +1973,15 @@ tbody td {
 
     <div id="ev-detail-link-row" style="display:none;margin-bottom:18px;">
       <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Enlace</div>
-      <a id="ev-detail-link" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#2f5c8f;padding:7px 14px;background:#f0f6ff;border:1px solid #d0dff0;border-radius:8px;text-decoration:none;">
-        🔗 <span id="ev-detail-link-label"></span>
-      </a>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <a id="ev-detail-link" href="#" target="_blank" rel="noopener noreferrer"
+          style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#2f5c8f;padding:7px 14px;background:#f0f6ff;border:1px solid #d0dff0;border-radius:8px;text-decoration:none;word-break:break-all;">
+          🔗 <span id="ev-detail-link-label"></span>
+        </a>
+        <button onclick="copyEventLink()" style="padding:6px 12px;border:1px solid var(--border);background:#fff;border-radius:8px;cursor:pointer;font-size:12px;color:var(--text-muted);white-space:nowrap;" title="Copiar enlace">
+          📋 Copiar
+        </button>
+      </div>
     </div>
 
     <div id="ev-detail-reg-note" style="display:none;padding:10px 14px;background:#e8f5e9;border:1px solid #c8e6c9;border-radius:8px;font-size:12px;color:#2e7d32;margin-bottom:16px;">
@@ -4673,10 +4679,13 @@ function openEventDetailModal(id, src) {
   const linkRow = document.getElementById('ev-detail-link-row');
   if (ev.link) {
     linkRow.style.display = 'block';
+    // Ensure full URL with protocol
+    const fullUrl = ev.link.startsWith('http') ? ev.link : 'https://' + ev.link;
     const a = document.getElementById('ev-detail-link');
-    a.href = ev.link;
-    document.getElementById('ev-detail-link-label').textContent =
-      ev.link.replace(/^https?:\/\//,'').split('/')[0];
+    a.href = fullUrl;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    document.getElementById('ev-detail-link-label').textContent = fullUrl;
   } else {
     linkRow.style.display = 'none';
   }
@@ -4694,6 +4703,23 @@ function openEventDetailModal(id, src) {
   deleteBtn.style.display = src === 'reg' ? 'none' : 'inline-flex'; // cal events deleted via calendar only
 
   document.getElementById('modal-event-detail').classList.add('open');
+}
+
+function copyEventLink() {
+  const a = document.getElementById('ev-detail-link');
+  if (!a || !a.href || a.href === '#') return;
+  navigator.clipboard.writeText(a.href).then(() => {
+    toast('✓ Enlace copiado al portapapeles', 'success');
+  }).catch(() => {
+    // Fallback for browsers without clipboard API
+    const el = document.createElement('textarea');
+    el.value = a.href;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    toast('✓ Enlace copiado', 'success');
+  });
 }
 
 function closeEventDetailModal() {
