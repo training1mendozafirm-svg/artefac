@@ -789,6 +789,7 @@ const Catalog = {
 const Cloud = (function(){
   let syncTimer = null;
   let jsonpCounter = 0;
+  let hasPulledOnce = false; // evita empujar un tablero vacío antes de traer lo que ya existe en la nube
 
   function url(){ return (Store.get().settings.gasUrl || "").trim(); }
 
@@ -812,6 +813,14 @@ const Cloud = (function(){
   function push(){
     const gasUrl = url();
     if(!gasUrl) return;
+    // Protección: si el tablero local está vacío y todavía no hemos traído
+    // la versión de la nube, no mandamos nada — así nunca se sobreescribe
+    // información real con un tablero vacío por una carrera de tiempos.
+    const trainings = Store.get().trainings || [];
+    if(trainings.length === 0 && !hasPulledOnce){
+      setStatus("Esperando datos de la nube antes de guardar…");
+      return;
+    }
     setStatus("Guardando…");
     fetch(gasUrl, {
       method: "POST",
@@ -834,6 +843,7 @@ const Cloud = (function(){
     window[cbName] = function(data){
       delete window[cbName];
       script.remove();
+      hasPulledOnce = true;
       if(data && typeof data === "object"){
         const s = Store.get();
         Object.assign(s, data);
