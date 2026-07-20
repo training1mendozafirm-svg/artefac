@@ -553,6 +553,44 @@ function formatPhone(tel){
   if(clean.length===10) return `(${clean.slice(0,3)}) ${clean.slice(3,6)}-${clean.slice(6)}`;
   return tel;
 }
+function cleanPhone(tel){ return (tel||'').replace(/\D/g,''); }
+function copyText(text, successMsg){
+  if(navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(text).then(()=>toast(successMsg,'copy')).catch(()=>fallbackCopy(text, successMsg));
+  } else {
+    fallbackCopy(text, successMsg);
+  }
+}
+function fallbackCopy(text, successMsg){
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try{ document.execCommand('copy'); toast(successMsg,'copy'); }
+  catch(e){ toast('No se pudo copiar','triangle-exclamation'); }
+  ta.remove();
+}
+function triggerCall(tel){
+  const digits = cleanPhone(tel);
+  if(!digits) return;
+  const a = document.createElement('a');
+  a.href = `tel:${digits}`;
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+function triggerWhatsapp(tel){
+  const digits = cleanPhone(tel);
+  if(!digits) return;
+  const number = digits.length===10 ? `52${digits}` : digits;
+  const a = document.createElement('a');
+  a.href = `https://wa.me/${number}`;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
 
 /* ═══════════════════════════ FILTER/SEARCH ENGINE ═══════════════════════════ */
 function getFiltered(){
@@ -779,13 +817,13 @@ function bindCardEvents(){
     el.onclick = (e)=>{ e.stopPropagation(); toggleFav(el.dataset.fav); };
   });
   document.querySelectorAll('[data-call]').forEach(el=>{
-    el.onclick = (e)=>{ e.stopPropagation(); if(el.dataset.call) window.location.href = `tel:${el.dataset.call}`; };
+    el.onclick = (e)=>{ e.stopPropagation(); triggerCall(el.dataset.call); };
   });
   document.querySelectorAll('[data-whats]').forEach(el=>{
-    el.onclick = (e)=>{ e.stopPropagation(); if(el.dataset.whats) window.open(`https://wa.me/52${el.dataset.whats}`, '_blank'); };
+    el.onclick = (e)=>{ e.stopPropagation(); triggerWhatsapp(el.dataset.whats); };
   });
   document.querySelectorAll('[data-copy]').forEach(el=>{
-    el.onclick = (e)=>{ e.stopPropagation(); navigator.clipboard.writeText(el.dataset.copy); toast('Correo copiado al portapapeles', 'copy'); };
+    el.onclick = (e)=>{ e.stopPropagation(); copyText(el.dataset.copy, 'Correo copiado al portapapeles'); };
   });
   document.querySelectorAll('[data-share]').forEach(el=>{
     el.onclick = (e)=>{ e.stopPropagation(); shareContact(el.dataset.share); };
@@ -801,8 +839,11 @@ function shareContact(id){
   const p = people.find(x=>x.id===id);
   if(!p) return;
   const text = `${p.nombreDisplay}\n${p.cargo} · ${p.area}\n${p.correo}\n${formatPhone(p.telefono)}`;
-  if(navigator.share){ navigator.share({title:p.nombreDisplay, text}); }
-  else{ navigator.clipboard.writeText(text); toast('Contacto copiado al portapapeles', 'share-nodes'); }
+  if(navigator.share){
+    navigator.share({title:p.nombreDisplay, text}).catch(()=>{});
+  } else {
+    copyText(text, 'Contacto copiado al portapapeles');
+  }
 }
 
 /* ═══════════════════════════ DRAWER ═══════════════════════════ */
@@ -878,9 +919,9 @@ function openDrawer(id, silent){
 
   document.getElementById('drawerCloseBtn').onclick = closeDrawer;
   document.getElementById('drawerFavBtn').onclick = ()=>toggleFav(p.id);
-  document.querySelectorAll('#drawer [data-call]').forEach(el=>el.onclick=()=>{ if(el.dataset.call) window.location.href=`tel:${el.dataset.call}`; });
-  document.querySelectorAll('#drawer [data-whats]').forEach(el=>el.onclick=()=>{ if(el.dataset.whats) window.open(`https://wa.me/52${el.dataset.whats}`,'_blank'); });
-  document.querySelectorAll('#drawer [data-copy]').forEach(el=>el.onclick=()=>{ navigator.clipboard.writeText(el.dataset.copy); toast('Correo copiado','copy'); });
+  document.querySelectorAll('#drawer [data-call]').forEach(el=>el.onclick=()=>{ triggerCall(el.dataset.call); });
+  document.querySelectorAll('#drawer [data-whats]').forEach(el=>el.onclick=()=>{ triggerWhatsapp(el.dataset.whats); });
+  document.querySelectorAll('#drawer [data-copy]').forEach(el=>el.onclick=()=>{ copyText(el.dataset.copy, 'Correo copiado'); });
   document.querySelectorAll('#drawer [data-share]').forEach(el=>el.onclick=()=>shareContact(el.dataset.share));
 
   if(isAdmin){
