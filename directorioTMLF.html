@@ -412,6 +412,7 @@ mark{background:var(--gold-2); color:var(--navy-deep); padding:0 2px; border-rad
       </div>
     </div>
     <button class="filter-btn" id="importBtn" style="display:none;"><i class="fa-solid fa-file-import"></i> Importar Excel</button>
+    <button class="filter-btn" id="syncNowBtn" style="display:none;"><i class="fa-solid fa-cloud-arrow-down"></i> Sincronizar</button>
     <input type="file" id="importFile" accept=".xlsx,.xls,.csv" style="display:none;">
     <div class="spacer"></div>
     <div class="result-count" id="resultCount"></div>
@@ -456,6 +457,10 @@ mark{background:var(--gold-2); color:var(--navy-deep); padding:0 2px; border-rad
     <div class="field-row">
       <label>Contraseña</label>
       <input type="password" id="adminPassInput" placeholder="••••••••">
+    </div>
+    <div class="field-row">
+      <label>Clave de sincronización (Google Sheets) — opcional</label>
+      <input type="password" id="syncTokenInput" placeholder="Solo si vas a editar en la nube">
     </div>
     <div class="error-msg" id="adminLoginError">Contraseña incorrecta. Inténtalo de nuevo.</div>
   </div>
@@ -507,6 +512,64 @@ const SEED_DATA = [{"area": "PEOPLE", "cargo": "PEOPLE / MANAGER", "nombre": "MI
 
 const LEVEL_NAMES = {0:'Dirección',1:'Manager',2:'Coordinador',3:'Supervisor',4:'Team Leader',5:'Especialista'};
 const ADMIN_PASSWORD = 'TMLF2026';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzwuJOPO9_A4mz8tmikhVxIRLE0_o5pruGIPi2ZEeFJROGeeevYIGvUhU7WiY0JbIC16Q/exec';
+function getSyncToken(){ return localStorage.getItem('tmlf_sync_token') || ''; }
+function setSyncToken(t){ localStorage.setItem('tmlf_sync_token', t || ''); }
+
+async function syncFromSheet(showToast){
+  if(!APPS_SCRIPT_URL) return false;
+  try{
+    const res = await fetch(APPS_SCRIPT_URL + '?t=' + Date.now());
+    const json = await res.json();
+    if(json && json.ok && Array.isArray(json.data) && json.data.length){
+      people = json.data.map(r=>({
+        id: r.id,
+        area: r.area,
+        cargo: r.cargo,
+        nombre: (r.nombreDisplay||'').toUpperCase(),
+        nombreDisplay: r.nombreDisplay,
+        correo: r.correo,
+        correoSupport: r.correoSupport,
+        perfil: r.perfil,
+        estatus: r.estatus || 'activo',
+        rank: (r.rank !== undefined && r.rank !== null && r.rank !== '') ? Number(r.rank) : 5,
+        reportsTo: r.reportsTo || '',
+        foto: r.foto || null,
+        updatedAt: r.updatedAt || '',
+        nuevo: false
+      }));
+      saveState();
+      renderDashboard(); buildFilterPanel(); renderMain(); renderCharts();
+      if(showToast) toast('Directorio sincronizado con Google Sheets', 'cloud-arrow-down');
+      return true;
+    }
+  }catch(e){
+    if(showToast) toast('No se pudo conectar con Google Sheets', 'triangle-exclamation');
+  }
+  return false;
+}
+async function syncUpsertToSheet(p){
+  const token = getSyncToken();
+  if(!APPS_SCRIPT_URL || !token) return;
+  try{
+    await fetch(APPS_SCRIPT_URL, {
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({ token, action:'upsert', payload: p })
+    });
+  }catch(e){ /* offline, sigue guardado local */ }
+}
+async function syncDeleteToSheet(id){
+  const token = getSyncToken();
+  if(!APPS_SCRIPT_URL || !token) return;
+  try{
+    await fetch(APPS_SCRIPT_URL, {
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({ token, action:'delete', payload:{id} })
+    });
+  }catch(e){ /* offline, sigue eliminado local */ }
+}
 
 /* ═══════════════════════════ STATE ═══════════════════════════ */
 let people = [];
@@ -1004,6 +1067,7 @@ function saveEditFromDrawer(id){
   p.foto = document.getElementById('eFoto').value.trim() || null;
   p.updatedAt = new Date().toISOString();
   saveState();
+  syncUpsertToSheet(p);
   logHistory('edit', p.nombreDisplay);
   toast('Colaborador actualizado correctamente', 'circle-check');
   renderDashboard(); buildFilterPanel(); renderMain(); renderCharts();
@@ -1078,11 +1142,13 @@ document.getElementById('adminToggle').onclick = ()=>{
     document.getElementById('adminToggle').classList.remove('on');
     document.getElementById('adminToggle').innerHTML = '<i class="fa-solid fa-user-shield"></i> Administrador';
     document.getElementById('importBtn').style.display = 'none';
+    document.getElementById('syncNowBtn').style.display = 'none';
     document.body.classList.remove('admin-on');
     toast('Modo administrador desactivado', 'lock');
     renderMain();
   } else {
     document.getElementById('adminPassInput').value = '';
+    document.getElementById('syncTokenInput').value = getSyncToken();
     document.getElementById('adminLoginError').classList.remove('show');
     openModal('adminLoginModal');
     setTimeout(()=>document.getElementById('adminPassInput').focus(), 100);
@@ -1092,9 +1158,11 @@ function submitAdminLogin(){
   const val = document.getElementById('adminPassInput').value;
   if(val === ADMIN_PASSWORD){
     isAdmin = true;
+    setSyncToken(document.getElementById('syncTokenInput').value.trim());
     document.getElementById('adminToggle').classList.add('on');
     document.getElementById('adminToggle').innerHTML = '<i class="fa-solid fa-lock-open"></i> Modo Admin';
     document.getElementById('importBtn').style.display = 'flex';
+    document.getElementById('syncNowBtn').style.display = 'flex';
     document.body.classList.add('admin-on');
     closeModal('adminLoginModal');
     toast('Modo administrador activado', 'user-shield');
@@ -1134,14 +1202,17 @@ document.getElementById('personModalSubmit').onclick = ()=>{
     Object.assign(p, {nombreDisplay:nombre, nombre:nombre.toUpperCase(), area, cargo, correo, correoSupport, perfil, estatus, foto: foto||p.foto, updatedAt:new Date().toISOString()});
     logHistory('edit', nombre);
     toast('Colaborador actualizado', 'circle-check');
+    syncUpsertToSheet(p);
   } else {
     const id = (correo.split('@')[0]||nombre.toLowerCase().replace(/\s+/g,'-')).toLowerCase().replace(/[^a-z0-9]+/g,'-');
-    people.push({
+    const newP = {
       id, nombre:nombre.toUpperCase(), nombreDisplay:nombre, area, cargo, correo, correoSupport, perfil,
       estatus, foto: foto||null, nuevo:true, rank: guessRank(cargo), updatedAt:new Date().toISOString()
-    });
+    };
+    people.push(newP);
     logHistory('add', nombre);
     toast('Colaborador agregado al directorio', 'user-plus');
+    syncUpsertToSheet(newP);
   }
   saveState();
   closeModal('personModal');
@@ -1173,6 +1244,7 @@ document.getElementById('deleteConfirm').onclick = ()=>{
     saveFavs(); saveState();
     logHistory('delete', p.nombreDisplay);
     toast('Colaborador eliminado del directorio', 'trash');
+    syncDeleteToSheet(p.id);
   }
   closeModal('deleteModal');
   renderDashboard(); buildFilterPanel(); renderMain(); renderCharts();
@@ -1336,6 +1408,8 @@ loadState();
 renderDashboard();
 buildFilterPanel();
 renderMain();
+syncFromSheet(false);
+document.getElementById('syncNowBtn').onclick = ()=>syncFromSheet(true);
 
 /* ═══════════════════════════ COVER SCREEN ═══════════════════════════ */
 document.getElementById('coverMeta').textContent = `${people.length} colaboradores · ${new Set(people.map(p=>p.area)).size} áreas`;
