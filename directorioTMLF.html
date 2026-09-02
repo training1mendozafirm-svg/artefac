@@ -211,15 +211,17 @@ mark{background:var(--gold-2); color:var(--navy-deep); padding:0 2px; border-rad
 .tier-label{font-family:var(--font-label); font-size:10px; letter-spacing:1.4px; text-transform:uppercase; color:var(--gold); font-weight:700; text-align:center; margin-bottom:8px; width:100%;}
 
 /* ═══════════ ORG TREE (real hierarchy) ═══════════ */
-.org-tree-scroll{overflow-x:auto; padding-bottom:8px;}
+.org-tree-scroll{overflow-x:auto; overflow-y:hidden; padding-bottom:12px; width:100%;}
 .org-tree, .org-tree ul{
   display:flex; justify-content:center; padding-top:28px; position:relative;
-  list-style:none; margin:0; padding-left:0; padding-right:0;
+  list-style:none; margin:0 auto; padding-left:0; padding-right:0;
+  width:max-content;
 }
 .org-tree{padding-top:0;}
 .org-tree li{
   float:none; text-align:center; list-style-type:none; position:relative;
   padding:28px 14px 0 14px; display:flex; flex-direction:column; align-items:center;
+  flex-shrink:0;
 }
 .org-tree li::before, .org-tree li::after{
   content:''; position:absolute; top:0; right:50%;
@@ -235,9 +237,10 @@ mark{background:var(--gold-2); color:var(--navy-deep); padding:0 2px; border-rad
   content:''; position:absolute; top:0; left:50%;
   border-left:1.5px solid var(--gold-mid); width:0; height:28px;
 }
-.org-tree > li{ padding-top:0; }
+.org-tree > li{ padding-top:0; flex-shrink:0; }
 .org-tree > li::before, .org-tree > li::after{ display:none; }
-.org-tree .org-node{ display:inline-flex; margin:0 auto; white-space:nowrap; }
+.org-tree .org-node{ display:inline-flex; margin:0 auto; white-space:nowrap; flex-shrink:0; }
+
 
 /* ═══════════ DRAWER ═══════════ */
 .overlay{position:fixed; inset:0; background:rgba(5,12,20,.55); backdrop-filter:blur(2px); z-index:500; opacity:0; pointer-events:none; transition:opacity .25s;}
