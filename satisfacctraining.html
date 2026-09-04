@@ -46,7 +46,7 @@
     position:sticky; top:0; z-index:50;
     background:var(--ink); color:#EFEAE0; border-bottom:1px solid #000;
   }
-  .topbar-inner{ max-width:760px; margin:0 auto; padding:16px 24px 0; }
+  .topbar-inner{ max-width:920px; margin:0 auto; padding:16px 24px 0; }
   .topbar-row{ display:flex; justify-content:space-between; align-items:center; gap:14px; margin-bottom:14px; }
   .topbar-brand{display:flex; align-items:center; gap:10px;}
   .topbar-brand img{height:26px; width:auto; display:block; filter:brightness(0) invert(1);}
@@ -69,7 +69,7 @@
 
   /* ---------- Book stage ---------- */
   .book-stage{
-    max-width:760px; margin:0 auto; padding:48px 24px 140px;
+    max-width:920px; margin:0 auto; padding:48px 24px 140px;
     perspective:1400px;
   }
   .chapter-head{ display:flex; align-items:flex-start; gap:18px; margin-bottom:26px; }
@@ -83,7 +83,7 @@
     background:var(--paper-2);
     border:1px solid var(--line);
     border-radius:6px;
-    padding:34px 34px 30px;
+    padding:42px 46px 38px;
     position:relative;
     box-shadow:0 1px 0 var(--line), 0 18px 40px rgba(11,11,12,.06);
     transform-origin:left center;
@@ -129,6 +129,8 @@
   }
   .qnum::before{content:""; width:5px; height:5px; border-radius:50%; background:var(--gold);}
   .qopt-tag{font-size:10.5px; color:var(--text-soft); text-transform:uppercase; letter-spacing:.6px; font-weight:600;}
+  .qopt-tag.multi{color:var(--gold-deep); background:var(--gold-pale); padding:3px 9px; border-radius:10px;}
+  .multi-hint{color:var(--text-soft) !important; font-weight:500;}
   .qtext{ font-size:21px; line-height:1.5; font-weight:500; color:var(--ink); margin:0 0 4px; }
   .qhint{font-size:13.5px; color:var(--gold-deep); margin:6px 0 6px; font-style:italic; font-weight:500;}
   .qerr{
@@ -136,7 +138,7 @@
     align-items:center; gap:7px; background:#FBEDEB; border-radius:var(--radius); padding:10px 13px;
   }
 
-  .opt-list{display:flex; flex-direction:column; gap:10px; margin-top:22px;}
+  .opt-list{display:grid; grid-template-columns:repeat(auto-fill, minmax(250px,1fr)); gap:12px; margin-top:22px;}
   .opt{
     display:flex; align-items:center; gap:13px;
     border:1px solid var(--line); padding:14px 17px; border-radius:var(--radius);
@@ -195,7 +197,7 @@
     background:rgba(255,255,255,.92); backdrop-filter:blur(10px);
     border-top:1px solid var(--line); padding:16px 24px; box-shadow:0 -10px 26px rgba(11,11,12,.06);
   }
-  .navbar-inner{ max-width:760px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; gap:14px; }
+  .navbar-inner{ max-width:920px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; gap:14px; }
   .btn{
     font-family:'Inter',sans-serif; font-weight:700; font-size:14px; padding:13px 26px; border-radius:30px;
     border:1.5px solid transparent; cursor:pointer; transition:all .18s ease; letter-spacing:.1px;
@@ -630,6 +632,16 @@ function prevActiveSection(sIdx){
   return s >= 0 ? s : null;
 }
 
+// Posición de esta sección entre las secciones realmente activas en el
+// recorrido actual (ignora las que se saltan por bifurcación), para que
+// el numeral grande de cada capítulo coincida con el número que trae su
+// propia etiqueta (ej. "SECCIÓN 6").
+function activeSectionPosition(sIdx){
+  let pos = 0;
+  for(let s=0; s<=sIdx; s++){ if(isSectionActive(s)) pos++; }
+  return pos;
+}
+
 function isAnswered(sIdx,qIdx){
   const v = answers[qKey(sIdx,qIdx)];
   if(v===undefined || v===null || v==="") return false;
@@ -730,9 +742,25 @@ function renderThanks(){
       <p style="margin-bottom:14px;">Tu feedback es fundamental para identificar nuestras fortalezas, reconocer áreas de oportunidad y continuar mejorando la calidad de los trainings y el acompañamiento que brindamos a los equipos.</p>
       <p style="margin-bottom:14px;">Cada comentario será tomado en cuenta como parte de nuestro proceso de mejora continua y nos ayudará a fortalecer la colaboración entre Training, Operaciones y el equipo Legal.</p>
       <p>Gracias por ayudarnos a construir un mejor proceso de capacitación.</p>
-      <img class="cover-logo" style="width:66px; margin-top:20px; opacity:.85;" src="${LOGO_SRC}" alt="Training · TMLF">
+      <button class="btn btn-primary" style="padding:14px 32px; font-size:14.5px; margin-top:26px;" onclick="resetSurveyState()">Volver al inicio</button>
+      <img class="cover-logo" style="width:66px; margin-top:26px; opacity:.85;" src="${LOGO_SRC}" alt="Training · TMLF">
     </div>
   `;
+}
+
+// Reinicia por completo el estado de la encuesta (respuestas, posición,
+// errores) y regresa a la portada, sin necesidad de recargar la página —
+// útil para que la siguiente persona pueda contestar de inmediato.
+function resetSurveyState(){
+  Object.keys(answers).forEach(k=>delete answers[k]);
+  Object.keys(otherText).forEach(k=>delete otherText[k]);
+  currentInvalid.clear();
+  si = 0;
+  qi = 0;
+  navDir = "next";
+  screen = "cover";
+  window.scrollTo(0,0);
+  render();
 }
 
 function renderQuestionScreen(){
@@ -775,7 +803,7 @@ function renderQuestionScreen(){
     <div class="book-stage">
       ${isChapterStart ? `
         <div class="chapter-head">
-          <div class="chapter-num">${String(si+1).padStart(2,"0")}</div>
+          <div class="chapter-num">${String(activeSectionPosition(si)).padStart(2,"0")}</div>
           <div>
             <div class="chapter-eyebrow">${s.label}</div>
             <h2 class="chapter-title">${escapeHtml(s.title)}</h2>
@@ -794,6 +822,14 @@ function renderQuestionScreen(){
   `;
 }
 
+// Para preguntas de opción múltiple, añade la leyenda "puedes elegir varias"
+// salvo que la propia pregunta ya lo aclare en su indicación original.
+function multiLegend(q){
+  if(q.type !== "multi") return "";
+  if(q.hint && /múltiples|varias/i.test(q.hint)) return "";
+  return `<p class="qhint multi-hint">Puedes seleccionar varias opciones.</p>`;
+}
+
 function renderQuestionPage(sIdx, qIdx, q){
   const children = getChildIndices(sIdx, qIdx).filter(ci => isVisible(sIdx, ci));
   const key = qKey(sIdx,qIdx);
@@ -803,9 +839,11 @@ function renderQuestionPage(sIdx, qIdx, q){
     <div class="qnum-row">
       <div class="qnum">${q.num ? "Pregunta "+escapeHtml(q.num) : "Pregunta"}</div>
       ${q.type==="open"?'<div class="qopt-tag">Opcional</div>':""}
+      ${q.type==="multi"?'<div class="qopt-tag multi">Selecciona una o varias</div>':""}
     </div>
     <p class="qtext">${escapeHtml(q.text)}</p>
     ${q.hint?`<p class="qhint">${escapeHtml(q.hint)}</p>`:""}
+    ${multiLegend(q)}
     ${renderQuestionControl(sIdx, qIdx, q)}
     <div class="qerr" style="${mainInvalid?"display:flex;":""}">Esta pregunta es necesaria para continuar.</div>
   `;
@@ -819,9 +857,11 @@ function renderQuestionPage(sIdx, qIdx, q){
         <div class="qnum-row">
           <div class="qnum">${cq.num ? "Pregunta "+escapeHtml(cq.num) : "Pregunta"}</div>
           ${cq.type==="open"?'<div class="qopt-tag">Opcional</div>':""}
+          ${cq.type==="multi"?'<div class="qopt-tag multi">Selecciona una o varias</div>':""}
         </div>
         <p class="qtext sub-qtext">${escapeHtml(cq.text)}</p>
         ${cq.hint?`<p class="qhint">${escapeHtml(cq.hint)}</p>`:""}
+        ${multiLegend(cq)}
         ${renderQuestionControl(sIdx, ci, cq)}
         <div class="qerr" style="${cInvalid?"display:flex;":""}">Esta pregunta es necesaria para continuar.</div>
       </div>
@@ -1032,13 +1072,23 @@ function isSheetEndpointConfigured(){
   return SUBMIT_ENDPOINT && SUBMIT_ENDPOINT.indexOf("https://script.google.com") === 0;
 }
 
-// Lee la Sheet directamente por fetch(). El diagnóstico confirmó que esto
-// SÍ funciona en tu entorno (la URL devuelve JSON correctamente); JSONP
-// queda como respaldo por si algún navegador bloquea el fetch directo.
-async function fetchSheetDirect(){
-  const res = await fetch(SUBMIT_ENDPOINT, { method: "GET" });
-  const data = await res.json();
-  return data;
+// Lee la Sheet directamente por fetch(), con caché desactivada y un
+// reintento corto por si el primer intento falla por un arranque en frío
+// del Apps Script o un error de red pasajero.
+async function fetchSheetDirect(retries){
+  retries = retries===undefined ? 1 : retries;
+  const url = SUBMIT_ENDPOINT + (SUBMIT_ENDPOINT.indexOf("?")>-1?"&":"?") + "t=" + Date.now();
+  let lastErr;
+  for(let attempt=0; attempt<=retries; attempt++){
+    try{
+      const res = await fetch(url, { method: "GET", cache: "no-store" });
+      return await res.json();
+    }catch(e){
+      lastErr = e;
+      if(attempt < retries) await new Promise(r=>setTimeout(r, 500));
+    }
+  }
+  throw lastErr;
 }
 
 function fetchSheetJSONP(timeoutMs){
@@ -1127,7 +1177,7 @@ async function loadAllSubmissions(){
       try{
         data = await fetchSheetDirect();
       }catch(e){
-        console.error("Lectura directa de Google Sheet falló, probando JSONP:", e);
+        console.warn("Lectura directa de Google Sheet no respondió, probando por JSONP como respaldo:", e);
         data = await fetchSheetJSONP();
       }
       if(Array.isArray(data)){
@@ -1359,7 +1409,8 @@ async function runSheetDiagnostic(){
   let raw = "";
   let fetchError = "";
   try{
-    const res = await fetch(SUBMIT_ENDPOINT, { method:"GET" });
+    const url = SUBMIT_ENDPOINT + (SUBMIT_ENDPOINT.indexOf("?")>-1?"&":"?") + "t=" + Date.now();
+    const res = await fetch(url, { method:"GET", cache:"no-store" });
     raw = await res.text();
   }catch(e){
     fetchError = String(e);
