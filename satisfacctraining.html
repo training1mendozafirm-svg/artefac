@@ -191,6 +191,11 @@
   .char-counter{ font-size:12.5px; color:var(--text-soft); margin-top:8px; font-weight:600; }
   .char-counter.warn{color:var(--bad);}
   .char-counter.ok{color:var(--good);}
+  .shorttext-input{
+    width:100%; margin-top:24px; border:1px solid var(--line); border-radius:var(--radius);
+    padding:15px 16px; font-family:'Inter',sans-serif; font-size:16.5px; background:#FCFAF3;
+  }
+  .shorttext-input:focus{outline:2px solid var(--gold); outline-offset:1px;}
 
   .navbar{
     position:fixed; bottom:0; left:0; right:0; z-index:40;
@@ -398,34 +403,36 @@ const SECTIONS = [
     questions: [
       { num:"", text:"¿A qué sede perteneces?", type:"single",
         options:["CDMX","Cancún","Puerto Rico"] },
+      { num:"", text:"¿Cuál es tu área?", type:"single",
+        options:["DVS","Colletion","PWI","Case Review","Attys","Customer Service","Packets","Compliance","Back Office","Call Backs","PMO","WAEs","Marketing","Truckers","RFE","Otro"] },
       { num:"1", text:"¿Cuál es tu rol?", type:"single",
         options:["Manager","TL","Abogado"] },
       { num:"2", text:"Durante los últimos 3 meses, ¿recibiste training?", type:"single",
         options:["Sí","No"] },
       { num:"3", text:"¿Qué tipo de interacción has tenido con Training?", type:"multi",
         options:["Participación en trainings","Solicitud de trainings","Seguimiento de participantes","Feedback sobre participantes","Shadowing / acompañamientos","Desarrollo o actualización de materiales o scripts","Otro"],
-        hideIf:{ refQi:2, in:["No"] } },
+        hideIf:{ refQi:3, in:["No"] } },
       { num:"4", text:"¿Participaste en la elaboración del temario y en el diseño de las actividades del training?", type:"single",
         options:["Sí","No","No aplica"],
-        hideIf:{ refQi:2, in:["No"] } },
+        hideIf:{ refQi:3, in:["No"] } },
       { num:"4.1", text:"Si tu respuesta fue “No”, ¿cuál fue la razón principal por la que no participaste?", type:"single",
         options:["No fui convocado(a) para participar.","No se solicitó mi participación.","No tuve disponibilidad de tiempo.","Consideré que no era necesario participar.","No tenía información suficiente sobre el proceso para poder aportar.","Otro"],
-        showIf:{ refQi:4, in:["No"] } },
+        showIf:{ refQi:5, in:["No"] } },
       { num:"4.2", text:"Si tu respuesta fue “Sí”, ¿consideras que tus comentarios y aportaciones fueron tomados en cuenta durante la elaboración del training?", type:"single",
         options:["Sí, completamente","Sí, en su mayoría","Parcialmente","No","No estoy seguro(a)"],
-        showIf:{ refQi:4, in:["Sí"] } },
+        showIf:{ refQi:5, in:["Sí"] } },
       { num:"5", text:"¿De los trainings que solicitaste para tu equipo durante los últimos 3 meses, participaste o estuviste presente en alguna de las sesiones?", type:"single",
         options:["Sí, participé en todas o casi todas las sesiones.","Sí, participé en algunas sesiones.","No, no participé en ninguna sesión.","No aplica"],
-        hideIf:{ refQi:2, in:["No"] } },
+        hideIf:{ refQi:3, in:["No"] } },
       { num:"5.1", text:"Si participaste en alguna de las sesiones, ¿consideras que tu participación te permitió conocer de primera mano el contenido, la metodología y las actividades realizadas durante el training?", type:"single",
         options:["Sí, completamente","Sí, en su mayoría","Parcialmente","No"],
-        showIf:{ refQi:7, in:["Sí, participé en todas o casi todas las sesiones.","Sí, participé en algunas sesiones."] } },
+        showIf:{ refQi:8, in:["Sí, participé en todas o casi todas las sesiones.","Sí, participé en algunas sesiones."] } },
     ]
   },
   {
     label: "RUTA ALTERNATIVA",
     title: "Experiencia sin capacitación durante los últimos 3 meses",
-    showIf: { si:0, qi:2, in:["No"] },
+    showIf: { si:0, qi:3, in:["No"] },
     questions: [
       { num:"", text:"Durante los últimos 3 meses, ¿cuál fue la principal razón por la que no recibiste capacitación por parte de Training?", type:"single",
         options:["No he solicitado capacitación","Mi líder/equipo no ha solicitado capacitación","No se ha identificado una necesidad de capacitación","Se solicitó capacitación, pero no se llevó a cabo","No tuve disponibilidad para participar","No tenía conocimiento de los trainings disponibles","Otro"] },
@@ -437,7 +444,7 @@ const SECTIONS = [
   {
     label: "SECCIÓN 2",
     title: "Evaluación general del Training",
-    hideIf: { si:0, qi:2, in:["No"] },
+    hideIf: { si:0, qi:3, in:["No"] },
     questions: [
       { num:"4", text:"En general, ¿qué tan satisfecho(a) estás con los trainings realizados durante los últimos 3 meses?",
         type:"scale5", labels:["Muy insatisfecho","Insatisfecho","Neutral","Satisfecho","Muy satisfecho"] },
@@ -455,7 +462,7 @@ const SECTIONS = [
   {
     label: "SECCIÓN 3",
     title: "Calidad del instructor",
-    hideIf: { si:0, qi:2, in:["No"] },
+    hideIf: { si:0, qi:3, in:["No"] },
     questions: [
       { num:"11", text:"¿Cómo evaluarías el dominio de los temas por parte del instructor?", type:"scale5" },
       { num:"12", text:"¿Qué tan clara fue la explicación de los conceptos?", type:"scale5" },
@@ -467,7 +474,7 @@ const SECTIONS = [
   {
     label: "SECCIÓN 4",
     title: "Preparación para Operaciones",
-    hideIf: { si:0, qi:2, in:["No"] },
+    hideIf: { si:0, qi:3, in:["No"] },
     questions: [
       { num:"16", text:"¿Qué tan preparados consideras que quedan los participantes después de completar el training?", type:"scale5" },
       { num:"17", text:"¿Consideras que existe una diferencia entre lo que se enseña durante Training y lo que posteriormente se requiere en Operaciones?", type:"single",
@@ -481,7 +488,7 @@ const SECTIONS = [
   {
     label: "SECCIÓN 5",
     title: "Preparación para operación",
-    hideIf: { si:0, qi:2, in:["No"] },
+    hideIf: { si:0, qi:3, in:["No"] },
     questions: [
       { num:"20", text:"¿Qué tan confiable consideras el criterio utilizado por Training para determinar si un participante está listo para incorporarse a Operaciones?", type:"scale5" },
       { num:"21", text:"Durante los últimos 3 meses, ¿has recibido participantes que consideres que no estaban suficientemente preparados para incorporarse a tu equipo?", type:"single",
@@ -495,7 +502,7 @@ const SECTIONS = [
   {
     label: "SECCIÓN 6",
     title: "Acompañamiento / Shadowing posterior al Training",
-    hideIf: { si:0, qi:2, in:["No"] },
+    hideIf: { si:0, qi:3, in:["No"] },
     questions: [
       { num:"1", text:"Después de finalizar el training, ¿recibiste algún tipo de acompañamiento o shadowing antes de comenzar a realizar tus actividades de manera independiente?", type:"single",
         options:["Sí, recibí shadowing y acompañamiento","Sí, recibí acompañamiento, pero no shadowing","Recibí shadowing de manera parcial","No recibí ningún tipo de acompañamiento","No acepte el acompañamiento o shadowing"] },
@@ -512,7 +519,7 @@ const SECTIONS = [
   {
     label: "SECCIÓN 7",
     title: "Feedback de los últimos 3 meses",
-    hideIf: { si:0, qi:2, in:["No"] },
+    hideIf: { si:0, qi:3, in:["No"] },
     questions: [
       { num:"25", text:"¿Cuál consideras que ha sido la principal fortaleza del área de Training durante los últimos 3 meses?", type:"open" },
       { num:"26", text:"¿Cuál consideras que ha sido la principal área de oportunidad del área de Training durante los últimos 3 meses?", type:"open" },
@@ -936,6 +943,10 @@ function renderQuestionControl(sIdx, qIdx, q){
     body = `<textarea placeholder="Escribe tu respuesta…" oninput="setOpen('${key}', this.value)">${escapeHtml(val)}</textarea>
       <div class="char-counter ${counterClass}" id="counter-${key}">${counterText}</div>`;
   }
+  else if(q.type === "shorttext"){
+    const val = answers[key] || "";
+    body = `<input type="text" class="shorttext-input" placeholder="Escribe aquí…" value="${escapeAttr(val)}" oninput="setShortText('${key}', this.value)">`;
+  }
 
   return body;
 }
@@ -969,6 +980,10 @@ function currentOpenKeyIndex(key){
   // key tiene forma s{si}-q{qi}; devolvemos el qi para poder limpiar el estado de invalidez.
   const m = key.match(/-q(\d+)$/);
   return m ? parseInt(m[1],10) : -1;
+}
+function setShortText(key, value){
+  answers[key] = value;
+  currentInvalid.delete(currentOpenKeyIndex(key));
 }
 
 // Re-renderiza solo la pantalla de pregunta actual, sin mover el scroll ni animar como página nueva.
@@ -1567,6 +1582,46 @@ function renderAdminOverview(subs){
   const trainingQ = findQuestion(q=>q.type==="single" && q.options && q.options.length===2 && q.options[0]==="Sí" && q.options[1]==="No");
   const trainingBlock = trainingQ ? renderDonutBlock("¿Recibió training en los últimos 3 meses?", subs, qKey(trainingQ.si,trainingQ.qi), trainingQ.q.options) : "";
 
+  // Distribución por área (lista de barras, no dona: son demasiadas categorías
+  // para verse claro como pastel).
+  const areaQ = findQuestion(q=>q.text==="¿Cuál es tu área?");
+  let areaHtml = "";
+  if(areaQ){
+    const key = qKey(areaQ.si, areaQ.qi);
+    const counts = {};
+    areaQ.q.options.forEach(o=>counts[o]=0);
+    let answeredArea = 0;
+    const otherAreaTexts = [];
+    subs.forEach(sub=>{
+      const v = sub.answers ? sub.answers[key] : undefined;
+      if(v && counts.hasOwnProperty(v)){
+        counts[v]++; answeredArea++;
+        if(v==="Otro"){
+          const t = sub.other ? sub.other[key] : "";
+          if(t && t.trim()) otherAreaTexts.push(t);
+        }
+      }
+    });
+    const maxArea = Math.max(1, ...Object.values(counts));
+    const areaBars = areaQ.q.options.map(o=>{
+      const c = counts[o]||0;
+      const pct = Math.round((c/maxArea)*100);
+      const pctOfTotal = answeredArea ? Math.round((c/answeredArea)*100) : 0;
+      return `<div class="admin-bar-row">
+        <div class="admin-bar-label">${escapeHtml(o)}</div>
+        <div class="admin-bar-track"><div class="admin-bar-fill" style="width:${pct}%"></div></div>
+        <div class="admin-bar-count">${c} <span>(${pctOfTotal}%)</span></div>
+      </div>`;
+    }).join("");
+    areaHtml = `
+      <div class="kpi-card" style="grid-column:1/-1;">
+        <div class="kpi-title">Distribución por área</div>
+        <div class="admin-bars" style="margin-top:14px;">${areaBars}</div>
+        ${otherAreaTexts.length ? `<div class="admin-open-list"><div class="admin-open-title">Especificaciones de "Otro" (${otherAreaTexts.length})</div>${otherAreaTexts.map(t=>`<div class="admin-open-item">${escapeHtml(t)}</div>`).join("")}</div>` : ""}
+      </div>
+    `;
+  }
+
   // Respuestas por día
   const byDay = {};
   subs.forEach(s=>{
@@ -1596,6 +1651,7 @@ function renderAdminOverview(subs){
       ${siteBlock}
       ${roleBlock}
       ${trainingBlock}
+      ${areaHtml}
       ${trendHtml}
     </div>
   `;
@@ -1734,7 +1790,7 @@ function renderAdminQuestion(sIdx, qIdx, q, subs){
       </div>`;
     }).join("") + `</div>`;
   }
-  else if(q.type === "open"){
+  else if(q.type === "open" || q.type === "shorttext"){
     if(values.length){
       body = `<div class="admin-open-list">` + values.map(t=>`<div class="admin-open-item">${escapeHtml(t)}</div>`).join("") + `</div>`;
     } else {
