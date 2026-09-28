@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Registro de Capacitaciones</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap">
+<style>
+[hidden]{display:none!important}
+body{margin:0}
+img{max-width:100%}
+:root{
+  --navy:#0E2240; --navy-2:#16315A; --blue:#2360C4; --blue-soft:#E7EEFA; --blue-line:#C9D7EF;
+  --bg:#F2F4F8; --surface:#FFFFFF; --surface-2:#F7F9FC; --line:#E1E6EE; --line-2:#EDF0F5;
+  --text:#14203A; --muted:#5A667B; --faint:#8A94A6;
+  --ok:#1E8E5A; --ok-bg:#E4F4EC; --warn:#A86A00; --warn-bg:#FFF3D6; --prog:#2360C4; --prog-bg:#E7EEFA; --bad:#B8322E; --bad-bg:#FBE8E7; --none:#7A8497; --none-bg:#EEF1F5;
+  --shadow:0 1px 2px rgba(14,34,64,.05),0 4px 14px rgba(14,34,64,.05);
+  --shadow-lg:0 20px 50px rgba(14,34,64,.22);
+  --head-text:#FFFFFF; --head-muted:#AFC0DC;
+  --r:12px; --r-sm:8px;
+  --f-body:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-cond:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --navy:#0A1628; --navy-2:#132744; --blue:#6E9CF0; --blue-soft:#18294A; --blue-line:#2A4170;
+    --bg:#0D1524; --surface:#142035; --surface-2:#18263E; --line:#243453; --line-2:#1E2D48;
+    --text:#E6ECF6; --muted:#A3B0C6; --faint:#76849C;
+    --ok:#5BCB93; --ok-bg:#133A2A; --warn:#F1BE4D; --warn-bg:#3A2E10; --prog:#8DB2F5; --prog-bg:#1A2D52; --bad:#F08A85; --bad-bg:#3F1C1D; --none:#95A1B6; --none-bg:#1D2A42;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.2); --shadow-lg:0 20px 50px rgba(0,0,0,.5);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --navy:#0A1628; --navy-2:#132744; --blue:#6E9CF0; --blue-soft:#18294A; --blue-line:#2A4170;
+  --bg:#0D1524; --surface:#142035; --surface-2:#18263E; --line:#243453; --line-2:#1E2D48;
+  --text:#E6ECF6; --muted:#A3B0C6; --faint:#76849C;
+  --ok:#5BCB93; --ok-bg:#133A2A; --warn:#F1BE4D; --warn-bg:#3A2E10; --prog:#8DB2F5; --prog-bg:#1A2D52; --bad:#F08A85; --bad-bg:#3F1C1D; --none:#95A1B6; --none-bg:#1D2A42;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.2); --shadow-lg:0 20px 50px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:var(--f-body);font-size:14px;line-height:1.5}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+
+/* Header */
+.top{background:var(--navy);color:var(--head-text);position:sticky;top:env(safe-area-inset-top,0px);z-index:30}
+.top-in{max-width:1280px;margin:0 auto;padding-inline:24px;display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-block:16px 0}
+.brand{display:flex;align-items:center;gap:12px;padding-bottom:14px}
+.mark{width:38px;height:38px;border-radius:9px;background:var(--blue);display:grid;place-items:center;flex:none}
+.mark svg{width:20px;height:20px;stroke:#fff}
+.brand .eyebrow{font-family:var(--f-cond);letter-spacing:.18em;font-size:13px;font-weight:600;color:var(--head-muted);line-height:1}
+.brand h1{margin:2px 0 0;font-size:19px;font-weight:600;letter-spacing:-.01em;line-height:1.2}
+.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.tab{background:none;border:0;color:var(--head-muted);font-family:var(--f-cond);font-weight:600;font-size:15px;letter-spacing:.1em;padding:12px 16px 14px;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:color .15s}
+.tab:hover{color:#fff}
+.tab[aria-selected="true"]{color:#fff;border-bottom-color:#6E9CF0}
+
+main{max-width:1280px;margin:0 auto;padding-inline:24px;padding-block:28px 64px}
+.view{display:flex;flex-direction:column;gap:22px}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.sec-h h2{margin:0;font-size:20px;font-weight:600;letter-spacing:-.01em;text-wrap:balance}
+.sec-h p{margin:2px 0 0;color:var(--muted);font-size:13.5px}
+.label{font-family:var(--f-cond);font-weight:600;letter-spacing:.12em;font-size:12.5px;text-transform:uppercase;color:var(--muted)}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px}
+.kpi .v{font-family:var(--f-cond);font-size:40px;font-weight:600;line-height:1;letter-spacing:-.01em}
+.kpi .s{font-size:12.5px;color:var(--faint)}
+.kpi.alert .v{color:var(--bad)}
+.kpi.lead{background:var(--navy-2);border-color:var(--navy-2);color:#fff}
+.kpi.lead .label{color:var(--head-muted)} .kpi.lead .s{color:var(--head-muted)}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.panel-h{padding:16px 18px 12px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--line-2)}
+.panel-h h3{margin:0;font-size:15px;font-weight:600}
+.panel-b{padding:16px 18px}
+.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+
+/* Bars */
+.bars{display:flex;flex-direction:column;gap:14px}
+.bar-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px}
+.bar-name{font-size:13.5px;font-weight:500;overflow-wrap:anywhere}
+.bar-val{font-size:13px;color:var(--muted)}
+.bar-track{grid-column:1/-1;height:8px;background:var(--line-2);border-radius:99px;overflow:hidden}
+.bar-fill{height:100%;background:var(--blue);border-radius:99px;min-width:0;transition:width .4s}
+
+/* Filters */
+.filters{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;box-shadow:var(--shadow)}
+.field{display:flex;flex-direction:column;gap:4px;min-width:150px;flex:1 1 150px}
+.field.search{flex:2 1 260px}
+.field label{font-family:var(--f-cond);font-weight:600;letter-spacing:.1em;font-size:12px;text-transform:uppercase;color:var(--muted)}
+.inp{height:40px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface-2);padding:0 12px;width:100%;min-width:0}
+.inp:focus{border-color:var(--blue);outline:none;box-shadow:0 0 0 3px var(--blue-soft)}
+.search-wrap{position:relative}
+.search-wrap svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--faint)}
+.search-wrap .inp{padding-left:34px}
+select.inp:disabled{opacity:.55}
+.btn{height:40px;border-radius:var(--r-sm);border:1px solid var(--line);background:var(--surface);padding:0 14px;cursor:pointer;font-weight:500;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:background .15s,border-color .15s}
+.btn:hover{border-color:var(--blue);color:var(--blue)}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.primary:hover{filter:brightness(1.08);color:#fff}
+.btn.sm{height:32px;padding:0 12px;font-size:13px}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.count{color:var(--muted);font-size:13.5px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:none;padding:6px 12px;cursor:pointer;font-size:13px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--blue-soft);color:var(--blue);font-weight:600}
+
+/* People cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
+.pcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s,border-color .15s}
+.pcard:hover{transform:translateY(-2px);border-color:var(--blue-line)}
+.p-top{display:flex;gap:12px;align-items:flex-start}
+.avatar{width:42px;height:42px;border-radius:50%;background:var(--blue-soft);color:var(--blue);display:grid;place-items:center;font-family:var(--f-cond);font-weight:700;font-size:16px;letter-spacing:.04em;flex:none}
+.p-name{font-weight:600;font-size:14.5px;line-height:1.3;overflow-wrap:anywhere}
+.p-role{font-size:13px;color:var(--muted);margin-top:2px}
+.meta{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-family:var(--f-cond);font-weight:600;font-size:12.5px;letter-spacing:.08em;padding:2px 8px;border-radius:6px;background:var(--surface-2);border:1px solid var(--line);color:var(--muted);text-transform:uppercase}
+.tag.area{background:var(--navy-2);color:#fff;border-color:var(--navy-2)}
+.p-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;padding-top:12px;border-top:1px solid var(--line-2);margin-top:auto;flex-wrap:wrap}
+.tcount{display:flex;align-items:center;gap:6px;font-weight:600;font-size:13.5px}
+.tcount svg{width:16px;height:16px;stroke:var(--blue)}
+.norec{font-family:var(--f-cond);font-weight:600;letter-spacing:.08em;font-size:12px;color:var(--none);background:var(--none-bg);padding:2px 8px;border-radius:6px}
+
+/* Status pills */
+.st{display:inline-flex;align-items:center;gap:5px;font-family:var(--f-cond);font-weight:600;letter-spacing:.08em;font-size:12.5px;padding:2px 9px;border-radius:99px;white-space:nowrap;text-transform:uppercase}
+.st.ok{color:var(--ok);background:var(--ok-bg)}
+.st.warn{color:var(--warn);background:var(--warn-bg)}
+.st.prog{color:var(--prog);background:var(--prog-bg)}
+.st.none{color:var(--none);background:var(--none-bg)}
+.st.bad{color:var(--bad);background:var(--bad-bg)}
+
+/* Empty */
+.empty{border:1.5px dashed var(--line);border-radius:var(--r);padding:34px 22px;text-align:center;color:var(--muted);background:var(--surface-2);display:flex;flex-direction:column;align-items:center;gap:8px}
+.empty svg{width:34px;height:34px;stroke:var(--faint)}
+.empty strong{color:var(--text);font-size:15px}
+.empty p{margin:0;max-width:52ch;font-size:13.5px}
+
+/* Tables */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:13.5px}
+th{font-family:var(--f-cond);font-weight:600;letter-spacing:.1em;text-transform:uppercase;font-size:12.5px;color:var(--muted);text-align:left;padding:11px 14px;background:var(--surface-2);border-bottom:1px solid var(--line);white-space:nowrap}
+th.sortable{cursor:pointer;user-select:none}
+th.sortable:hover{color:var(--blue)}
+td{padding:11px 14px;border-bottom:1px solid var(--line-2);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:var(--surface-2)}
+.linkish{background:none;border:0;padding:0;color:var(--text);font-weight:600;cursor:pointer;text-align:left}
+.linkish:hover{color:var(--blue);text-decoration:underline}
+
+/* Catalog */
+.catalog{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.ccard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow);transition:border-color .15s}
+.ccard:hover{border-color:var(--blue-line)}
+.ccard[aria-pressed="true"]{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
+.ccard h4{margin:0;font-size:15px;font-weight:600;line-height:1.3}
+.cstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;border-top:1px solid var(--line-2);padding-top:10px}
+.cstats b{display:block;font-family:var(--f-cond);font-size:22px;font-weight:600;line-height:1.1}
+.cstats span{font-size:11.5px;color:var(--faint)}
+
+/* Matrix */
+.matrix-wrap{overflow:auto;max-height:70vh;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.matrix th,.matrix td{text-align:center;padding:8px 10px}
+.matrix thead th{position:sticky;top:0;z-index:2}
+.matrix .rowh{position:sticky;left:0;z-index:1;background:var(--surface);text-align:left;min-width:220px;max-width:260px;border-right:1px solid var(--line)}
+.matrix thead .rowh{z-index:3;background:var(--surface-2)}
+.matrix thead th.col{white-space:normal;min-width:110px;max-width:140px;line-height:1.25;letter-spacing:.05em;vertical-align:bottom}
+.cell{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:7px;font-weight:700;font-size:14px}
+.cell.ok{color:var(--ok);background:var(--ok-bg)} .cell.warn{color:var(--warn);background:var(--warn-bg)} .cell.prog{color:var(--prog);background:var(--prog-bg)} .cell.none{color:var(--faint);background:transparent}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted);align-items:center}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.pct{font-size:12px;color:var(--muted);font-weight:600}
+
+/* Drawer */
+.scrim{position:fixed;inset:0;background:rgba(8,18,36,.45);z-index:50;opacity:0;transition:opacity .2s}
+.scrim.show{opacity:1}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,100%);background:var(--bg);z-index:51;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease}
+.drawer.show{transform:none}
+.dr-head{background:var(--navy);color:#fff;padding:18px 20px;padding-top:calc(18px + env(safe-area-inset-top,0px));display:flex;gap:14px;align-items:flex-start}
+.dr-head .avatar{background:rgba(255,255,255,.12);color:#fff;width:52px;height:52px;font-size:19px}
+.dr-head h2{margin:0;font-size:18px;font-weight:600;line-height:1.25;text-wrap:balance}
+.dr-head .p-role{color:var(--head-muted)}
+.x{margin-left:auto;background:rgba(255,255,255,.1);border:0;color:#fff;width:34px;height:34px;border-radius:8px;cursor:pointer;flex:none;display:grid;place-items:center}
+.x:hover{background:rgba(255,255,255,.2)}
+.dr-body{overflow-y:auto;padding:20px;padding-bottom:calc(28px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:18px}
+.info{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--line-2);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.info div{background:var(--surface);padding:10px 14px}
+.info .k{font-family:var(--f-cond);font-weight:600;letter-spacing:.1em;font-size:12px;text-transform:uppercase;color:var(--faint)}
+.info .v{font-weight:500;overflow-wrap:anywhere}
+.info .wide{grid-column:1/-1}
+.mini{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.mini div{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px;text-align:center}
+.mini b{display:block;font-family:var(--f-cond);font-size:24px;font-weight:600;line-height:1.1}
+.mini span{font-size:11px;color:var(--muted);line-height:1.2;display:block;margin-top:3px}
+.hist{display:flex;flex-direction:column;gap:10px}
+.hitem{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.hitem-h{padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.hitem-t{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.hitem h4{margin:0;font-size:14.5px;font-weight:600;text-transform:uppercase;letter-spacing:.01em}
+.hgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 12px;font-size:13px}
+.hgrid .k{color:var(--faint);font-size:11.5px}
+.details{border-top:1px solid var(--line-2);background:var(--surface-2);padding:14px 16px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px;font-size:13px}
+.details .k{font-family:var(--f-cond);font-weight:600;letter-spacing:.1em;font-size:11.5px;text-transform:uppercase;color:var(--faint)}
+.details .wide{grid-column:1/-1}
+.details a{color:var(--blue);overflow-wrap:anywhere}
+.hitem-f{padding:0 16px 14px}
+.dr-sec{display:flex;justify-content:space-between;align-items:center;gap:8px}
+
+.hlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.hrow{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 12px;display:flex;gap:10px;align-items:center;font-weight:500;font-size:13.5px;line-height:1.3;overflow-wrap:anywhere}
+.ck{flex:none;width:22px;height:22px;border-radius:50%;background:var(--ok-bg);color:var(--ok);display:grid;place-items:center;font-size:12px;font-weight:700}
+.miss{display:flex;flex-wrap:wrap;gap:6px}
+.miss span{font-size:12.5px;padding:4px 10px;border-radius:99px;border:1px dashed var(--line);color:var(--muted);background:var(--surface-2)}
+.simple th{font-family:var(--f-body);text-transform:none;letter-spacing:0;font-size:13.5px;font-weight:700;color:var(--blue);background:var(--surface);padding:14px 16px}
+.simple td{padding:12px 16px;font-size:13.5px}
+.simple tbody tr:nth-child(odd) td{background:var(--surface-2)}
+.simple tbody tr:hover td{background:var(--blue-soft)}
+.simple .lk{background:none;border:0;padding:0;color:var(--blue);cursor:pointer;text-align:left}
+.simple .lk:hover{text-decoration:underline}
+@media (max-width:1050px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:760px){
+  .top-in,main{padding-inline:16px}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid-2{grid-template-columns:1fr}
+  .mini{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .hgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .brand h1{font-size:17px}
+  .kpi .v{font-size:34px}
+}
+@media (max-width:420px){.info,.details{grid-template-columns:1fr}.field{min-width:100%}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <div class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg></div>
+      <div><div class="eyebrow">TRAINING</div><h1>Registro de Capacitaciones</h1></div>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Secciones">
+      <button class="tab" role="tab" data-tab="resumen" aria-selected="true">RESUMEN</button>
+      <button class="tab" role="tab" data-tab="colaboradores" aria-selected="false">COLABORADORES</button>
+      <button class="tab" role="tab" data-tab="capacitaciones" aria-selected="false">CAPACITACIONES</button>
+      <button class="tab" role="tab" data-tab="cobertura" aria-selected="false">COBERTURA</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- RESUMEN -->
+  <section class="view" id="v-resumen">
+    <div class="sec-h"><div><h2>Resumen general</h2><p id="res-sub">Estado de capacitación de toda la población registrada.</p></div></div>
+    <div class="kpis" id="kpis"></div>
+    <div class="grid-2">
+      <div class="panel"><div class="panel-h"><h3>Cobertura por área</h3><span class="label">Capacitados / total</span></div><div class="panel-b"><div class="bars" id="bars-area"></div></div></div>
+      <div class="panel"><div class="panel-h"><h3>Cobertura por cargo</h3><span class="label">Capacitados / total</span></div><div class="panel-b"><div class="bars" id="bars-cargo"></div></div></div>
+    </div>
+    <div class="grid-2">
+      <div class="panel"><div class="panel-h"><h3>Capacitaciones más impartidas</h3><button class="btn sm" data-goto="capacitaciones">Ver listado</button></div><div class="panel-b" id="top-trainings"></div></div>
+      <div class="panel"><div class="panel-h"><h3>Colaboradores con menor cobertura</h3><button class="btn sm" data-goto="cobertura">Ver cobertura</button></div><div class="panel-b" id="recent"></div></div>
+    </div>
+    <div class="panel"><div class="panel-h"><h3>Colaboradores sin capacitaciones registradas</h3><button class="btn sm" id="see-without">Ver en directorio</button></div><div class="panel-b"><div class="chips" id="without"></div></div></div>
+  </section>
+
+  <!-- COLABORADORES -->
+  <section class="view" id="v-colaboradores" hidden>
+    <div class="sec-h"><div><h2>Directorio de colaboradores</h2><p>Busca, filtra y abre el expediente de capacitación de cada persona.</p></div></div>
+    <div class="filters">
+      <div class="field search"><label for="f-q">Buscar colaborador</label><div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input class="inp" id="f-q" type="search" placeholder="Nombre o apellido" autocomplete="off"></div></div>
+      <div class="field"><label for="f-area">Área</label><select class="inp" id="f-area"></select></div>
+      <div class="field"><label for="f-depto">Departamento</label><select class="inp" id="f-depto"></select></div>
+      <div class="field"><label for="f-cargo">Cargo</label><select class="inp" id="f-cargo"></select></div>
+      <div class="field"><label for="f-cap">Capacitación</label><select class="inp" id="f-cap"></select></div>
+      <div class="field"><label for="f-est">Estatus de capacitación</label><select class="inp" id="f-est"><option value="">Todos</option><option value="con">Con capacitación</option><option value="sin">Sin capacitación</option></select></div>
+      <button class="btn" id="f-clear" type="button">Limpiar filtros</button>
+    </div>
+    <div class="toolbar">
+      <div class="count num" id="c-count"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <label class="label" for="f-sort">Ordenar</label>
+        <select class="inp" id="f-sort" style="width:auto;height:34px"><option value="name">Nombre A–Z</option><option value="most">Más capacitaciones</option><option value="least">Menos capacitaciones</option><option value="area">Área</option><option value="cargo">Cargo</option></select>
+        <div class="seg" role="group" aria-label="Vista"><button id="vw-cards" aria-pressed="true">Tarjetas</button><button id="vw-table" aria-pressed="false">Tabla</button></div>
+      </div>
+    </div>
+    <div id="people"></div>
+  </section>
+
+  <!-- CAPACITACIONES -->
+  <section class="view" id="v-capacitaciones" hidden>
+    <div class="sec-h"><div><h2>Capacitaciones por colaborador</h2><p>Listado de cada capacitación registrada, una fila por colaborador.</p></div></div>
+    <div class="filters">
+      <div class="field search"><label for="cap-q">Buscar colaborador</label><div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input class="inp" id="cap-q" type="search" placeholder="Nombre o apellido" autocomplete="off"></div></div>
+      <div class="field"><label for="cap-train">Capacitación</label><select class="inp" id="cap-train"></select></div>
+      <div class="field"><label for="cap-area">Área</label><select class="inp" id="cap-area"></select></div>
+      <button class="btn" id="cap-clear" type="button">Limpiar filtros</button>
+    </div>
+    <div class="count num" id="cap-count"></div>
+    <div id="catalog"></div>
+  </section>
+
+  <!-- COBERTURA -->
+  <section class="view" id="v-cobertura" hidden>
+    <div class="sec-h"><div><h2>Matriz de cobertura</h2><p>Colaboradores × capacitaciones. Útil para detectar brechas.</p></div></div>
+    <div class="filters">
+      <div class="field"><label for="m-area">Área</label><select class="inp" id="m-area"></select></div>
+      <div class="field"><label for="m-depto">Departamento</label><select class="inp" id="m-depto"></select></div>
+      <div class="field"><label for="m-cargo">Cargo</label><select class="inp" id="m-cargo"></select></div>
+      <div class="field"><label for="m-sort">Ordenar filas</label><select class="inp" id="m-sort"><option value="name">Nombre A–Z</option><option value="most">Mayor cobertura</option><option value="least">Menor cobertura</option></select></div>
+      <button class="btn" id="m-clear" type="button">Limpiar filtros</button>
+    </div>
+    <div class="legend">
+      <span><i class="cell ok">✓</i> Capacitación recibida</span>
+      <span><i class="cell none">—</i> No registrada</span>
+    </div>
+    <div id="matrix"></div>
+  </section>
+</main>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="dr-name" hidden></aside>
+
+<script>
+/* =====================================================================
+   DATOS — COLABORADORES
+   Para agregar colaboradores: añade un objeto con un id único (C0xx).
+   ===================================================================== */
+const COLABORADORES = [
+  {id:"C001",area:"PWI",departamento:"PRE WELCOME INTERVIEW & PRECASE REVIEW",cargo:"PWI MANAGER",nombre:"RAUL ESCALANTE LOPEZ",formacion:"LIC. EN PSICOLOGÍA"},
+  {id:"C002",area:"PWI",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI COORDINATOR",nombre:"ALICIA SORIA REYES",formacion:"MAESTRÍA EN DOCENCIA"},
+  {id:"C003",area:"PWI",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI TL",nombre:"TATIANA ITZEL JAIMES AGUIRRE",formacion:"LIC. EN PSICOLOGÍA"},
+  {id:"C004",area:"PWI",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI AGENT",nombre:"VERONICA ALEXANDRA AVILA LOPEZ",formacion:"LIC. PSICOLOGÍA"},
+  {id:"C005",area:"PWI",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI AGENT",nombre:"CRISTIAN RENE ARREOLA GARCIA",formacion:"LIC. PSICOLOGÍA"},
+  {id:"C006",area:"PWI",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI AGENT",nombre:"ALONDRA LIZETH HUERTA VAZQUEZ",formacion:"LIC. EN PSICOLOGÍA"},
+  {id:"C007",area:"PWI",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI AGENT",nombre:"DIVIA HUERTA TEODOSIO",formacion:"LIC. EN PSICOLOGÍA"},
+  {id:"C008",area:"PSYCH",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI AGENT",nombre:"MARTIN MARTINEZ LUNA",formacion:"LIC. CIENCIAS FORENSES"},
+  {id:"C009",area:"PSYCH",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI AGENT",nombre:"NANCY GABRIELA SOLANO ANGUIANO",formacion:"LIC. EN CRIMINALÍSTICA"},
+  {id:"C010",area:"PSYCH",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI AGENT",nombre:"LIZETH ANAHI LEYVA JACOME",formacion:"LIC. EN PSICOLOGÍA"},
+  {id:"C011",area:"PSYCH",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI TL",nombre:"JOSE FRANCISCO DIAZ CASTAÑEDA",formacion:"LIC. EN SOCIOLOGÍA"},
+  {id:"C012",area:"PWI",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI AGENT",nombre:"RODRIGO MONROY ZAVALA",formacion:"MAESTRÍA EN PSICOLOGÍA CLÍNICA"},
+  {id:"C013",area:"PWI",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI AGENT",nombre:"GUSTAVO DIEGO CAMPOS MARTINEZ",formacion:"LIC. EN PSICOLOGÍA"},
+  {id:"C014",area:"PWI",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI AGENT",nombre:"KENIA DHAMAR BECERRA PARRA",formacion:"LIC. EN PSICOLOGÍA"},
+  {id:"C015",area:"PWI",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI AGENT",nombre:"ANGEL VENTURA YAÑEZ",formacion:"LIC. EN PSICOLOGÍA"},
+  {id:"C016",area:"PWI",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI AGENT",nombre:"GUILLERMO ALBERTO RAMIREZ ROMERO",formacion:"LIC. EN PSICOLOGÍA"},
+  {id:"C017",area:"PWI",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI AGENT",nombre:"ANGEL ALBERTO MURILLO MEZA",formacion:"LIC. EN PSICOLOGÍA"},
+  {id:"C018",area:"PWI",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI AGENT",nombre:"FERNANDO DAVID FIERRO DURAN",formacion:"LIC. EN ARQUITECTURA"},
+  {id:"C019",area:"PSYCH",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI TL",nombre:"ALMA ERENDIRA DURAN RIVERA",formacion:"LIC. EN PSICOLOGÍA"},
+  {id:"C020",area:"PSYCH",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI AGENT",nombre:"NORMA ANGELICA ZAVALA DAVILA",formacion:"LIC. EN PSICOLOGÍA"},
+  {id:"C021",area:"PSYCH",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI AGENT",nombre:"DIEGO MARTINEZ HIDALGO",formacion:"LIC. EN PSICOLOGÍA"},
+  {id:"C022",area:"PSYCH",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI AGENT",nombre:"SAMANTHA FONSECA SALAZAR",formacion:"LIC. EN PSICOLOGÍA"},
+  {id:"C023",area:"PSYCH",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI AGENT",nombre:"KARLA ANGELICA CARDENAS REYES",formacion:"LIC. EN PSICOLOGÍA"},
+  {id:"C024",area:"PSYCH",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI AGENT",nombre:"SUSLAY YACARANDAY CASTILLO MENDOZA",formacion:"LIC. EN PSICOLOGÍA"},
+  {id:"C025",area:"PSYCH",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI AGENT",nombre:"ARELY BERENICE RIVERA PALACIOS",formacion:"LIC. EN PSICOLOGÍA"},
+  {id:"C026",area:"PSYCH",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI TL COMPLEX",nombre:"DANNEVI GARCIA HERNANDEZ",formacion:"LIC. EN PSICOLOGÍA"},
+  {id:"C027",area:"PSYCH",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI AGENT",nombre:"LUIS ENRIQUE RICO CASTAÑEDA",formacion:"LIC. EN PSICOLOGÍA"},
+  {id:"C028",area:"PSYCH",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI AGENT",nombre:"CARLOS ALBERTO CORTES ARELLANO",formacion:"LIC. EN PSICOLOGÍA"},
+  {id:"C029",area:"PSYCH",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI AGENT",nombre:"DULCE AMAIRANI MARTINEZ BAUTISTA",formacion:"LIC. EN PSICOLOGÍA"},
+  {id:"C030",area:"PSYCH",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI AGENT",nombre:"ROBERTO SEGURA CONTRERAS",formacion:"LIC. EN PSICOLOGÍA"},
+  {id:"C031",area:"PSYCH",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI AGENT",nombre:"JENY MACEDO LOPEZ",formacion:"LIC. EN PSICOLOGÍA"},
+  {id:"C032",area:"PSYCH",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI AGENT",nombre:"CINTYA JOSELYN LOPEZ VILLANUEVA",formacion:"LIC. EN PSICOLOGÍA"},
+  {id:"C033",area:"PSYCH",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI AGENT",nombre:"DIANA VIDAL HERNANDEZ",formacion:"LIC. EN CRIMINOLOGIA CRIMINALÍSTICA Y TÉCNICAS PERICIALES"},
+  {id:"C034",area:"PSYCH",departamento:"PRE WELCOME INTERVIEW",cargo:"PWI AGENT",nombre:"CAROLINA ELIZABETH HERNANDEZ POUPARD",formacion:"LIC. EN PSICOLOGÍA"},
+  {id:"C035",area:"PWI",departamento:"PRE CASE REVIEW",cargo:"PRE WELCOME CALL COORDINATOR JR",nombre:"RENATA RAMIREZ FLORES",formacion:"LIC. EN PSICOLOGÍA GENERAL"}
+];
+
+/* =====================================================================
+   DATOS — REGISTRO DE CAPACITACIONES (histórico acumulativo)
+   Un objeto por capacitación recibida. Campos no proporcionados = null.
+   {
+     id: "R0001",
+     colaboradorId: "C012",
+     capacitacion: "Common Core Visa T",
+     categoria: null,          // p. ej. "Visa T"
+     fecha: null,              // "AAAA-MM-DD"
+     instructor: null,
+     modalidad: null,          // "Presencial" | "Virtual" | ...
+     duracionHoras: null,      // número
+     calificacion: null,       // número 0–100
+     estatus: null,            // "COMPLETADO" | "REQUIERE REFUERZO" | "EN PROCESO"
+     observaciones: null,
+     evidencia: null           // texto o URL
+   }
+   Sin estatus registrado, el registro cuenta como capacitación recibida.
+   ===================================================================== */
+const CAPACITACIONES = [
+  /* Carga 1 · 28/09/2026 · solo nombre de capacitación proporcionado */
+  {id:"R0001",colaboradorId:"C003",capacitacion:"Common Core",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0002",colaboradorId:"C003",capacitacion:"Soft Skills",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0003",colaboradorId:"C003",capacitacion:"Ongoing Visa T elearning",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0004",colaboradorId:"C003",capacitacion:"Evidencias P+ ORGÁNICO",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0005",colaboradorId:"C003",capacitacion:"Personal Injury",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0006",colaboradorId:"C003",capacitacion:"Manual de regresos",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0007",colaboradorId:"C003",capacitacion:"Materiales Interactivos Complementarios",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0008",colaboradorId:"C003",capacitacion:"Folios Operativos",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0009",colaboradorId:"C003",capacitacion:"Consulta de Material",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0010",colaboradorId:"C003",capacitacion:"External Training Hub",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0011",colaboradorId:"C003",capacitacion:"Pre Welcome Call",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0012",colaboradorId:"C003",capacitacion:"E-learning VAWA",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0013",colaboradorId:"C003",capacitacion:"ACTUALIZACIONES 2026",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0014",colaboradorId:"C003",capacitacion:"ACTUALIZACIONES CLIENTES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0015",colaboradorId:"C003",capacitacion:"Pre Welcome Interview",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0016",colaboradorId:"C004",capacitacion:"Common Core",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0017",colaboradorId:"C004",capacitacion:"ORIENTATION VISA T PSYCH",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0018",colaboradorId:"C004",capacitacion:"Consulta de Material",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0019",colaboradorId:"C004",capacitacion:"MENDOZA NEWS",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0020",colaboradorId:"C004",capacitacion:"E-learning VAWA",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0021",colaboradorId:"C004",capacitacion:"ACTUALIZACIONES 2026",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0022",colaboradorId:"C004",capacitacion:"ACTUALIZACIONES CLIENTES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0023",colaboradorId:"C004",capacitacion:"Pre Welcome Interview",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0024",colaboradorId:"C005",capacitacion:"Common Core",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0025",colaboradorId:"C005",capacitacion:"ORIENTATION VISA T PSYCH",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0026",colaboradorId:"C005",capacitacion:"Consulta de Material",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0027",colaboradorId:"C005",capacitacion:"External Training Hub",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0028",colaboradorId:"C005",capacitacion:"E-learning VAWA",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0029",colaboradorId:"C005",capacitacion:"ACTUALIZACIONES CLIENTES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0030",colaboradorId:"C005",capacitacion:"Pre Welcome Interview",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0031",colaboradorId:"C006",capacitacion:"Orientation Psych VAWA",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0032",colaboradorId:"C006",capacitacion:"Common Core",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0033",colaboradorId:"C006",capacitacion:"Soft Skills",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0034",colaboradorId:"C006",capacitacion:"Ongoing Visa T elearning",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0035",colaboradorId:"C006",capacitacion:"Evidencias P+ ORGÁNICO",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0036",colaboradorId:"C006",capacitacion:"CCC VAWA",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0037",colaboradorId:"C006",capacitacion:"Materiales Interactivos Complementarios",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0038",colaboradorId:"C006",capacitacion:"MICROCAPACITACIONES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0039",colaboradorId:"C006",capacitacion:"Folios Operativos",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0040",colaboradorId:"C006",capacitacion:"AI",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0041",colaboradorId:"C006",capacitacion:"ORIENTATION VISA T PSYCH",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0042",colaboradorId:"C006",capacitacion:"Consulta de Material",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0043",colaboradorId:"C006",capacitacion:"ACTUALIZACIONES 2026",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0044",colaboradorId:"C006",capacitacion:"ACTUALIZACIONES CLIENTES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0045",colaboradorId:"C006",capacitacion:"Pre Welcome Interview",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0046",colaboradorId:"C007",capacitacion:"Orientation Psych VAWA",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0047",colaboradorId:"C007",capacitacion:"Common Core",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0048",colaboradorId:"C007",capacitacion:"MICROCAPACITACIONES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0049",colaboradorId:"C007",capacitacion:"AI",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0050",colaboradorId:"C007",capacitacion:"ORIENTATION VISA T PSYCH",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0051",colaboradorId:"C007",capacitacion:"External Training Hub",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0052",colaboradorId:"C007",capacitacion:"Pre Welcome Interview",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0053",colaboradorId:"C007",capacitacion:"EVIDENCE UPDATE",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0054",colaboradorId:"C008",capacitacion:"Orientation Psych VAWA",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0055",colaboradorId:"C008",capacitacion:"Common Core",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0056",colaboradorId:"C008",capacitacion:"Evidencias P+ ORGÁNICO",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0057",colaboradorId:"C008",capacitacion:"MICROCAPACITACIONES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0058",colaboradorId:"C008",capacitacion:"ORIENTATION VISA T PSYCH",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0059",colaboradorId:"C008",capacitacion:"Consulta de Material",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0060",colaboradorId:"C008",capacitacion:"MENDOZA NEWS",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0061",colaboradorId:"C008",capacitacion:"ACTUALIZACIONES 2026",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0062",colaboradorId:"C008",capacitacion:"ACTUALIZACIONES CLIENTES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0063",colaboradorId:"C008",capacitacion:"Pre Welcome Interview",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0064",colaboradorId:"C008",capacitacion:"TMLF Marketing Orientation",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0065",colaboradorId:"C009",capacitacion:"Orientation Psych VAWA",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0066",colaboradorId:"C009",capacitacion:"Common Core",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0067",colaboradorId:"C009",capacitacion:"Materiales Interactivos Complementarios",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0068",colaboradorId:"C009",capacitacion:"MICROCAPACITACIONES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0069",colaboradorId:"C009",capacitacion:"ORIENTATION VISA T PSYCH",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0070",colaboradorId:"C009",capacitacion:"Consulta de Material",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0071",colaboradorId:"C009",capacitacion:"Pre Welcome Call",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0072",colaboradorId:"C009",capacitacion:"Legal Strategy Call",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0073",colaboradorId:"C009",capacitacion:"ACTUALIZACIONES 2026",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0074",colaboradorId:"C009",capacitacion:"TMLF I-FORMS",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0075",colaboradorId:"C009",capacitacion:"Pre Welcome Interview",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0076",colaboradorId:"C010",capacitacion:"Visa T",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0077",colaboradorId:"C010",capacitacion:"Common Core",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0078",colaboradorId:"C010",capacitacion:"Materiales Interactivos Complementarios",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0079",colaboradorId:"C010",capacitacion:"MICROCAPACITACIONES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0080",colaboradorId:"C010",capacitacion:"ORIENTATION VISA T PSYCH",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0081",colaboradorId:"C010",capacitacion:"VES - P+ - CORTES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0082",colaboradorId:"C010",capacitacion:"Consulta de Material",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0083",colaboradorId:"C010",capacitacion:"Ongoing P+",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0084",colaboradorId:"C010",capacitacion:"ACTUALIZACIONES 2026",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0085",colaboradorId:"C010",capacitacion:"Pre Welcome Interview",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0086",colaboradorId:"C011",capacitacion:"Orientation Psych VAWA",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0087",colaboradorId:"C011",capacitacion:"Common Core",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0088",colaboradorId:"C011",capacitacion:"Ongoing Visa T elearning",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0089",colaboradorId:"C011",capacitacion:"Evidencias P+ ORGÁNICO",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0090",colaboradorId:"C011",capacitacion:"Manual de regresos",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0091",colaboradorId:"C011",capacitacion:"Materiales Interactivos Complementarios",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0092",colaboradorId:"C011",capacitacion:"MICROCAPACITACIONES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0093",colaboradorId:"C011",capacitacion:"Folios Operativos",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0094",colaboradorId:"C011",capacitacion:"ORIENTATION VISA T PSYCH",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0095",colaboradorId:"C011",capacitacion:"Consulta de Material",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0096",colaboradorId:"C011",capacitacion:"External Training Hub",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0097",colaboradorId:"C011",capacitacion:"ACTUALIZACIONES 2026",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0098",colaboradorId:"C011",capacitacion:"ACTUALIZACIONES CLIENTES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0099",colaboradorId:"C011",capacitacion:"Slack Communications",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0100",colaboradorId:"C011",capacitacion:"Pre Welcome Interview",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0101",colaboradorId:"C012",capacitacion:"Pre Welcome Interview",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0102",colaboradorId:"C012",capacitacion:"Common Core - Avanzado",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0103",colaboradorId:"C013",capacitacion:"Orientation Psych VAWA",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0104",colaboradorId:"C013",capacitacion:"Common Core",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0105",colaboradorId:"C013",capacitacion:"MICROCAPACITACIONES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0106",colaboradorId:"C013",capacitacion:"AI",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0107",colaboradorId:"C013",capacitacion:"ORIENTATION VISA T PSYCH",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0108",colaboradorId:"C013",capacitacion:"Consulta de Material",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0109",colaboradorId:"C013",capacitacion:"External Training Hub",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0110",colaboradorId:"C013",capacitacion:"Pre Welcome Interview",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0111",colaboradorId:"C013",capacitacion:"EVIDENCE UPDATE",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0112",colaboradorId:"C014",capacitacion:"Orientation Psych VAWA",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0113",colaboradorId:"C014",capacitacion:"Common Core",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0114",colaboradorId:"C014",capacitacion:"MICROCAPACITACIONES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0115",colaboradorId:"C014",capacitacion:"AI",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0116",colaboradorId:"C014",capacitacion:"ORIENTATION VISA T PSYCH",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0117",colaboradorId:"C014",capacitacion:"External Training Hub",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0118",colaboradorId:"C014",capacitacion:"Pre Welcome Call",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0119",colaboradorId:"C014",capacitacion:"EVIDENCE UPDATE",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0120",colaboradorId:"C015",capacitacion:"Orientation Psych VAWA",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0121",colaboradorId:"C015",capacitacion:"Common Core",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0122",colaboradorId:"C015",capacitacion:"MICROCAPACITACIONES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0123",colaboradorId:"C015",capacitacion:"AI",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0124",colaboradorId:"C015",capacitacion:"ORIENTATION VISA T PSYCH",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0125",colaboradorId:"C015",capacitacion:"External Training Hub",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0126",colaboradorId:"C015",capacitacion:"Pre Welcome Call",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0127",colaboradorId:"C015",capacitacion:"MENDOZA NEWS",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0128",colaboradorId:"C015",capacitacion:"Pre Welcome Interview",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0129",colaboradorId:"C015",capacitacion:"EVIDENCE UPDATE",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0130",colaboradorId:"C016",capacitacion:"Folios Operativos",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0131",colaboradorId:"C016",capacitacion:"EVIDENCE UPDATE",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0132",colaboradorId:"C016",capacitacion:"Pre Welcome Interview",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0133",colaboradorId:"C016",capacitacion:"ACTUALIZACIONES 2026",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0134",colaboradorId:"C016",capacitacion:"Pre Welcome Call",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0135",colaboradorId:"C016",capacitacion:"External Training Hub",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0136",colaboradorId:"C016",capacitacion:"Consulta de Material",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0137",colaboradorId:"C016",capacitacion:"ORIENTATION VISA T PSYCH",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0138",colaboradorId:"C016",capacitacion:"AI",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0139",colaboradorId:"C016",capacitacion:"Orientation Psych VAWA",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0140",colaboradorId:"C016",capacitacion:"MICROCAPACITACIONES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0141",colaboradorId:"C016",capacitacion:"Materiales Interactivos Complementarios",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0142",colaboradorId:"C016",capacitacion:"Manual de regresos",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0143",colaboradorId:"C016",capacitacion:"Evidencias P+ ORGÁNICO",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0144",colaboradorId:"C016",capacitacion:"Ongoing Visa T elearning",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0145",colaboradorId:"C016",capacitacion:"Evidencias RAR",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0146",colaboradorId:"C016",capacitacion:"Common Core",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0147",colaboradorId:"C017",capacitacion:"AI",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0148",colaboradorId:"C017",capacitacion:"EVIDENCE UPDATE",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0149",colaboradorId:"C017",capacitacion:"Pre Welcome Interview",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0150",colaboradorId:"C017",capacitacion:"ACTUALIZACIONES CLIENTES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0151",colaboradorId:"C017",capacitacion:"ACTUALIZACIONES 2026",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0152",colaboradorId:"C017",capacitacion:"MENDOZA NEWS",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0153",colaboradorId:"C017",capacitacion:"External Training Hub",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0154",colaboradorId:"C017",capacitacion:"Consulta de Material",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0155",colaboradorId:"C017",capacitacion:"ORIENTATION VISA T PSYCH",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0156",colaboradorId:"C017",capacitacion:"Orientation Psych VAWA",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0157",colaboradorId:"C017",capacitacion:"Folios Operativos",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0158",colaboradorId:"C017",capacitacion:"MICROCAPACITACIONES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0159",colaboradorId:"C017",capacitacion:"Materiales Interactivos Complementarios",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0160",colaboradorId:"C017",capacitacion:"Manual de regresos",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0161",colaboradorId:"C017",capacitacion:"Evidencias P+ ORGÁNICO",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0162",colaboradorId:"C017",capacitacion:"Ongoing Visa T elearning",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0163",colaboradorId:"C017",capacitacion:"Orientation Psicología Visa T",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0164",colaboradorId:"C017",capacitacion:"Common Core",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0165",colaboradorId:"C018",capacitacion:"Orientation Writers",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0166",colaboradorId:"C018",capacitacion:"Common Core",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0167",colaboradorId:"C018",capacitacion:"VISA T - ONLINE",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0168",colaboradorId:"C018",capacitacion:"ORIENTATION FOLLOW UP",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0169",colaboradorId:"C018",capacitacion:"Materiales Interactivos Complementarios",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0170",colaboradorId:"C018",capacitacion:"Pre Welcome Call",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0171",colaboradorId:"C018",capacitacion:"VISA T ACTUALIZACIONES 2025",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0172",colaboradorId:"C018",capacitacion:"TMLF I-FORMS",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0173",colaboradorId:"C018",capacitacion:"Pre Welcome Interview",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0174",colaboradorId:"C018",capacitacion:"EVIDENCE UPDATE",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0175",colaboradorId:"C019",capacitacion:"Common Core",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0176",colaboradorId:"C019",capacitacion:"Ongoing Visa T elearning",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0177",colaboradorId:"C019",capacitacion:"Evidencias P+ ORGÁNICO",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0178",colaboradorId:"C019",capacitacion:"Personal Injury",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0179",colaboradorId:"C019",capacitacion:"Manual de regresos",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0180",colaboradorId:"C019",capacitacion:"Materiales Interactivos Complementarios",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0181",colaboradorId:"C019",capacitacion:"Folios Operativos",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0182",colaboradorId:"C019",capacitacion:"Consulta de Material",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0183",colaboradorId:"C019",capacitacion:"External Training Hub",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0184",colaboradorId:"C019",capacitacion:"E-learning VAWA",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0185",colaboradorId:"C019",capacitacion:"ACTUALIZACIONES 2026",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0186",colaboradorId:"C019",capacitacion:"ACTUALIZACIONES CLIENTES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0187",colaboradorId:"C019",capacitacion:"Slack Communications",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0188",colaboradorId:"C019",capacitacion:"Pre Welcome Interview",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0189",colaboradorId:"C019",capacitacion:"EVIDENCE UPDATE",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0190",colaboradorId:"C020",capacitacion:"Orientation Psych VAWA",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0191",colaboradorId:"C020",capacitacion:"Common Core",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0192",colaboradorId:"C020",capacitacion:"MICROCAPACITACIONES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0193",colaboradorId:"C020",capacitacion:"AI",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0194",colaboradorId:"C020",capacitacion:"ORIENTATION VISA T PSYCH",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0195",colaboradorId:"C020",capacitacion:"ACTUALIZACIONES 2026",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0196",colaboradorId:"C020",capacitacion:"ACTUALIZACIONES CLIENTES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0197",colaboradorId:"C020",capacitacion:"Pre Welcome Interview",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0198",colaboradorId:"C020",capacitacion:"EVIDENCE UPDATE",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0199",colaboradorId:"C021",capacitacion:"Orientation Psych VAWA",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0200",colaboradorId:"C021",capacitacion:"Common Core",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0201",colaboradorId:"C021",capacitacion:"Evidencias P+ ORGÁNICO",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0202",colaboradorId:"C021",capacitacion:"MICROCAPACITACIONES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0203",colaboradorId:"C021",capacitacion:"ORIENTATION VISA T PSYCH",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0204",colaboradorId:"C021",capacitacion:"ACTUALIZACIONES 2026",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0205",colaboradorId:"C021",capacitacion:"ACTUALIZACIONES CLIENTES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0206",colaboradorId:"C021",capacitacion:"Case Review Call",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0207",colaboradorId:"C021",capacitacion:"Pre Welcome Interview",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0208",colaboradorId:"C021",capacitacion:"EVIDENCE UPDATE",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0209",colaboradorId:"C022",capacitacion:"ORIENTATION VISA T PSYCH",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0210",colaboradorId:"C022",capacitacion:"External Training Hub",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0211",colaboradorId:"C022",capacitacion:"MENDOZA NEWS",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0212",colaboradorId:"C022",capacitacion:"E-learning VAWA",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0213",colaboradorId:"C022",capacitacion:"ACTUALIZACIONES 2026",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0214",colaboradorId:"C022",capacitacion:"ACTUALIZACIONES CLIENTES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0215",colaboradorId:"C022",capacitacion:"Pre Welcome Interview",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0216",colaboradorId:"C023",capacitacion:"ORIENTATION VISA T PSYCH",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0217",colaboradorId:"C023",capacitacion:"Consulta de Material",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0218",colaboradorId:"C023",capacitacion:"E-learning VAWA",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0219",colaboradorId:"C023",capacitacion:"ACTUALIZACIONES 2026",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0220",colaboradorId:"C023",capacitacion:"ACTUALIZACIONES CLIENTES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0221",colaboradorId:"C023",capacitacion:"Pre Welcome Interview",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0222",colaboradorId:"C023",capacitacion:"EVIDENCE UPDATE",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0223",colaboradorId:"C024",capacitacion:"Common Core",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0224",colaboradorId:"C024",capacitacion:"ORIENTATION VISA T PSYCH",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0225",colaboradorId:"C024",capacitacion:"MENDOZA NEWS",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0226",colaboradorId:"C024",capacitacion:"E-learning VAWA",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0227",colaboradorId:"C024",capacitacion:"ACTUALIZACIONES 2026",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0228",colaboradorId:"C024",capacitacion:"ACTUALIZACIONES CLIENTES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0229",colaboradorId:"C024",capacitacion:"Pre Welcome Interview",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0230",colaboradorId:"C024",capacitacion:"EVIDENCE UPDATE",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0231",colaboradorId:"C025",capacitacion:"Common Core",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0232",colaboradorId:"C025",capacitacion:"ORIENTATION VISA T PSYCH",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0233",colaboradorId:"C025",capacitacion:"Consulta de Material",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0234",colaboradorId:"C025",capacitacion:"External Training Hub",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0235",colaboradorId:"C025",capacitacion:"MENDOZA NEWS",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0236",colaboradorId:"C025",capacitacion:"E-learning VAWA",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0237",colaboradorId:"C025",capacitacion:"ACTUALIZACIONES 2026",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0238",colaboradorId:"C025",capacitacion:"ACTUALIZACIONES CLIENTES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0239",colaboradorId:"C025",capacitacion:"Pre Welcome Interview",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0240",colaboradorId:"C025",capacitacion:"EVIDENCE UPDATE",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0241",colaboradorId:"C026",capacitacion:"Folios Operativos",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0242",colaboradorId:"C026",capacitacion:"Pre Welcome Interview",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0243",colaboradorId:"C026",capacitacion:"TMLF I-FORMS",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0244",colaboradorId:"C026",capacitacion:"ACTUALIZACIONES CLIENTES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0245",colaboradorId:"C026",capacitacion:"ACTUALIZACIONES 2026",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0246",colaboradorId:"C026",capacitacion:"Pre Welcome Call",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0247",colaboradorId:"C026",capacitacion:"External Training Hub",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0248",colaboradorId:"C026",capacitacion:"Consulta de Material",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0249",colaboradorId:"C026",capacitacion:"AI",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0250",colaboradorId:"C026",capacitacion:"Orientation Psych VAWA",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0251",colaboradorId:"C026",capacitacion:"MICROCAPACITACIONES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0252",colaboradorId:"C026",capacitacion:"Materiales Interactivos Complementarios",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0253",colaboradorId:"C026",capacitacion:"Manual de regresos",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0254",colaboradorId:"C026",capacitacion:"Personal Injury",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0255",colaboradorId:"C026",capacitacion:"Evidencias P+ ORGÁNICO",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0256",colaboradorId:"C026",capacitacion:"Ongoing Visa T elearning",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0257",colaboradorId:"C026",capacitacion:"Soft Skills",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0258",colaboradorId:"C026",capacitacion:"Common Core",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0259",colaboradorId:"C027",capacitacion:"Visa T",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0260",colaboradorId:"C027",capacitacion:"Common Core",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0261",colaboradorId:"C027",capacitacion:"Ongoing Visa T elearning",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0262",colaboradorId:"C027",capacitacion:"Evidencias P+ ORGÁNICO",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0263",colaboradorId:"C027",capacitacion:"Manual de regresos",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0264",colaboradorId:"C027",capacitacion:"Materiales Interactivos Complementarios",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0265",colaboradorId:"C027",capacitacion:"Folios Operativos",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0266",colaboradorId:"C027",capacitacion:"Consulta de Material",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0267",colaboradorId:"C027",capacitacion:"External Training Hub",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0268",colaboradorId:"C027",capacitacion:"Pre Welcome Call",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0269",colaboradorId:"C027",capacitacion:"ACTUALIZACIONES 2026",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0270",colaboradorId:"C027",capacitacion:"TMLF I-FORMS",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0271",colaboradorId:"C027",capacitacion:"Pre Welcome Interview",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0272",colaboradorId:"C028",capacitacion:"Common Core",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0273",colaboradorId:"C028",capacitacion:"Ongoing Visa T elearning",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0274",colaboradorId:"C028",capacitacion:"Evidencias P+ ORGÁNICO",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0275",colaboradorId:"C028",capacitacion:"Manual de regresos",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0276",colaboradorId:"C028",capacitacion:"Materiales Interactivos Complementarios",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0277",colaboradorId:"C028",capacitacion:"Folios Operativos",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0278",colaboradorId:"C028",capacitacion:"Consulta de Material",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0279",colaboradorId:"C028",capacitacion:"Pre Welcome Call",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0280",colaboradorId:"C028",capacitacion:"ACTUALIZACIONES 2026",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0281",colaboradorId:"C028",capacitacion:"TMLF I-FORMS",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0282",colaboradorId:"C028",capacitacion:"Pre Welcome Interview",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0283",colaboradorId:"C029",capacitacion:"Common Core",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0284",colaboradorId:"C029",capacitacion:"Ongoing Visa T elearning",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0285",colaboradorId:"C029",capacitacion:"Evidencias P+ ORGÁNICO",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0286",colaboradorId:"C029",capacitacion:"Manual de regresos",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0287",colaboradorId:"C029",capacitacion:"Materiales Interactivos Complementarios",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0288",colaboradorId:"C029",capacitacion:"Folios Operativos",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0289",colaboradorId:"C029",capacitacion:"AI",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0290",colaboradorId:"C029",capacitacion:"Consulta de Material",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0291",colaboradorId:"C029",capacitacion:"External Training Hub",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0292",colaboradorId:"C029",capacitacion:"MENDOZA NEWS",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0293",colaboradorId:"C029",capacitacion:"ACTUALIZACIONES 2026",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0294",colaboradorId:"C029",capacitacion:"Pre Welcome Interview",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0295",colaboradorId:"C030",capacitacion:"Orientation Psych VAWA",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0296",colaboradorId:"C030",capacitacion:"Common Core",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0297",colaboradorId:"C030",capacitacion:"Orientation Psicología Visa T",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0298",colaboradorId:"C030",capacitacion:"Ongoing Visa T elearning",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0299",colaboradorId:"C030",capacitacion:"Evidencias P+ ORGÁNICO",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0300",colaboradorId:"C030",capacitacion:"Manual de regresos",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0301",colaboradorId:"C030",capacitacion:"Materiales Interactivos Complementarios",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0302",colaboradorId:"C030",capacitacion:"MICROCAPACITACIONES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0303",colaboradorId:"C030",capacitacion:"Folios Operativos",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0304",colaboradorId:"C030",capacitacion:"AI",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0305",colaboradorId:"C030",capacitacion:"ORIENTATION VISA T PSYCH",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0306",colaboradorId:"C030",capacitacion:"Consulta de Material",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0307",colaboradorId:"C030",capacitacion:"MENDOZA NEWS",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0308",colaboradorId:"C030",capacitacion:"ACTUALIZACIONES 2026",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0309",colaboradorId:"C030",capacitacion:"Pre Welcome Interview",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0310",colaboradorId:"C031",capacitacion:"Orientation Psych VAWA",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0311",colaboradorId:"C031",capacitacion:"Common Core",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0312",colaboradorId:"C031",capacitacion:"Ongoing Visa T elearning",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0313",colaboradorId:"C031",capacitacion:"Evidencias P+ ORGÁNICO",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0314",colaboradorId:"C031",capacitacion:"Manual de regresos",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0315",colaboradorId:"C031",capacitacion:"Materiales Interactivos Complementarios",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0316",colaboradorId:"C031",capacitacion:"MICROCAPACITACIONES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0317",colaboradorId:"C031",capacitacion:"Folios Operativos",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0318",colaboradorId:"C031",capacitacion:"AI",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0319",colaboradorId:"C031",capacitacion:"ORIENTATION VISA T PSYCH",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0320",colaboradorId:"C031",capacitacion:"Consulta de Material",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0321",colaboradorId:"C031",capacitacion:"External Training Hub",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0322",colaboradorId:"C031",capacitacion:"ACTUALIZACIONES 2026",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0323",colaboradorId:"C031",capacitacion:"Pre Welcome Interview",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0324",colaboradorId:"C032",capacitacion:"Orientation Psych VAWA",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0325",colaboradorId:"C032",capacitacion:"Common Core",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0326",colaboradorId:"C032",capacitacion:"MICROCAPACITACIONES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0327",colaboradorId:"C032",capacitacion:"AI",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0328",colaboradorId:"C032",capacitacion:"ORIENTATION VISA T PSYCH",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0329",colaboradorId:"C032",capacitacion:"ACTUALIZACIONES 2026",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0330",colaboradorId:"C032",capacitacion:"Pre Welcome Interview",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0331",colaboradorId:"C033",capacitacion:"Common Core",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0332",colaboradorId:"C033",capacitacion:"Orientation Psicología Visa T",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0333",colaboradorId:"C033",capacitacion:"Ongoing Visa T elearning",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0334",colaboradorId:"C033",capacitacion:"Evidencias P+ ORGÁNICO",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0335",colaboradorId:"C033",capacitacion:"Manual de regresos",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0336",colaboradorId:"C033",capacitacion:"Materiales Interactivos Complementarios",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0337",colaboradorId:"C033",capacitacion:"Folios Operativos",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0338",colaboradorId:"C033",capacitacion:"Consulta de Material",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0339",colaboradorId:"C033",capacitacion:"External Training Hub",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0340",colaboradorId:"C033",capacitacion:"MENDOZA NEWS",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0341",colaboradorId:"C033",capacitacion:"E-learning VAWA",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0342",colaboradorId:"C033",capacitacion:"ACTUALIZACIONES 2026",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0343",colaboradorId:"C033",capacitacion:"ACTUALIZACIONES CLIENTES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0344",colaboradorId:"C033",capacitacion:"Pre Welcome Interview",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0345",colaboradorId:"C033",capacitacion:"EVIDENCE UPDATE",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0346",colaboradorId:"C034",capacitacion:"Attorney Training",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0347",colaboradorId:"C034",capacitacion:"Common Core",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0348",colaboradorId:"C034",capacitacion:"ORIENTATION VISA T PSYCH",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0349",colaboradorId:"C034",capacitacion:"Consulta de Material",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0350",colaboradorId:"C034",capacitacion:"Pre Welcome Call",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0351",colaboradorId:"C034",capacitacion:"MENDOZA NEWS",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0352",colaboradorId:"C034",capacitacion:"E-learning VAWA",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0353",colaboradorId:"C034",capacitacion:"ACTUALIZACIONES 2026",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0354",colaboradorId:"C034",capacitacion:"ACTUALIZACIONES CLIENTES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0355",colaboradorId:"C035",capacitacion:"Consulta de Material",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0356",colaboradorId:"C035",capacitacion:"COLLECTION",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0357",colaboradorId:"C035",capacitacion:"Case Review Call",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0358",colaboradorId:"C035",capacitacion:"Compliance Updates",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0359",colaboradorId:"C035",capacitacion:"TMLF I-FORMS",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0360",colaboradorId:"C035",capacitacion:"ACTUALIZACIONES CLIENTES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0361",colaboradorId:"C035",capacitacion:"ACTUALIZACIONES 2026",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0362",colaboradorId:"C035",capacitacion:"E-learning VAWA",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0363",colaboradorId:"C035",capacitacion:"Pre Welcome Call",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0364",colaboradorId:"C035",capacitacion:"Multi-Party Litigation",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0365",colaboradorId:"C035",capacitacion:"External Training Hub",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0366",colaboradorId:"C035",capacitacion:"Orientation Psych VAWA",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0367",colaboradorId:"C035",capacitacion:"AI",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0368",colaboradorId:"C035",capacitacion:"Folios Operativos",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0369",colaboradorId:"C035",capacitacion:"Materiales Interactivos Complementarios",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0370",colaboradorId:"C035",capacitacion:"Manual de regresos",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0371",colaboradorId:"C035",capacitacion:"Personal Injury",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0372",colaboradorId:"C035",capacitacion:"Visa T Common Core",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0373",colaboradorId:"C035",capacitacion:"Evidencias P+ ORGÁNICO",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0374",colaboradorId:"C035",capacitacion:"Ongoing Visa T elearning",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0375",colaboradorId:"C035",capacitacion:"Soft Skills",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0376",colaboradorId:"C035",capacitacion:"Common Core",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0377",colaboradorId:"C001",capacitacion:"Attorney Training",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0378",colaboradorId:"C001",capacitacion:"Orientation Psych VAWA",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0379",colaboradorId:"C001",capacitacion:"Orientation Packets",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0380",colaboradorId:"C001",capacitacion:"Visa T",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0381",colaboradorId:"C001",capacitacion:"Ongoing Visa T elearning",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0382",colaboradorId:"C001",capacitacion:"Evidencias P+ ORGÁNICO",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0383",colaboradorId:"C001",capacitacion:"Personal Injury",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0384",colaboradorId:"C001",capacitacion:"Materiales Interactivos Complementarios",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0385",colaboradorId:"C001",capacitacion:"Folios Operativos",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0386",colaboradorId:"C001",capacitacion:"Teoría del caso",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0387",colaboradorId:"C001",capacitacion:"Consulta de Material",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0388",colaboradorId:"C001",capacitacion:"Multi-Party Litigation",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0389",colaboradorId:"C001",capacitacion:"E-learning VAWA",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0390",colaboradorId:"C001",capacitacion:"ACTUALIZACIONES 2026",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0391",colaboradorId:"C001",capacitacion:"Customer Service",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0392",colaboradorId:"C001",capacitacion:"COLLECTION",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0393",colaboradorId:"C002",capacitacion:"Soft Skills",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0394",colaboradorId:"C002",capacitacion:"Ongoing Visa T elearning",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0395",colaboradorId:"C002",capacitacion:"Evidencias P+ ORGÁNICO",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0396",colaboradorId:"C002",capacitacion:"Personal Injury",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0397",colaboradorId:"C002",capacitacion:"Materiales Interactivos Complementarios",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0398",colaboradorId:"C002",capacitacion:"Folios Operativos",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0399",colaboradorId:"C002",capacitacion:"Consulta de Material",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0400",colaboradorId:"C002",capacitacion:"Multi-Party Litigation",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0401",colaboradorId:"C002",capacitacion:"E-learning VAWA",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0402",colaboradorId:"C002",capacitacion:"ACTUALIZACIONES 2026",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null},
+  {id:"R0403",colaboradorId:"C002",capacitacion:"ACTUALIZACIONES CLIENTES",categoria:null,fecha:null,instructor:null,modalidad:null,duracionHoras:null,calificacion:null,estatus:null,observaciones:null,evidencia:null}
+];
+
+/* ===================================================================== */
+const $ = s => document.querySelector(s);
+const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const norm = s => String(s ?? "").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/\s+/g," ").trim();
+const clean = s => String(s ?? "").replace(/\s+/g," ").trim();
+const has = v => v !== null && v !== undefined && String(v).trim() !== "" && String(v).trim() !== "-";
+const dash = v => has(v) ? esc(v) : "—";
+const collator = new Intl.Collator("es",{sensitivity:"base"});
+
+COLABORADORES.forEach(c => { for (const k of ["area","departamento","cargo","nombre","formacion"]) c[k] = clean(c[k]); });
+const trKey = r => norm(r.capacitacion);
+
+const STATUS = {
+  "COMPLETADO":{cls:"ok",icon:"✓",label:"COMPLETADO"},
+  "REQUIERE REFUERZO":{cls:"warn",icon:"⚠",label:"REQUIERE REFUERZO"},
+  "EN PROCESO":{cls:"prog",icon:"●",label:"EN PROCESO"}
+};
+function statusOf(r){
+  if (!r) return {cls:"none",icon:"—",label:"SIN REGISTRO"};
+  const k = norm(r.estatus).toUpperCase();
+  return STATUS[k] || (has(r.estatus) ? {cls:"none",icon:"•",label:clean(r.estatus).toUpperCase()} : {cls:"ok",icon:"✓",label:"RECIBIDA"});
+}
+const pill = r => { const s = statusOf(r); return `<span class="st ${s.cls}">${s.icon} ${esc(s.label)}</span>`; };
+function fmtDate(d){ if(!has(d)) return "—"; const m = String(d).match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? `${m[3]}/${m[2]}/${m[1]}` : esc(d); }
+const fmtNum = n => Number.isInteger(n) ? String(n) : n.toFixed(1);
+const initials = n => n.split(" ").filter(Boolean).slice(0,2).map(w=>w[0]).join("");
+const title = s => s.toLowerCase().replace(/(^|\s)\S/g, m => m.toUpperCase());
+
+/* Índices derivados */
+let byPerson, trainings;
+function buildIndex(){
+  byPerson = new Map(COLABORADORES.map(c => [c.id, []]));
+  const nameToId = new Map(COLABORADORES.map(c => [norm(c.nombre), c.id]));
+  const tmap = new Map();
+  CAPACITACIONES.forEach(r => {
+    const pid = byPerson.has(r.colaboradorId) ? r.colaboradorId : nameToId.get(norm(r.colaboradorId || r.colaborador));
+    if (!pid || !has(r.capacitacion)) return;
+    r._pid = pid;
+    byPerson.get(pid).push(r);
+    const k = trKey(r);
+    if (!tmap.has(k)) tmap.set(k, {key:k, nombre:clean(r.capacitacion), categoria:null, records:[]});
+    const t = tmap.get(k); t.records.push(r); if (!t.categoria && has(r.categoria)) t.categoria = clean(r.categoria);
+  });
+  trainings = [...tmap.values()].map(t => {
+    const people = new Set(t.records.map(r => r._pid));
+    const grades = t.records.map(r => r.calificacion).filter(v => typeof v === "number");
+    const dates = t.records.map(r => r.fecha).filter(has).sort();
+    return {...t, people, avg: grades.length ? grades.reduce((a,b)=>a+b,0)/grades.length : null, last: dates.length ? dates[dates.length-1] : null};
+  });
+}
+const latestFor = (pid, key) => {
+  const rs = byPerson.get(pid).filter(r => trKey(r) === key);
+  if (!rs.length) return null;
+  return rs.slice().sort((a,b)=> String(b.fecha||"").localeCompare(String(a.fecha||"")))[0];
+};
+const uniqTrainings = pid => new Set(byPerson.get(pid).map(trKey)).size;
+
+/* Opciones de filtros */
+const uniq = key => [...new Set(COLABORADORES.map(c=>c[key]).filter(Boolean))].sort(collator.compare);
+function fillSelect(sel, values, allLabel, labeler = v=>v){
+  const cur = sel.value;
+  sel.innerHTML = `<option value="">${allLabel}</option>` + values.map(v => `<option value="${esc(v)}">${esc(labeler(v))}</option>`).join("");
+  if ([...sel.options].some(o=>o.value===cur)) sel.value = cur;
+}
+
+/* ============ RESUMEN ============ */
+function renderResumen(){
+  const total = COLABORADORES.length;
+  const trained = COLABORADORES.filter(c => byPerson.get(c.id).length).length;
+  const recs = CAPACITACIONES.filter(r=>r._pid).length;
+  const avg = total ? recs/total : 0;
+  $("#kpis").innerHTML = [
+    ["Total de colaboradores", total, "Registrados en el sistema", "lead"],
+    ["Colaboradores capacitados", trained, total ? `${Math.round(trained/total*100)}% de la población` : "—", ""],
+    ["Capacitaciones registradas", recs, `${trainings.length} capacitaciones distintas`, ""],
+    ["Promedio por colaborador", recs ? fmtNum(avg) : "0", "Registros por persona", ""],
+    ["Sin capacitaciones", total - trained, "Sin registros de training", total-trained ? "alert" : ""]
+  ].map(([l,v,s,c]) => `<div class="kpi ${c}"><span class="label">${l}</span><span class="v num">${v}</span><span class="s">${s}</span></div>`).join("");
+
+  const bars = (key, el) => {
+    const groups = uniq(key).map(g => {
+      const ppl = COLABORADORES.filter(c=>c[key]===g);
+      const t = ppl.filter(c=>byPerson.get(c.id).length).length;
+      return {g, n:ppl.length, t};
+    }).sort((a,b)=>b.n-a.n);
+    $(el).innerHTML = groups.map(x => `<div class="bar-row"><span class="bar-name">${esc(x.g)}</span><span class="bar-val num">${x.t} / ${x.n} · ${Math.round(x.t/x.n*100)}%</span><div class="bar-track" role="img" aria-label="${x.t} de ${x.n}"><div class="bar-fill" style="width:${x.t/x.n*100}%"></div></div></div>`).join("");
+  };
+  bars("area","#bars-area"); bars("cargo","#bars-cargo");
+
+  const top = trainings.slice().sort((a,b)=>b.people.size-a.people.size||collator.compare(a.nombre,b.nombre)).slice(0,8);
+  $("#top-trainings").innerHTML = top.length
+    ? `<div class="bars">${top.map(t=>`<div class="bar-row"><span class="bar-name">${esc(t.nombre)}</span><span class="bar-val num">${t.people.size} / ${total}</span><div class="bar-track"><div class="bar-fill" style="width:${t.people.size/total*100}%"></div></div></div>`).join("")}</div>`
+    : emptyBox("Aún no hay capacitaciones registradas","Cuando se carguen los registros reales, aquí aparecerán las capacitaciones con mayor alcance.");
+
+  const T = trainings.length;
+  const low = COLABORADORES.slice().sort((a,b)=>uniqTrainings(a.id)-uniqTrainings(b.id)||collator.compare(a.nombre,b.nombre)).slice(0,8);
+  $("#recent").innerHTML = T
+    ? `<div class="bars">${low.map(c=>{const n=uniqTrainings(c.id);return `<div class="bar-row"><button class="linkish bar-name" data-open="${c.id}">${esc(c.nombre)}</button><span class="bar-val num">${n} / ${T}</span><div class="bar-track"><div class="bar-fill" style="width:${n/T*100}%"></div></div></div>`}).join("")}</div>`
+    : emptyBox("Sin capacitaciones registradas","Aquí aparecerán los colaboradores con menos capacitaciones del catálogo.");
+
+  const without = COLABORADORES.filter(c=>!byPerson.get(c.id).length).sort((a,b)=>collator.compare(a.nombre,b.nombre));
+  $("#without").innerHTML = without.length
+    ? without.map(c=>`<button class="btn sm" data-open="${c.id}">${esc(title(c.nombre))}</button>`).join("")
+    : `<span class="count">Todos los colaboradores tienen al menos una capacitación registrada.</span>`;
+  $("#res-sub").textContent = recs ? `${trained} de ${total} colaboradores con al menos una capacitación.` : "Aún no hay capacitaciones registradas. Todos los colaboradores aparecen con 0 registros.";
+}
+function emptyBox(t,p){ return `<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg><strong>${t}</strong><p>${p}</p></div>`; }
+const person = id => COLABORADORES.find(c=>c.id===id);
+
+/* ============ COLABORADORES ============ */
+let viewMode = "cards";
+function renderFilters(){
+  fillSelect($("#f-area"), uniq("area"), "Todas");
+  fillSelect($("#f-depto"), uniq("departamento"), "Todos");
+  fillSelect($("#f-cargo"), uniq("cargo"), "Todos");
+  const ts = trainings.slice().sort((a,b)=>collator.compare(a.nombre,b.nombre));
+  fillSelect($("#f-cap"), ts.map(t=>t.key), ts.length ? "Todas" : "Sin capacitaciones registradas", k => trainings.find(t=>t.key===k).nombre);
+  $("#f-cap").disabled = !ts.length;
+  fillSelect($("#cap-train"), ts.map(t=>t.key), "Todas", k => trainings.find(t=>t.key===k).nombre);
+  fillSelect($("#cap-area"), uniq("area"), "Todas");
+  fillSelect($("#m-area"), uniq("area"), "Todas");
+  fillSelect($("#m-depto"), uniq("departamento"), "Todos");
+  fillSelect($("#m-cargo"), uniq("cargo"), "Todos");
+}
+function filteredPeople(){
+  const q = norm($("#f-q").value), a=$("#f-area").value, d=$("#f-depto").value, g=$("#f-cargo").value, cap=$("#f-cap").value, est=$("#f-est").value;
+  const words = q.split(" ").filter(Boolean);
+  let list = COLABORADORES.filter(c => {
+    const n = norm(c.nombre);
+    if (words.length && !words.every(w=>n.includes(w))) return false;
+    if (a && c.area!==a) return false;
+    if (d && c.departamento!==d) return false;
+    if (g && c.cargo!==g) return false;
+    const recs = byPerson.get(c.id);
+    if (est==="con" && !recs.length) return false;
+    if (est==="sin" && recs.length) return false;
+    if (cap && !recs.some(r=>trKey(r)===cap)) return false;
+    return true;
+  });
+  const s = $("#f-sort").value, cnt = c=>byPerson.get(c.id).length, byName=(x,y)=>collator.compare(x.nombre,y.nombre);
+  list.sort({
+    name: byName,
+    most: (x,y)=>cnt(y)-cnt(x)||byName(x,y),
+    least: (x,y)=>cnt(x)-cnt(y)||byName(x,y),
+    area: (x,y)=>collator.compare(x.area,y.area)||byName(x,y),
+    cargo: (x,y)=>collator.compare(x.cargo,y.cargo)||byName(x,y)
+  }[s]);
+  return list;
+}
+const capWord = n => `${n} ${n===1?"capacitación":"capacitaciones"}`;
+const capIcon = `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg>`;
+function renderPeople(){
+  const list = filteredPeople();
+  $("#c-count").textContent = `Mostrando ${list.length} de ${COLABORADORES.length} colaboradores`;
+  if (!list.length){ $("#people").innerHTML = emptyBox("Ningún colaborador coincide","Ajusta la búsqueda o usa “Limpiar filtros” para ver a todos."); return; }
+  if (viewMode==="cards"){
+    $("#people").innerHTML = `<div class="cards">${list.map(c=>{const n=byPerson.get(c.id).length;return `
+      <article class="pcard">
+        <div class="p-top"><div class="avatar" aria-hidden="true">${esc(initials(c.nombre))}</div><div><div class="p-name">${esc(c.nombre)}</div><div class="p-role">${esc(title(c.cargo))}</div></div></div>
+        <div class="meta"><span class="tag area">${esc(c.area)}</span><span class="tag">${esc(c.departamento)}</span></div>
+        <div class="p-foot"><div style="display:flex;flex-direction:column;gap:4px"><span class="tcount num">${capIcon} ${capWord(n)}</span>${n?"":`<span class="norec">SIN REGISTROS DE TRAINING</span>`}</div><button class="btn sm primary" data-open="${c.id}">Ver historial</button></div>
+      </article>`}).join("")}</div>`;
+  } else {
+    $("#people").innerHTML = `<div class="tbl-wrap"><table><thead><tr><th>Nombre</th><th>Área</th><th>Cargo</th><th>Departamento</th><th>Capacitaciones</th><th></th></tr></thead><tbody>${list.map(c=>{const n=byPerson.get(c.id).length;return `<tr><td><button class="linkish" data-open="${c.id}">${esc(c.nombre)}</button></td><td><span class="tag area">${esc(c.area)}</span></td><td>${esc(c.cargo)}</td><td>${esc(c.departamento)}</td><td class="num">${n ? `<strong>${n}</strong>` : `<span class="norec">0 · SIN REGISTROS</span>`}</td><td><button class="btn sm" data-open="${c.id}">Ver historial</button></td></tr>`}).join("")}</tbody></table></div>`;
+  }
+}
+
+/* ============ PERFIL ============ */
+let lastFocus = null;
+function openProfile(id){
+  const c = person(id); if (!c) return;
+  const recs = byPerson.get(id);
+  const got = new Set(recs.map(trKey));
+  const catalog = trainings.slice().sort((a,b)=>collator.compare(a.nombre,b.nombre));
+  const received = catalog.filter(t=>got.has(t.key));
+  const missing = catalog.filter(t=>!got.has(t.key));
+  const dr = $("#drawer");
+  dr.innerHTML = `
+    <div class="dr-head"><div class="avatar" aria-hidden="true">${esc(initials(c.nombre))}</div><div><h2 id="dr-name">${esc(c.nombre)}</h2><div class="p-role">${esc(c.cargo)} · ${esc(c.area)}</div></div><button class="x" id="dr-close" aria-label="Cerrar expediente"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="dr-body">
+      <div><div class="label" style="margin-bottom:8px">Información del colaborador</div>
+      <div class="info">
+        <div class="wide"><div class="k">Nombre completo</div><div class="v">${esc(c.nombre)}</div></div>
+        <div><div class="k">Área</div><div class="v">${dash(c.area)}</div></div>
+        <div><div class="k">Cargo</div><div class="v">${dash(c.cargo)}</div></div>
+        <div class="wide"><div class="k">Departamento</div><div class="v">${dash(c.departamento)}</div></div>
+        <div class="wide"><div class="k">Formación académica</div><div class="v">${dash(c.formacion)}</div></div>
+      </div></div>
+      <div class="mini num">
+        <div><b>${received.length}</b><span>Capacitaciones recibidas</span></div>
+        <div><b>${catalog.length ? Math.round(received.length/catalog.length*100)+"%" : "—"}</b><span>Cobertura del catálogo</span></div>
+        <div><b>${missing.length}</b><span>No registradas</span></div>
+      </div>
+      <div class="label">Historial de training</div>
+      ${received.length ? `<div class="hlist">${received.map(t=>`<div class="hrow"><span class="ck" aria-hidden="true">✓</span>${esc(t.nombre)}</div>`).join("")}</div>` : `<div class="empty"><span class="st none">— SIN REGISTRO</span><strong>Sin registros de training</strong><p>Este colaborador aún no tiene capacitaciones registradas.</p></div>`}
+      ${missing.length && received.length ? `<div class="label">Capacitaciones no registradas · ${missing.length}</div><div class="miss">${missing.map(t=>`<span>${esc(t.nombre)}</span>`).join("")}</div>` : ""}
+    </div>`;
+  lastFocus = document.activeElement;
+  dr.hidden = false; $("#scrim").hidden = false;
+  requestAnimationFrame(()=>{ dr.classList.add("show"); $("#scrim").classList.add("show"); $("#dr-close").focus(); });
+  document.body.style.overflow = "hidden";
+}
+function histItem(r){
+  const dur = typeof r.duracionHoras==="number" ? `${fmtNum(r.duracionHoras)} ${r.duracionHoras===1?"hora":"horas"}` : dash(r.duracionHoras);
+  const cal = typeof r.calificacion==="number" ? `${fmtNum(r.calificacion)}/100` : dash(r.calificacion);
+  const ev = has(r.evidencia) ? (/^https?:\/\//i.test(r.evidencia) ? `<a href="${esc(r.evidencia)}" target="_blank" rel="noopener">${esc(r.evidencia)}</a>` : esc(r.evidencia)) : "—";
+  const f = (k,v,w) => `<div class="${w?"wide":""}"><div class="k">${k}</div><div>${v}</div></div>`;
+  return `<div class="hitem">
+    <div class="hitem-h">
+      <div class="hitem-t"><h4>${esc(r.capacitacion)}</h4>${pill(r)}</div>
+      <div class="hgrid num">
+        <div><div class="k">Fecha</div>${fmtDate(r.fecha)}</div><div><div class="k">Categoría</div>${dash(r.categoria)}</div><div><div class="k">Instructor</div>${dash(r.instructor)}</div>
+        <div><div class="k">Modalidad</div>${dash(r.modalidad)}</div><div><div class="k">Duración</div>${dur}</div><div><div class="k">Calificación</div>${cal}</div>
+      </div>
+    </div>
+    <div class="hitem-f"><button class="btn sm" data-toggle aria-expanded="false">Ver detalles</button></div>
+    <div class="details" hidden>
+      ${f("Nombre de capacitación",esc(r.capacitacion),1)}${f("Fecha",fmtDate(r.fecha))}${f("Categoría",dash(r.categoria))}${f("Instructor",dash(r.instructor))}${f("Modalidad",dash(r.modalidad))}${f("Duración",dur)}${f("Calificación",cal)}${f("Estatus",pill(r),1)}${f("Observaciones",dash(r.observaciones),1)}${f("Evidencia",ev,1)}
+    </div></div>`;
+}
+function closeProfile(){
+  const dr = $("#drawer"); dr.classList.remove("show"); $("#scrim").classList.remove("show");
+  document.body.style.overflow = "";
+  setTimeout(()=>{ dr.hidden = true; $("#scrim").hidden = true; }, 220);
+  if (lastFocus) lastFocus.focus();
+}
+
+/* ============ CAPACITACIONES ============ */
+let selTraining = null, capPeopleSort = {k:"nombre", dir:1}, capTab = "con";
+let listSort = {k:"nombre", dir:1};
+function renderCatalog(){
+  const q = norm($("#cap-q").value).split(" ").filter(Boolean), tk = $("#cap-train").value, a = $("#cap-area").value;
+  const total = CAPACITACIONES.filter(r=>r._pid).length;
+  let rows = CAPACITACIONES.filter(r=>r._pid).map(r=>({c:person(r._pid), r})).filter(x =>
+    (!q.length || q.every(w=>norm(x.c.nombre).includes(w))) && (!tk || trKey(x.r)===tk) && (!a || x.c.area===a));
+  const byN=(x,y)=>collator.compare(x.c.nombre,y.c.nombre), byC=(x,y)=>collator.compare(x.r.capacitacion,y.r.capacitacion);
+  rows.sort((x,y)=> listSort.k==="nombre" ? (byN(x,y)*listSort.dir || byC(x,y)) : (byC(x,y)*listSort.dir || byN(x,y)));
+  $("#cap-count").textContent = `Mostrando ${rows.length} de ${total} registros`;
+  if (!total){ $("#catalog").innerHTML = emptyBox("Aún no hay capacitaciones registradas","Cada capacitación registrada aparecerá aquí como una fila."); return; }
+  if (!rows.length){ $("#catalog").innerHTML = emptyBox("Ningún registro coincide","Ajusta la búsqueda o usa “Limpiar filtros”."); return; }
+  const th = (k,l) => `<th class="sortable" data-lsort="${k}" aria-sort="${listSort.k===k?(listSort.dir>0?"ascending":"descending"):"none"}">${l}${listSort.k===k?(listSort.dir>0?" ▲":" ▼"):""}</th>`;
+  $("#catalog").innerHTML = `<div class="tbl-wrap"><table class="simple"><thead><tr>${th("nombre","Colaborador")}${th("cap","Capacitación")}</tr></thead><tbody>${
+    rows.map(x=>`<tr><td><button class="lk" data-open="${x.c.id}">${esc(x.c.nombre)}</button></td><td>${esc(x.r.capacitacion)}</td></tr>`).join("")}</tbody></table></div>`;
+}
+function renderCapDetail(){
+  const t = trainings.find(x=>x.key===selTraining);
+  if (!t){ $("#cap-detail").innerHTML = ""; return; }
+  const withP = [...t.people].map(id=>({c:person(id), r:latestFor(id,t.key)}));
+  const without = COLABORADORES.filter(c=>!t.people.has(c.id)).sort((a,b)=>collator.compare(a.nombre,b.nombre));
+  const k = capPeopleSort.k, dir = capPeopleSort.dir;
+  const val = x => ({nombre:x.c.nombre, area:x.c.area, cargo:x.c.cargo, departamento:x.c.departamento}[k]);
+  withP.sort((a,b)=>{const va=val(a),vb=val(b);return (typeof va==="number"?va-vb:collator.compare(String(va),String(vb)))*dir;});
+  const th = (key,lbl) => `<th class="sortable" data-sort="${key}" aria-sort="${k===key?(dir>0?"ascending":"descending"):"none"}">${lbl}${k===key?(dir>0?" ▲":" ▼"):""}</th>`;
+  $("#cap-detail").innerHTML = `<div class="panel">
+    <div class="panel-h"><h3>${esc(t.nombre)}</h3>
+      <div class="seg" role="group" aria-label="Lista"><button data-captab="con" aria-pressed="${capTab==="con"}">Recibida (${withP.length})</button><button data-captab="sin" aria-pressed="${capTab==="sin"}">Pendiente (${without.length})</button></div></div>
+    <div class="panel-b">${capTab==="con" ? `<div class="label" style="margin-bottom:10px">Colaboradores que han recibido esta capacitación</div>
+      <div class="tbl-wrap"><table><thead><tr>${th("nombre","Nombre")}${th("area","Área")}${th("cargo","Cargo")}${th("departamento","Departamento")}</tr></thead><tbody>
+      ${withP.map(x=>`<tr><td><button class="linkish" data-open="${x.c.id}">${esc(x.c.nombre)}</button></td><td>${esc(x.c.area)}</td><td>${esc(x.c.cargo)}</td><td>${esc(x.c.departamento)}</td></tr>`).join("")}</tbody></table></div>`
+    : `<div class="label" style="margin-bottom:10px">Colaboradores sin esta capacitación registrada</div>
+      ${without.length ? `<div class="tbl-wrap"><table><thead><tr><th>Nombre</th><th>Área</th><th>Cargo</th><th>Departamento</th></tr></thead><tbody>${without.map(c=>`<tr><td><button class="linkish" data-open="${c.id}">${esc(c.nombre)}</button></td><td>${esc(c.area)}</td><td>${esc(c.cargo)}</td><td>${esc(c.departamento)}</td></tr>`).join("")}</tbody></table></div>` : `<p class="count">Todos los colaboradores tienen esta capacitación registrada.</p>`}`}
+    </div></div>`;
+}
+
+/* ============ COBERTURA ============ */
+function renderMatrix(){
+  const a=$("#m-area").value, d=$("#m-depto").value, g=$("#m-cargo").value, s=$("#m-sort").value;
+  const rows = COLABORADORES.filter(c=>(!a||c.area===a)&&(!d||c.departamento===d)&&(!g||c.cargo===g));
+  const cols = trainings.slice().sort((x,y)=>collator.compare(x.nombre,y.nombre));
+  const cov = c => cols.filter(t=>t.people.has(c.id)).length;
+  const byName=(x,y)=>collator.compare(x.nombre,y.nombre);
+  rows.sort({name:byName, most:(x,y)=>cov(y)-cov(x)||byName(x,y), least:(x,y)=>cov(x)-cov(y)||byName(x,y)}[s]);
+  if (!rows.length){ $("#matrix").innerHTML = emptyBox("Ningún colaborador coincide","Ajusta los filtros de la matriz."); return; }
+  const colCount = t => rows.filter(c=>t.people.has(c.id)).length;
+  $("#matrix").innerHTML = `
+    ${cols.length ? "" : `<div style="margin-bottom:14px">${emptyBox("La matriz está lista para recibir capacitaciones","Cada capacitación registrada se agregará como una columna. Por ahora se muestran los ${rows.length} colaboradores del filtro, todos con 0 capacitaciones.")}</div>`}
+    <div class="matrix-wrap"><table class="matrix"><thead><tr><th class="rowh">Colaborador · ${rows.length}</th>${cols.map(t=>`<th class="col" title="${esc(t.nombre)}">${esc(t.nombre)}<div class="pct num">${colCount(t)}/${rows.length}</div></th>`).join("")}<th>Cobertura</th></tr></thead>
+    <tbody>${rows.map(c=>{const n=cov(c);return `<tr><td class="rowh"><button class="linkish" data-open="${c.id}">${esc(c.nombre)}</button><div class="p-role">${esc(c.area)} · ${esc(c.cargo)}</div></td>${cols.map(t=>{const r=latestFor(c.id,t.key);const st=statusOf(r);return `<td><span class="cell ${st.cls}" title="${esc(t.nombre)}: ${esc(st.label)}" aria-label="${esc(st.label)}">${st.icon}</span></td>`}).join("")}<td class="num"><strong>${n}</strong>${cols.length?` / ${cols.length}`:""}</td></tr>`}).join("")}</tbody></table></div>`;
+}
+
+/* ============ NAVEGACIÓN / EVENTOS ============ */
+const TABS = ["resumen","colaboradores","capacitaciones","cobertura"];
+function go(tab){
+  if (!TABS.includes(tab)) tab = "resumen";
+  document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-selected", b.dataset.tab===tab));
+  TABS.forEach(t=>$("#v-"+t).hidden = t!==tab);
+  try{ localStorage.setItem("trc-tab",tab); }catch(e){}
+  window.scrollTo({top:0});
+}
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>go(b.dataset.tab)));
+document.addEventListener("click", e=>{
+  const o = e.target.closest("[data-open]"); if (o){ openProfile(o.dataset.open); return; }
+  const gt = e.target.closest("[data-goto]"); if (gt){ go(gt.dataset.goto); return; }
+  const tg = e.target.closest("[data-toggle]");
+  if (tg){ const det = tg.closest(".hitem").querySelector(".details"); det.hidden = !det.hidden; tg.setAttribute("aria-expanded", !det.hidden); tg.textContent = det.hidden ? "Ver detalles" : "Ocultar detalles"; return; }
+  if (e.target.closest("#expand-all")){ const btn=e.target.closest("#expand-all"); const open = btn.textContent==="Expandir todo"; document.querySelectorAll("#drawer .hitem").forEach(h=>{h.querySelector(".details").hidden=!open;const t=h.querySelector("[data-toggle]");t.textContent=open?"Ocultar detalles":"Ver detalles";t.setAttribute("aria-expanded",open);}); btn.textContent = open?"Contraer todo":"Expandir todo"; return; }
+  if (e.target.closest("#dr-close") || e.target.id==="scrim"){ closeProfile(); return; }
+  const tr = e.target.closest("[data-train]"); if (tr){ selTraining = selTraining===tr.dataset.train ? null : tr.dataset.train; capTab="con"; renderCatalog(); if(selTraining) $("#cap-detail").scrollIntoView({behavior:"smooth",block:"start"}); return; }
+  const ct = e.target.closest("[data-captab]"); if (ct){ capTab = ct.dataset.captab; renderCapDetail(); return; }
+  const so = e.target.closest("th[data-sort]"); if (so){ const k=so.dataset.sort; capPeopleSort = {k, dir: capPeopleSort.k===k ? -capPeopleSort.dir : 1}; renderCapDetail(); }
+});
+document.addEventListener("keydown", e=>{ if (e.key==="Escape" && !$("#drawer").hidden) closeProfile(); });
+["#f-q","#f-area","#f-depto","#f-cargo","#f-cap","#f-est","#f-sort"].forEach(s=>$(s).addEventListener(s==="#f-q"?"input":"change", renderPeople));
+$("#f-clear").addEventListener("click",()=>{ ["#f-q","#f-area","#f-depto","#f-cargo","#f-cap","#f-est"].forEach(s=>$(s).value=""); renderPeople(); });
+$("#see-without").addEventListener("click",()=>{ ["#f-q","#f-area","#f-depto","#f-cargo","#f-cap"].forEach(s=>$(s).value=""); $("#f-est").value="sin"; renderPeople(); go("colaboradores"); });
+$("#vw-cards").addEventListener("click",()=>{viewMode="cards";$("#vw-cards").setAttribute("aria-pressed",true);$("#vw-table").setAttribute("aria-pressed",false);renderPeople();});
+$("#vw-table").addEventListener("click",()=>{viewMode="table";$("#vw-table").setAttribute("aria-pressed",true);$("#vw-cards").setAttribute("aria-pressed",false);renderPeople();});
+$("#cap-q").addEventListener("input", renderCatalog);
+["#cap-train","#cap-area"].forEach(s=>$(s).addEventListener("change", renderCatalog));
+$("#cap-clear").addEventListener("click",()=>{ ["#cap-q","#cap-train","#cap-area"].forEach(s=>$(s).value=""); renderCatalog(); });
+document.addEventListener("click", e=>{ const t=e.target.closest("th[data-lsort]"); if(!t) return; const k=t.dataset.lsort; listSort={k, dir:listSort.k===k?-listSort.dir:1}; renderCatalog(); });
+["#m-area","#m-depto","#m-cargo","#m-sort"].forEach(s=>$(s).addEventListener("change", renderMatrix));
+$("#m-clear").addEventListener("click",()=>{ ["#m-area","#m-depto","#m-cargo"].forEach(s=>$(s).value=""); $("#m-sort").value="name"; renderMatrix(); });
+
+function renderAll(){ buildIndex(); renderFilters(); renderResumen(); renderPeople(); renderCatalog(); renderMatrix(); }
+renderAll();
+let startTab = (location.hash||"").slice(1);
+if (!TABS.includes(startTab)){ try{ startTab = localStorage.getItem("trc-tab") || "resumen"; }catch(e){ startTab="resumen"; } }
+go(startTab);
+</script>
+
+</body>
+</html>
