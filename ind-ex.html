@@ -1148,23 +1148,101 @@ tbody td {
 }
 .sync-flash { animation: syncFlash 0.8s ease; }
 
-/* ===== PRINT / PDF ===== */
+/* ===== COORD EDITORIAL REPORT ===== */
+.rpt-page { background:#fff; border-radius:8px; box-shadow:0 2px 16px rgba(0,0,0,.1); margin-bottom:20px; overflow:hidden; }
+.rpt-cover { padding:40px 36px 0; }
+.rpt-cover-top { display:flex; justify-content:space-between; margin-bottom:32px; }
+.rpt-firm { font-size:9.5px; font-weight:700; color:#0e1a30; letter-spacing:2.5px; text-transform:uppercase; }
+.rpt-dept { font-size:8.5px; color:#888; letter-spacing:1px; margin-top:2px; }
+.rpt-gendate { font-size:9px; color:#aaa; text-align:right; }
+.rpt-per-lbl { font-size:9px; letter-spacing:3px; color:#b59240; text-transform:uppercase; font-weight:700; }
+.rpt-per-val { font-size:38px; font-weight:700; color:#b59240; line-height:1.05; margin:5px 0 2px; }
+.rpt-title { font-size:30px; font-weight:700; color:#0e1a30; line-height:1.2; }
+.rpt-rule { width:50px; height:3px; background:#b59240; margin:16px 0; }
+.rpt-desc { font-size:11px; color:#666; line-height:1.7; max-width:380px; }
+.rpt-kpi-strip { background:#0e1a30; padding:18px 36px; margin-top:28px; }
+.rpt-kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); text-align:center; }
+.rpt-kpi-sep { border-right:1px solid rgba(255,255,255,.12); }
+.rpt-knum { font-size:26px; font-weight:700; color:#b59240; line-height:1; }
+.rpt-klbl { font-size:8px; letter-spacing:1.5px; color:#aaa; text-transform:uppercase; margin-top:4px; line-height:1.4; }
+.rpt-foot { padding:8px 36px; display:flex; justify-content:space-between; background:#f7f7f7; border-top:1px solid #e8e8e8; }
+.rpt-foot span { font-size:8.5px; color:#aaa; }
+
+.rpt-inner { padding:20px 30px 40px; }
+.rpt-inner-hdr { background:#0e1a30; padding:10px 30px; display:flex; justify-content:space-between; align-items:center; }
+.rpt-inner-hdr .ti { font-size:8px; color:#b59240; letter-spacing:2px; text-transform:uppercase; }
+.rpt-inner-hdr .pe { font-size:8.5px; color:#ccc; }
+
+.rpt-stitle { font-size:9px; font-weight:700; letter-spacing:2px; color:#0e1a30; text-transform:uppercase; border-bottom:1.5px solid #b59240; padding-bottom:4px; margin-bottom:10px; }
+.rpt-col2 { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:14px; }
+.rpt-col3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+.rpt-section { margin-bottom:18px; }
+
+.rpt-dist-total { font-size:28px; font-weight:700; color:#0e1a30; }
+.rpt-dist-row { display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid #f0f0f0; font-size:10px; }
+.rpt-dist-row:last-child { border-bottom:none; }
+.rpt-dist-key { color:#444; }
+.rpt-dist-val { color:#b59240; font-weight:700; }
+
+.rpt-feat-tag { font-size:7.5px; letter-spacing:2px; color:#b59240; text-transform:uppercase; font-weight:700; margin-bottom:5px; }
+.rpt-feat-title { font-size:11px; font-weight:700; color:#0e1a30; line-height:1.4; margin-bottom:10px; }
+.rpt-feat-col-hdr { font-size:7.5px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#888; border-bottom:1px solid #e0e0e0; padding-bottom:4px; margin-bottom:5px; }
+.rpt-feat-text { font-size:9.5px; line-height:1.6; color:#444; }
+.rpt-feat-bullet { background:#f5f7fa; border-left:3px solid #0e1a30; padding:8px 12px; font-size:9.5px; line-height:1.6; color:#444; margin-top:8px; border-radius:0 4px 4px 0; }
+
+.rpt-chip { display:inline-block; padding:3px 10px; border-radius:20px; border:1px solid #0e1a30; font-size:8.5px; color:#0e1a30; margin:2px; }
+
+.rpt-equipo-text { font-size:10px; line-height:1.8; color:#333; }
+.rpt-other-item { display:flex; gap:8px; margin-bottom:7px; align-items:flex-start; font-size:10px; line-height:1.5; }
+.rpt-num { min-width:20px; height:20px; background:#0e1a30; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:8px; font-weight:700; color:#b59240; flex-shrink:0; }
+
+.rpt-proj-row { display:flex; justify-content:space-between; align-items:center; padding:5px 0; border-bottom:1px solid #f0f0f0; font-size:10px; }
+.rpt-proj-lbl { color:#333; flex:1; }
+.rpt-proj-val { font-weight:700; color:#0e1a30; min-width:55px; text-align:right; }
+
+.rpt-gest-box { background:#f5f7fa; border-left:4px solid #0e1a30; padding:12px 16px; border-radius:0 5px 5px 0; font-size:10.5px; line-height:1.75; color:#333; }
+.rpt-comp-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px 20px; }
+.rpt-comp-item { display:flex; gap:8px; font-size:10px; line-height:1.5; color:#333; align-items:flex-start; }
+.rpt-comp-num { min-width:18px; height:18px; background:#b59240; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:8px; font-weight:700; color:#fff; flex-shrink:0; }
+
+.rpt-table { width:100%; border-collapse:collapse; font-size:9px; }
+.rpt-table th { background:#0e1a30; color:#fff; padding:6px 8px; font-size:8px; letter-spacing:.5px; text-transform:uppercase; text-align:left; }
+.rpt-table td { padding:5px 8px; border-bottom:1px solid #f0f0f0; vertical-align:top; }
+.rpt-table tr:nth-child(even) td { background:#fafafa; }
+.rpt-day-hdr td { background:#0e1a30!important; color:#b59240!important; font-weight:700; font-size:9px; border-top:2px solid #b59240; }
+.rpt-sub td { background:#f0f0f0!important; font-style:italic; font-size:8.5px; color:#666; }
+.rpt-empty { text-align:center; padding:32px; color:var(--text-muted); }
+
+/* ─── PRINT: solo el reporte, ocultar UI del app ─── */
+@media print {
+  .sidebar, .topbar, #coord-filters-bar, .no-print { display:none!important; }
+  .main { margin-left:0!important; }
+  .content { padding:0!important; }
+  .view { display:none!important; }
+  #view-coordinacion { display:block!important; padding:0!important; }
+  #coord-report-preview { display:block!important; }
+  .rpt-page { box-shadow:none; border-radius:0; margin-bottom:0; page-break-after:always; break-after:page; }
+  .rpt-page:last-child { page-break-after:auto; }
+}
 @media print {
   body { background: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .sidebar, .topbar, .page-header, .filters-bar, .btn-row,
-  button, .btn, #pdf-close-btn { display: none !important; }
+  button, .btn, .filter-select, #pdf-close-btn, #trainer-selector { display: none !important; }
   .main { margin-left: 0 !important; }
   .content { padding: 8px !important; }
   .card { box-shadow: none !important; border: 1px solid #e0e0e0 !important; break-inside: avoid; margin-bottom: 12px !important; }
   .stats-row { break-inside: avoid; }
-  .view:not(#view-coordinacion) { display: none !important; }
-  #view-coordinacion { display: block !important; }
+  /* Show only the active view */
+  .view { display: none !important; }
+  .view.active { display: block !important; }
   table { font-size: 11px !important; }
   th, td { padding: 5px 8px !important; }
-  #pdf-header { display: block !important; }
+  #pdf-header, #trainer-pdf-header { display: block !important; }
   .exec-summary { border: 1px solid #ddd !important; background: #f9f9f9 !important; }
-  thead { background: #152040 !important; }
+  thead tr { background: #152040 !important; }
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  /* Hide acciones column */
+  th:last-child, td:last-child { display: none !important; }
 }
 #pdf-header {
   display: none;
@@ -1567,92 +1645,107 @@ tbody td {
 
     <!-- ========================= VIEW: DASHBOARD ========================= -->
     <div class="view" id="view-dashboard">
-      <div class="page-header">
-        <h1>Dashboard General</h1>
-        <p class="subtitle">Métricas consolidadas del equipo de training</p>
-        <div class="divider"></div>
-      </div>
-
-      <div class="filters-bar">
-        <select class="filter-select" id="dash-trainer" onchange="renderDashboard()">
-          <option value="">Todos los trainers</option>
-          <option>Andrea Zendejas</option>
-          <option>Joham Burgos</option>
-          <option>Diego Romo</option>
-          <option>Brenda Domínguez</option>
-                <option>Juanita Olivares</option>
-        </select>
-        <select class="filter-select" id="dash-mes" onchange="renderDashboard()">
-          <option value="">Todos los meses</option>
-          <option value="0">Enero</option><option value="1">Febrero</option><option value="2">Marzo</option>
-          <option value="3">Abril</option><option value="4">Mayo</option><option value="5">Junio</option>
-          <option value="6">Julio</option><option value="7">Agosto</option><option value="8">Septiembre</option>
-          <option value="9">Octubre</option><option value="10">Noviembre</option><option value="11">Diciembre</option>
-        </select>
-        <select class="filter-select" id="dash-cat" onchange="cascadeDashEsp();renderDashboard()">
-          <option value="">Todas las categorías</option>
-          <option>Training</option>
-          <option>Desarrollo</option>
-          <option>Acompañamiento / Shadowing</option>
-          <option>Llamadas</option>
-        </select>
-        <select class="filter-select" id="dash-esp" onchange="renderDashboard()">
-          <option value="">Todas las especificaciones</option>
-          <option>Impartición</option><option>Sombra trainee</option><option>Actualizaciones</option>
-          <option>Materiales</option><option>Scripts</option><option>Training (SCORM)</option><option>Actualización de Material</option>
-          <option>1 to 1</option><option>Habilitación</option><option>Shadowing</option><option>Apoyo training</option>
-          <option>Búsqueda de Material</option><option>Auditoría</option>
-          <option>Informativa</option><option>Planeación</option><option>Coordinación</option>
-        </select>
-        <select class="filter-select" id="dash-area" onchange="renderDashboard()">
-          <option value="">Todas las áreas</option>
-          <option>PR ATTY</option><option>CUSTOMER SERVICE</option><option>PWI</option>
-          <option>COMPLIANCE</option><option>SALES DVS</option><option>PWI VISA T</option>
-          <option>MARKETING</option><option>DISCOVERY CALLS</option><option>LSU</option>
-          <option>WAE'S</option><option>CALLBACKS</option><option>TRUCKERS</option>
-          <option>PRE WELCOME CALL</option><option>PRE CASE REVIEW</option><option>RFE</option>
-          <option>COLLECTIONS</option><option>CASE REVIEW</option><option>PACKETS</option>
-          <option>BACK OFFICE</option>
-          <option>TRAINING</option>
-          <option>TMLF</option>
-        </select>
-        <button class="btn btn-ghost btn-sm" onclick="clearDashFilters()">✕ Limpiar filtros</button>
-      </div>
-
-      <div class="stats-row" id="dash-stats"></div>
-
-      <div class="grid-2" style="margin-bottom:20px;">
-        <div class="card">
-          <div class="card-header"><div class="card-title">Horas por Trainer</div></div>
-          <div class="chart-container"><canvas id="chart-trainers"></canvas></div>
+      <!-- HEADER -->
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px;">
+        <div>
+          <h1 style="margin:0 0 4px;font-size:22px;color:#0e1a30;">Dashboard General</h1>
+          <p class="subtitle" style="margin:0;" id="dash-periodo-label">Reporte del equipo · Todos los periodos</p>
         </div>
-        <div class="card">
-          <div class="card-header"><div class="card-title">Actividades por Categoría</div></div>
-          <div class="chart-container"><canvas id="chart-tipos"></canvas></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <select class="filter-select" id="dash-mes" onchange="renderDashboard()" style="min-width:130px;">
+            <option value="">Todos los meses</option>
+            <option value="0">Enero</option><option value="1">Febrero</option><option value="2">Marzo</option>
+            <option value="3">Abril</option><option value="4">Mayo</option><option value="5">Junio</option>
+            <option value="6">Julio</option><option value="7">Agosto</option><option value="8">Septiembre</option>
+            <option value="9">Octubre</option><option value="10">Noviembre</option><option value="11">Diciembre</option>
+          </select>
+          <select class="filter-select" id="dash-trainer" onchange="renderDashboard()" style="min-width:150px;">
+            <option value="">Todos los trainers</option>
+            <option>Andrea Zendejas</option>
+            <option>Joham Burgos</option>
+            <option>Diego Romo</option>
+            <option>Brenda Domínguez</option>
+            <option>Juanita Olivares</option>
+          </select>
+          <select class="filter-select" id="dash-cat" onchange="cascadeDashEsp();renderDashboard()" style="min-width:150px;">
+            <option value="">Todas las categorías</option>
+            <option>Training</option><option>Desarrollo</option><option>Acompañamiento / Shadowing</option>
+            <option>Llamadas</option><option>Gestión</option><option>Documentación</option>
+          </select>
+          <select class="filter-select" id="dash-esp" onchange="renderDashboard()" style="min-width:150px;">
+            <option value="">Todas las especif.</option>
+            <option>Impartición</option><option>Sombra trainee</option><option>Actualizaciones</option>
+            <option>Materiales</option><option>Scripts</option><option>Training (SCORM)</option><option>Actualización de Material</option>
+            <option>1 to 1</option><option>Habilitación</option><option>Shadowing</option><option>Apoyo training</option>
+            <option>Búsqueda de Material</option><option>Auditoría</option>
+            <option>Informativa</option><option>Planeación</option><option>Coordinación</option><option>Actividades</option>
+          </select>
+          <select class="filter-select" id="dash-area" onchange="renderDashboard()" style="min-width:130px;">
+            <option value="">Todas las áreas</option>
+            <option>PR ATTY</option><option>CUSTOMER SERVICE</option><option>PWI</option>
+            <option>COMPLIANCE</option><option>SALES DVS</option><option>PWI VISA T</option>
+            <option>MARKETING</option><option>DISCOVERY CALLS</option><option>LSU</option>
+            <option>WAE'S</option><option>CALLBACKS</option><option>TRUCKERS</option>
+            <option>PRE WELCOME CALL</option><option>PRE CASE REVIEW</option><option>RFE</option>
+            <option>COLLECTIONS</option><option>CASE REVIEW</option><option>PACKETS</option>
+            <option>BACK OFFICE</option><option>TRAINING</option><option>TMLF</option>
+          </select>
+          <button class="btn btn-ghost btn-sm" onclick="clearDashFilters()">✕ Limpiar</button>
         </div>
       </div>
 
-      <div class="grid-2" style="margin-bottom:20px;">
-        <div class="card">
-          <div class="card-header"><div class="card-title">Por Especificación</div></div>
-          <div id="bar-categorias" class="bar-visual"></div>
+      <!-- RESUMEN EJECUTIVO AUTO -->
+      <div id="dash-exec-summary" style="background:linear-gradient(135deg,#0e1a30 0%,#1a2f52 100%);border-radius:12px;padding:18px 22px;margin-bottom:20px;display:none;">
+        <div style="font-size:10px;letter-spacing:2px;color:#c9a84c;text-transform:uppercase;margin-bottom:6px;">Resumen ejecutivo</div>
+        <div id="dash-exec-text" style="color:#e8edf5;font-size:14px;line-height:1.65;"></div>
+      </div>
+
+      <!-- KPI HERO ROW -->
+      <div id="dash-kpi-row" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:20px;"></div>
+
+      <!-- TRAINER CARDS -->
+      <div style="margin-bottom:20px;">
+        <div style="font-size:11px;letter-spacing:2px;color:#8a9bb5;text-transform:uppercase;margin-bottom:12px;font-weight:600;">Actividad por trainer</div>
+        <div id="dash-trainer-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;"></div>
+      </div>
+
+      <!-- QUÉ SE TRABAJÓ + ÁREAS -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;" class="grid-responsive-dash">
+        <div class="card" style="padding:18px;">
+          <div style="font-size:11px;letter-spacing:2px;color:#8a9bb5;text-transform:uppercase;margin-bottom:14px;font-weight:600;">¿En qué se trabajó?</div>
+          <div id="dash-cat-breakdown" style="display:flex;flex-direction:column;gap:10px;"></div>
         </div>
-        <div class="card">
-          <div class="card-header"><div class="card-title">Por Área Solicitante</div></div>
-          <div id="bar-areas" class="bar-visual"></div>
+        <div class="card" style="padding:18px;">
+          <div style="font-size:11px;letter-spacing:2px;color:#8a9bb5;text-transform:uppercase;margin-bottom:14px;font-weight:600;">Áreas atendidas</div>
+          <div id="dash-areas-breakdown" style="display:flex;flex-direction:column;gap:10px;"></div>
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-header"><div class="card-title">Comparativo por Semana (últimas 8 semanas)</div></div>
-        <div class="chart-container tall"><canvas id="chart-semanal"></canvas></div>
+      <!-- TREND + TOP ACTIVIDADES -->
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px;" class="grid-responsive-dash">
+        <div class="card" style="padding:18px;">
+          <div style="font-size:11px;letter-spacing:2px;color:#8a9bb5;text-transform:uppercase;margin-bottom:14px;font-weight:600;">Tendencia semanal de horas</div>
+          <div class="chart-container" style="height:200px;"><canvas id="chart-semanal"></canvas></div>
+        </div>
+        <div class="card" style="padding:18px;">
+          <div style="font-size:11px;letter-spacing:2px;color:#8a9bb5;text-transform:uppercase;margin-bottom:14px;font-weight:600;">Top especificaciones</div>
+          <div id="dash-esp-top" style="display:flex;flex-direction:column;gap:8px;"></div>
+        </div>
       </div>
 
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">Ranking de Trainers</div>
+      <!-- HEATMAP DÍAS -->
+      <div class="card" style="padding:18px;margin-bottom:20px;">
+        <div style="font-size:11px;letter-spacing:2px;color:#8a9bb5;text-transform:uppercase;margin-bottom:14px;font-weight:600;">Distribución de actividad por día de la semana</div>
+        <div id="dash-weekday-heatmap" style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;"></div>
+      </div>
+
+      <!-- ACTIVIDAD RECIENTE DEL EQUIPO -->
+      <div class="card" style="padding:18px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <div style="font-size:11px;letter-spacing:2px;color:#8a9bb5;text-transform:uppercase;font-weight:600;">Últimas actividades del equipo</div>
+          <span id="dash-total-acts-badge" style="background:#f0f4fa;color:#4a5e78;font-size:11px;padding:2px 10px;border-radius:20px;font-weight:600;"></span>
         </div>
-        <div class="ranking-list" id="dash-ranking"></div>
+        <div id="dash-recent-list" style="display:flex;flex-direction:column;gap:6px;"></div>
       </div>
     </div>
 
@@ -1665,6 +1758,15 @@ tbody td {
       </div>
       <div class="trainer-grid" id="trainer-selector"></div>
       <div id="trainer-report" style="display:none;">
+        <!-- PDF Header (solo visible al imprimir) -->
+        <div id="trainer-pdf-header" style="display:none;">
+          <div style="text-align:center;padding:14px 0 20px;border-bottom:3px solid #c9a84c;margin-bottom:20px;">
+            <div style="font-size:10px;letter-spacing:3px;color:#c9a84c;text-transform:uppercase;font-family:sans-serif;">TMLF Training · 2026</div>
+            <div style="font-size:22px;font-weight:700;color:#0e1a30;margin-top:5px;font-family:Georgia,serif;" id="trainer-pdf-name"></div>
+            <div style="font-size:15px;color:#2f5c8f;margin-top:3px;font-family:sans-serif;" id="trainer-pdf-periodo"></div>
+            <div style="font-size:11px;color:#6e7f96;margin-top:3px;font-family:sans-serif;" id="trainer-pdf-date"></div>
+          </div>
+        </div>
         <div class="exec-summary" id="trainer-exec-summary"></div>
         <div class="stats-row" id="trainer-stats"></div>
         <div class="grid-2" style="margin-bottom:20px;">
@@ -1680,20 +1782,37 @@ tbody td {
         <div class="card">
           <div class="card-header">
             <div class="card-title" id="trainer-table-title">Actividades registradas</div>
-            <div class="btn-row">
-              <select class="filter-select" id="trainer-filter-mes" onchange="renderTrainerReport()">
-                <option value="">Todos los meses</option>
+            <div class="btn-row" style="flex-wrap:wrap;gap:6px;align-items:center;">
+              <!-- Selector de período -->
+              <div style="display:flex;gap:4px;background:#f0f2f7;border-radius:8px;padding:3px;">
+                <button class="period-pdf-btn" id="pdf-btn-semana" onclick="setPdfPeriodo('semana')" style="padding:4px 10px;border:none;border-radius:6px;font-size:12px;cursor:pointer;background:transparent;color:var(--text-muted);font-family:var(--font-body);">Semana</button>
+                <button class="period-pdf-btn" id="pdf-btn-mes" onclick="setPdfPeriodo('mes')" style="padding:4px 10px;border:none;border-radius:6px;font-size:12px;cursor:pointer;background:transparent;color:var(--text-muted);font-family:var(--font-body);">Mes</button>
+                <button class="period-pdf-btn" id="pdf-btn-año" onclick="setPdfPeriodo('año')" style="padding:4px 10px;border:none;border-radius:6px;font-size:12px;cursor:pointer;background:transparent;color:var(--text-muted);font-family:var(--font-body);">Año</button>
+                <button class="period-pdf-btn active" id="pdf-btn-todo" onclick="setPdfPeriodo('todo')" style="padding:4px 10px;border:none;border-radius:6px;font-size:12px;cursor:pointer;background:var(--navy);color:#fff;font-family:var(--font-body);">Todo</button>
+              </div>
+
+              <!-- Semana picker -->
+              <input type="week" id="trainer-filter-semana" class="filter-select"
+                style="display:none;"
+                oninput="renderTrainerReport()">
+
+              <!-- Mes picker -->
+              <select class="filter-select" id="trainer-filter-mes" onchange="renderTrainerReport()" style="display:none;">
                 <option value="0">Enero</option><option value="1">Febrero</option><option value="2">Marzo</option>
                 <option value="3">Abril</option><option value="4">Mayo</option><option value="5">Junio</option>
                 <option value="6">Julio</option><option value="7">Agosto</option><option value="8">Septiembre</option>
                 <option value="9">Octubre</option><option value="10">Noviembre</option><option value="11">Diciembre</option>
               </select>
+              <select class="filter-select" id="trainer-filter-año" onchange="renderTrainerReport()" style="display:none;">
+                <option value="2024">2024</option><option value="2025">2025</option><option value="2026" selected>2026</option>
+              </select>
+
+              <!-- Filtros comunes -->
               <select class="filter-select" id="trainer-filter-cat" onchange="renderTrainerReport()">
                 <option value="">Todas las categorías</option>
                 <option>Training</option><option>Desarrollo</option>
                 <option>Acompañamiento / Shadowing</option><option>Llamadas</option>
-              <option>Gestión</option>
-                <option>Documentación</option>
+                <option>Gestión</option><option>Documentación</option>
               </select>
               <select class="filter-select" id="trainer-filter-area" onchange="renderTrainerReport()">
                 <option value="">Todas las áreas</option>
@@ -1703,8 +1822,11 @@ tbody td {
                 <option>WAE'S</option><option>CALLBACKS</option><option>TRUCKERS</option>
                 <option>PRE WELCOME CALL</option><option>PRE CASE REVIEW</option><option>RFE</option>
                 <option>COLLECTIONS</option><option>CASE REVIEW</option><option>PACKETS</option>
-                <option>BACK OFFICE</option>
+                <option>BACK OFFICE</option><option>TRAINING</option><option>TMLF</option>
               </select>
+              <button class="btn btn-primary btn-sm" onclick="downloadTrainerPDF()" style="gap:5px;white-space:nowrap;">
+                📄 Descargar PDF
+              </button>
             </div>
           </div>
           <div class="table-wrap">
@@ -1721,45 +1843,32 @@ tbody td {
 
     <!-- ========================= VIEW: PERÍODOS ========================= -->
     <div class="view" id="view-periodos">
-      <div class="page-header">
-        <h1>Reporte por Período</h1>
-        <p class="subtitle">Resumen semanal, mensual y anual del equipo</p>
-        <div class="divider"></div>
-      </div>
-      <div class="period-selector">
-        <button class="period-btn active" onclick="setPeriod('semana',this)">Semanal</button>
-        <button class="period-btn" onclick="setPeriod('mes',this)">Mensual</button>
-        <button class="period-btn" onclick="setPeriod('año',this)">Anual</button>
-      </div>
-      <div class="filters-bar">
-        <select class="filter-select" id="period-select" onchange="renderPeriodReport()">
-          <option value="">— Seleccionar período —</option>
-        </select>
-        <select class="filter-select" id="period-trainer" onchange="renderPeriodReport()">
-          <option value="">Todos los trainers</option>
-          <option>Andrea Zendejas</option><option>Joham Burgos</option><option>Diego Romo</option>
-          <option>Brenda Domínguez</option>
-                <option>Juanita Olivares</option>
-        </select>
-        <select class="filter-select" id="period-cat" onchange="renderPeriodReport()">
-          <option value="">Todas las categorías</option>
-          <option>Training</option><option>Desarrollo</option>
-          <option>Acompañamiento / Shadowing</option><option>Llamadas</option>
-        <option>Gestión</option>
-                <option>Documentación</option>
-        </select>
-        <select class="filter-select" id="period-area" onchange="renderPeriodReport()">
-          <option value="">Todas las áreas</option>
-          <option>PR ATTY</option><option>CUSTOMER SERVICE</option><option>PWI</option>
-          <option>COMPLIANCE</option><option>SALES DVS</option><option>PWI VISA T</option>
-          <option>MARKETING</option><option>DISCOVERY CALLS</option><option>LSU</option>
-          <option>WAE'S</option><option>CALLBACKS</option><option>TRUCKERS</option>
-          <option>PRE WELCOME CALL</option><option>PRE CASE REVIEW</option><option>RFE</option>
-          <option>COLLECTIONS</option><option>CASE REVIEW</option><option>PACKETS</option>
-          <option>BACK OFFICE</option>
-          <option>TRAINING</option>
-          <option>TMLF</option>
-        </select>
+      <!-- HEADER CON CONTROLES -->
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:20px;">
+        <div>
+          <h1 style="font-family:var(--font-heading);font-size:26px;font-weight:600;color:var(--text);margin-bottom:4px;">Reporte por Período</h1>
+          <p id="period-titulo-label" style="font-size:13px;color:var(--text-muted);">Resumen del equipo · Todos los períodos</p>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+          <!-- Toggle Semana/Mes/Año -->
+          <div style="display:flex;gap:3px;background:#e8eaf2;border-radius:9px;padding:3px;">
+            <button class="period-btn active" id="period-btn-semana" onclick="setPeriod('semana',this)" style="padding:5px 14px;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;background:white;color:var(--text);font-family:var(--font-body);box-shadow:0 1px 4px rgba(0,0,0,.08);">Semanal</button>
+            <button class="period-btn" id="period-btn-mes" onclick="setPeriod('mes',this)" style="padding:5px 14px;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:var(--text-muted);font-family:var(--font-body);">Mensual</button>
+            <button class="period-btn" id="period-btn-año" onclick="setPeriod('año',this)" style="padding:5px 14px;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:var(--text-muted);font-family:var(--font-body);">Anual</button>
+          </div>
+          <!-- Selector de período -->
+          <select class="filter-select" id="period-select" onchange="renderPeriodReport()" style="min-width:160px;">
+            <option value="">— Período —</option>
+          </select>
+          <!-- Trainer filter -->
+          <select class="filter-select" id="period-trainer" onchange="renderPeriodReport()">
+            <option value="">Todos los trainers</option>
+            <option>Andrea Zendejas</option><option>Joham Burgos</option><option>Diego Romo</option>
+            <option>Brenda Domínguez</option><option>Juanita Olivares</option>
+          </select>
+          <!-- Botón imprimir -->
+          <button class="btn btn-ghost btn-sm" onclick="window.print()" style="white-space:nowrap;gap:5px;">📄 Imprimir</button>
+        </div>
       </div>
       <div id="period-report-content">
         <div class="empty-state"><div class="icon">📅</div><p>Selecciona un período para generar el reporte</p></div>
@@ -1774,26 +1883,14 @@ tbody td {
       <div class="pdf-date" id="pdf-header-date"></div>
     </div>
     <div class="view" id="view-coordinacion">
-      <div class="page-header">
-        <h1>Reporte para Coordinación</h1>
-        <p class="subtitle">Descarga y exportación para Karen Reyna</p>
-        <div class="divider"></div>
-      </div>
-      <div class="card" style="background:linear-gradient(135deg,#ffffff,rgba(201,168,76,0.03));border-color:rgba(201,168,76,0.25);">
-        <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
-          <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#152040,#2f5c8f);display:flex;align-items:center;justify-content:center;font-size:20px;">👩‍💼</div>
-          <div>
-            <div style="font-weight:600;font-size:15px;">Karen Reyna</div>
-            <div style="font-size:12px;color:var(--text-muted);">Coordinadora · TMLF Training</div>
-          </div>
-          <div style="margin-left:auto;font-family:var(--font-condensed);font-size:11px;color:var(--text-muted);">Generado: <span id="coord-fecha-gen"></span></div>
-        </div>
-        <div class="filters-bar">
+      <!-- TOPBAR DE FILTROS (solo visible en pantalla, oculto al imprimir) -->
+      <div id="coord-filters-bar" class="card" style="margin-bottom:16px;padding:14px 20px;no-print">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <span style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;">Filtros:</span>
           <select class="filter-select" id="coord-trainer" onchange="renderCoordReport()">
             <option value="">Todos los trainers</option>
             <option>Andrea Zendejas</option><option>Joham Burgos</option><option>Diego Romo</option>
-            <option>Brenda Domínguez</option>
-                <option>Juanita Olivares</option>
+            <option>Brenda Domínguez</option><option>Juanita Olivares</option>
           </select>
           <select class="filter-select" id="coord-mes" onchange="renderCoordReport()">
             <option value="">Todos los meses</option>
@@ -1806,49 +1903,31 @@ tbody td {
             <option value="">Todas las categorías</option>
             <option>Training</option><option>Desarrollo</option>
             <option>Acompañamiento / Shadowing</option><option>Llamadas</option>
-          <option>Gestión</option>
-                <option>Documentación</option>
+            <option>Gestión</option><option>Documentación</option>
           </select>
           <select class="filter-select" id="coord-esp" onchange="renderCoordReport()">
             <option value="">Todas las especificaciones</option>
-            <option>Impartición</option><option>Sombra trainee</option><option>Actualizaciones</option>
-            <option>Materiales</option><option>Scripts</option><option>Training (SCORM)</option><option>Actualización de Material</option>
-            <option>1 to 1</option><option>Habilitación</option><option>Shadowing</option><option>Apoyo training</option>
-            <option>Búsqueda de Material</option><option>Auditoría</option>
-          <option>Informativa</option><option>Planeación</option><option>Coordinación</option>
+            <option>Impartición</option><option>Sombra trainee</option><option>Materiales</option>
+            <option>Scripts</option><option>Training (SCORM)</option><option>Actualización de Material</option>
+            <option>1 to 1</option><option>Shadowing</option><option>Apoyo training</option>
+            <option>Informativa</option><option>Planeación</option><option>Coordinación</option>
           </select>
           <select class="filter-select" id="coord-area" onchange="renderCoordReport()">
             <option value="">Todas las áreas</option>
             <option>PR ATTY</option><option>CUSTOMER SERVICE</option><option>PWI</option>
-            <option>COMPLIANCE</option><option>SALES DVS</option><option>PWI VISA T</option>
-            <option>MARKETING</option><option>DISCOVERY CALLS</option><option>LSU</option>
-            <option>WAE'S</option><option>CALLBACKS</option><option>TRUCKERS</option>
-            <option>PRE WELCOME CALL</option><option>PRE CASE REVIEW</option><option>RFE</option>
+            <option>COMPLIANCE</option><option>SALES DVS</option><option>TRUCKERS</option>
             <option>COLLECTIONS</option><option>CASE REVIEW</option><option>PACKETS</option>
-            <option>BACK OFFICE</option>
+            <option>TRAINING</option><option>TMLF</option>
           </select>
+          <button class="btn btn-primary" onclick="window.print()" style="margin-left:auto;gap:6px;white-space:nowrap;">
+            📄 Descargar PDF
+          </button>
         </div>
       </div>
 
-      <div style="margin-bottom:20px;">
-        <button class="btn btn-primary btn-lg" onclick="downloadCoordPDF()" style="gap:10px;padding:12px 28px;font-size:15px;">
-          📄 Descargar PDF
-        </button>
-        <span style="font-size:12px;color:var(--text-muted);margin-left:14px;">Genera un PDF del reporte con los filtros activos</span>
-      </div>
-
-      <div class="card">
-        <div class="card-header"><div class="card-title">Vista previa del reporte</div></div>
-        <div class="exec-summary" id="coord-exec-summary" style="margin-bottom:16px;"></div>
-        <div class="stats-row" id="coord-stats"></div>
-        <div class="table-wrap" id="coord-table-wrap">
-          <table>
-            <thead><tr>
-              <th>Fecha</th><th>Trainer</th><th>Categoría</th><th>Especificación</th><th>Área</th><th>Hrs</th><th>Descripción</th>
-            </tr></thead>
-            <tbody id="coord-table-body"></tbody>
-          </table>
-        </div>
+      <!-- REPORTE EDITORIAL — lo que ves es lo que se imprime -->
+      <div id="coord-report-preview">
+        <!-- renderCoordReport() escribe aquí -->
       </div>
     </div>
 
@@ -3096,81 +3175,173 @@ function destroyChart(id) {
 const PALETTE = ['#c9a84c','#92bcea','#afb3f7','#4caf82','#e0a050','#7a93ac','#e05050','#60c0a0','#d4a0e0','#f0d060'];
 
 function renderDashboard() {
-  const t = document.getElementById('dash-trainer').value;
+  const tFilter = document.getElementById('dash-trainer').value;
   const m = document.getElementById('dash-mes').value;
   const cat = document.getElementById('dash-cat').value;
   const esp = document.getElementById('dash-esp').value;
   const area = document.getElementById('dash-area').value;
   const filters = {};
-  if (t) filters.trainer = t;
+  if (tFilter) filters.trainer = tFilter;
   if (m !== '') filters.mes = m;
   if (cat) filters.categoria = cat;
   if (esp) filters.especificacion = esp;
   if (area) filters.area = area;
   const arr = filterRecords(filters);
 
+  // Periodo label
+  const MESES_N = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const periodoStr = m !== '' ? MESES_N[parseInt(m)] + ' 2026' : 'Todos los periodos';
+  const trainerStr = tFilter ? ' · ' + tFilter.split(' ')[0] : '';
+  document.getElementById('dash-periodo-label').textContent = 'Reporte del equipo · ' + periodoStr + trainerStr;
+
   const totalHrs = arr.reduce((s,r) => s + parseFloat(r.horas||0), 0);
-  document.getElementById('dash-stats').innerHTML = `
-    <div class="stat-card"><div class="stat-value">${arr.length}</div><div class="stat-label">Actividades</div><div class="stat-icon">📋</div></div>
-    <div class="stat-card blue"><div class="stat-value">${totalHrs}h</div><div class="stat-label">Horas totales</div><div class="stat-icon">⏱</div></div>
-    <div class="stat-card lavender"><div class="stat-value">${new Set(arr.map(r=>r.trainer)).size}</div><div class="stat-label">Trainers activos</div><div class="stat-icon">👤</div></div>
-    <div class="stat-card success"><div class="stat-value">${new Set(arr.map(r=>r.categoria)).size}</div><div class="stat-label">Categorías</div><div class="stat-icon">🏷</div></div>
-  `;
+  const trainersActivos = [...new Set(arr.map(r=>r.trainer).filter(Boolean))];
+  const areasAtendidas = [...new Set(arr.map(r=>r.area).filter(Boolean))];
+  const catsUsadas = [...new Set(arr.map(r=>r.categoria).filter(Boolean))];
 
-  // Chart trainers (bar)
-  destroyChart('trainers');
-  const hrsByT = sumBy(arr, 'horas', 'trainer');
-  const tLabels = TRAINERS.map(t => t.split(' ')[0]);
-  const tData = TRAINERS.map(t => hrsByT[t]||0);
-  const ctx1 = document.getElementById('chart-trainers').getContext('2d');
-  charts['trainers'] = new Chart(ctx1, {
-    type: 'bar',
-    data: { labels: tLabels, datasets: [{ data: tData, backgroundColor: PALETTE, borderRadius: 6, borderSkipped: false }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.raw + 'h' } } }, scales: { x: { ticks: { color: '#6e7f96', font: { family: 'DM Sans', size: 11 } }, grid: { display: false } }, y: { ticks: { color: '#6e7f96', font: { family: 'DM Sans', size: 11 } }, grid: { color: '#e8eaf2' } } } }
-  });
+  // ---- RESUMEN EJECUTIVO ----
+  const execEl = document.getElementById('dash-exec-summary');
+  const execTextEl = document.getElementById('dash-exec-text');
+  if (arr.length > 0) {
+    execEl.style.display = 'block';
+    const hrsByT2 = sumBy(arr, 'horas', 'trainer');
+    const topTrainer = Object.entries(hrsByT2).sort((a,b)=>b[1]-a[1])[0];
+    const catMap2 = countBy(arr, 'categoria');
+    const topCat = Object.entries(catMap2).sort((a,b)=>b[1]-a[1])[0];
+    const topEsp2 = Object.entries(countBy(arr,'especificacion')).sort((a,b)=>b[1]-a[1])[0];
+    const topArea2 = Object.entries(countBy(arr,'area')).sort((a,b)=>b[1]-a[1])[0];
+    const avgHrsXTrainer = trainersActivos.length ? (totalHrs / trainersActivos.length).toFixed(1) : 0;
+    execTextEl.innerHTML = `Durante el periodo <strong>${periodoStr}</strong>, el equipo de training registró un total de <strong>${totalHrs}h</strong> distribuidas en <strong>${arr.length} actividades</strong>, con participación de <strong>${trainersActivos.length} trainer${trainersActivos.length!==1?'s':''}</strong> activo${trainersActivos.length!==1?'s':''}. ${topTrainer ? `<strong>${topTrainer[0].split(' ')[0]}</strong> lideró con <strong>${topTrainer[1]}h</strong>.` : ''} ${topCat ? `La mayor carga de trabajo recayó en <strong>${topCat[0]}</strong>` : ''}${topEsp2 ? ` (principalmente <strong>${topEsp2[0]}</strong>)` : ''}. ${topArea2 ? `El área con mayor demanda fue <strong>${topArea2[0]}</strong>.` : ''} El promedio por trainer fue <strong>${avgHrsXTrainer}h</strong> y se cubrieron <strong>${areasAtendidas.length} área${areasAtendidas.length!==1?'s':''}</strong>.`;
+  } else {
+    execEl.style.display = 'none';
+  }
 
-  // Chart categorias (doughnut)
-  destroyChart('tipos');
-  const catMap = countBy(arr, 'categoria');
-  const catTop = topN(catMap, 7);
-  const ctx2 = document.getElementById('chart-tipos').getContext('2d');
-  charts['tipos'] = new Chart(ctx2, {
-    type: 'doughnut',
-    data: { labels: catTop.map(t=>t[0]), datasets: [{ data: catTop.map(t=>t[1]), backgroundColor: PALETTE, borderWidth: 2, borderColor: '#ffffff', hoverOffset: 6 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#4a5e78', font: { family: 'DM Sans', size: 11 }, boxWidth: 12, padding: 10 } } }, cutout: '65%' }
-  });
-
-  // Bar especificaciones
-  const espMap = countBy(arr, 'especificacion');
-  const espTop = topN(espMap, 10);
-  const maxEsp = espTop[0]?.[1] || 1;
-  document.getElementById('bar-categorias').innerHTML = espTop.length ? espTop.map((e, i) => `
-    <div class="bar-item">
-      <div class="bar-label" title="${e[0]}">${e[0]}</div>
-      <div class="bar-track"><div class="bar-fill ${['','blue','lavender','','','blue','','lavender','',''][i%10]}" style="width:${Math.round(e[1]/maxEsp*100)}%"></div></div>
-      <div class="bar-val">${e[1]}</div>
+  // ---- KPI HERO ----
+  const promedioHrsDia = (() => {
+    const dias = [...new Set(arr.map(r=>r.fecha).filter(Boolean))];
+    return dias.length ? (totalHrs / dias.length).toFixed(1) : 0;
+  })();
+  const kpiData = [
+    { label: 'Horas totales', val: totalHrs + 'h', color: '#2f5c8f', icon: '⏱', sub: promedioHrsDia + 'h promedio/día' },
+    { label: 'Actividades', val: arr.length, color: '#c9a84c', icon: '📋', sub: catsUsadas.length + ' categoría' + (catsUsadas.length!==1?'s':'') },
+    { label: 'Trainers activos', val: trainersActivos.length, color: '#43A047', icon: '👤', sub: 'de ' + TRAINERS.length + ' en el equipo' },
+    { label: 'Áreas atendidas', val: areasAtendidas.length, color: '#8E24AA', icon: '🏢', sub: areasAtendidas.slice(0,2).join(', ') + (areasAtendidas.length > 2 ? '...' : '') },
+  ];
+  document.getElementById('dash-kpi-row').innerHTML = kpiData.map(k => `
+    <div style="background:#fff;border-radius:12px;padding:18px 16px;box-shadow:0 1px 6px rgba(0,0,0,.06);border-top:3px solid ${k.color};">
+      <div style="font-size:28px;font-weight:800;color:${k.color};line-height:1;margin-bottom:4px;">${k.val}</div>
+      <div style="font-size:11px;font-weight:700;color:#4a5e78;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">${k.label}</div>
+      <div style="font-size:11px;color:#8a9bb5;">${k.sub}</div>
     </div>
-  `).join('') : '<div class="empty-state"><p>Sin datos</p></div>';
+  `).join('');
 
-  // Bar áreas
-  const areaMap = countBy(arr, 'area');
-  const areaTop = topN(areaMap, 8);
-  const maxArea = areaTop[0]?.[1] || 1;
-  document.getElementById('bar-areas').innerHTML = areaTop.length ? areaTop.map((a, i) => `
-    <div class="bar-item">
-      <div class="bar-label" title="${a[0]}">${a[0]}</div>
-      <div class="bar-track"><div class="bar-fill success" style="width:${Math.round(a[1]/maxArea*100)}%"></div></div>
-      <div class="bar-val">${a[1]}</div>
-    </div>
-  `).join('') : '<div class="empty-state"><p>Sin datos</p></div>';
+  // ---- TRAINER CARDS ----
+  const hrsByTrainer = sumBy(arr, 'horas', 'trainer');
+  const actsByTrainer = countBy(arr, 'trainer');
+  const maxHrsTrainer = Math.max(...TRAINERS.map(t => hrsByTrainer[t]||0), 1);
+  const sortedTrainers = [...TRAINERS].sort((a,b) => (hrsByTrainer[b]||0) - (hrsByTrainer[a]||0));
+  const medals = ['🥇','🥈','🥉'];
+  document.getElementById('dash-trainer-cards').innerHTML = sortedTrainers.map((trainer, idx) => {
+    const tc = TRAINER_COLORS[trainer] || { bg:'#607d8b', init: trainer[0], textDark:'#37474f' };
+    const hrs = hrsByTrainer[trainer] || 0;
+    const acts = actsByTrainer[trainer] || 0;
+    const pct = Math.round(hrs / maxHrsTrainer * 100);
+    const topCatT = Object.entries(countBy(arr.filter(r=>r.trainer===trainer), 'categoria')).sort((a,b)=>b[1]-a[1])[0];
+    const topEspT = Object.entries(countBy(arr.filter(r=>r.trainer===trainer), 'especificacion')).sort((a,b)=>b[1]-a[1])[0];
+    const isActive = hrs > 0;
+    return `<div style="background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 6px rgba(0,0,0,.06);border:1.5px solid ${isActive ? tc.bg+'33' : '#e8eaf2'};opacity:${isActive?1:0.55};">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <div style="width:38px;height:38px;border-radius:50%;background:${tc.bg};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;flex-shrink:0;">${tc.init}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:700;font-size:13px;color:#0e1a30;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${medals[idx]||''} ${trainer.split(' ')[0]}</div>
+          <div style="font-size:11px;color:#8a9bb5;">${trainer.split(' ').slice(1).join(' ')}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:20px;font-weight:800;color:${tc.bg};line-height:1;">${hrs}h</div>
+          <div style="font-size:10px;color:#8a9bb5;">${acts} activ.</div>
+        </div>
+      </div>
+      <div style="height:5px;background:#f0f4fa;border-radius:3px;margin-bottom:10px;">
+        <div style="height:100%;width:${pct}%;background:${tc.bg};border-radius:3px;transition:width .4s;"></div>
+      </div>
+      ${isActive ? `<div style="display:flex;flex-wrap:wrap;gap:4px;">
+        ${topCatT ? `<span style="background:${tc.bg}18;color:${tc.bg};font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600;">${topCatT[0]}</span>` : ''}
+        ${topEspT ? `<span style="background:#f0f4fa;color:#6e7f96;font-size:10px;padding:2px 7px;border-radius:10px;">${topEspT[0]}</span>` : ''}
+      </div>` : '<div style="font-size:11px;color:#b0bec5;font-style:italic;">Sin actividad registrada</div>'}
+    </div>`;
+  }).join('');
 
-  // Chart semanal
+  // ---- QUÉ SE TRABAJÓ (categorías con barras apiladas de trainers) ----
+  const catBreakdown = Object.entries(countBy(arr, 'categoria')).sort((a,b)=>b[1]-a[1]);
+  const maxCatCount = catBreakdown[0]?.[1] || 1;
+  const totalActs = arr.length || 1;
+  const CAT_COLORS = {
+    'Training':'#2f5c8f','Desarrollo':'#c9a84c','Acompañamiento / Shadowing':'#8E24AA',
+    'Llamadas':'#00ACC1','Gestión':'#E67C73','Documentación':'#43A047'
+  };
+  document.getElementById('dash-cat-breakdown').innerHTML = catBreakdown.length ? catBreakdown.map(([cat, count]) => {
+    const pct = Math.round(count / maxCatCount * 100);
+    const catPct = Math.round(count / totalActs * 100);
+    const hrsForCat = arr.filter(r=>r.categoria===cat).reduce((s,r)=>s+parseFloat(r.horas||0),0);
+    const col = CAT_COLORS[cat] || '#607d8b';
+    // mini dots de trainers que trabajaron en esta cat
+    const trainersInCat = [...new Set(arr.filter(r=>r.categoria===cat).map(r=>r.trainer).filter(Boolean))];
+    const dots = trainersInCat.map(t => {
+      const tc = TRAINER_COLORS[t] || {bg:'#607d8b',init:t[0]};
+      return `<span title="${t}" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:${tc.bg};color:#fff;font-size:9px;font-weight:700;margin-left:-4px;border:1.5px solid #fff;">${tc.init}</span>`;
+    }).join('');
+    return `<div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="width:8px;height:8px;border-radius:50%;background:${col};display:inline-block;flex-shrink:0;"></span>
+          <span style="font-size:12px;font-weight:600;color:#2c3e54;">${cat}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="display:flex;margin-left:4px;">${dots}</div>
+          <span style="font-size:11px;color:#8a9bb5;">${hrsForCat}h</span>
+          <span style="font-size:11px;font-weight:700;color:${col};min-width:30px;text-align:right;">${catPct}%</span>
+        </div>
+      </div>
+      <div style="height:6px;background:#f0f4fa;border-radius:3px;">
+        <div style="height:100%;width:${pct}%;background:${col};border-radius:3px;"></div>
+      </div>
+    </div>`;
+  }).join('') : '<div style="font-size:13px;color:#b0bec5;text-align:center;padding:20px;">Sin datos</div>';
+
+  // ---- ÁREAS ATENDIDAS ----
+  const areaBreakdown = Object.entries(countBy(arr, 'area')).sort((a,b)=>b[1]-a[1]).slice(0, 10);
+  const maxAreaCount = areaBreakdown[0]?.[1] || 1;
+  const AREA_COLS = ['#2f5c8f','#00ACC1','#43A047','#c9a84c','#8E24AA','#E67C73','#F9A825','#00ACC1','#455A64','#D32F2F'];
+  document.getElementById('dash-areas-breakdown').innerHTML = areaBreakdown.length ? areaBreakdown.map(([area, count], i) => {
+    const pct = Math.round(count / maxAreaCount * 100);
+    const hrsForArea = arr.filter(r=>r.area===area).reduce((s,r)=>s+parseFloat(r.horas||0),0);
+    const col = AREA_COLS[i % AREA_COLS.length];
+    const trainersInArea = [...new Set(arr.filter(r=>r.area===area).map(r=>r.trainer).filter(Boolean))];
+    const dots = trainersInArea.slice(0,4).map(t => {
+      const tc = TRAINER_COLORS[t] || {bg:'#607d8b',init:t[0]};
+      return `<span title="${t}" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:${tc.bg};color:#fff;font-size:8px;font-weight:700;margin-left:-3px;border:1px solid #fff;">${tc.init}</span>`;
+    }).join('');
+    return `<div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
+        <span style="font-size:11px;font-weight:600;color:#2c3e54;letter-spacing:.5px;">${area}</span>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div style="display:flex;margin-left:2px;">${dots}</div>
+          <span style="font-size:11px;color:#8a9bb5;">${hrsForArea}h</span>
+          <span style="font-size:11px;font-weight:700;color:${col};min-width:28px;text-align:right;">${count}</span>
+        </div>
+      </div>
+      <div style="height:5px;background:#f0f4fa;border-radius:3px;">
+        <div style="height:100%;width:${pct}%;background:${col};border-radius:3px;"></div>
+      </div>
+    </div>`;
+  }).join('') : '<div style="font-size:13px;color:#b0bec5;text-align:center;padding:20px;">Sin datos</div>';
+
+  // ---- TREND SEMANAL ----
   destroyChart('semanal');
   const now = new Date();
   const weeks = [];
   for (let i = 7; i >= 0; i--) {
-    const d = new Date(now);
-    d.setDate(d.getDate() - i * 7);
+    const d = new Date(now); d.setDate(d.getDate() - i * 7);
     weeks.push(getWeekKey(d.toISOString().split('T')[0]));
   }
   const hrsPerWeek = weeks.map(w => arr.filter(r => getWeekKey(r.fecha) === w).reduce((s,r) => s + parseFloat(r.horas||0), 0));
@@ -3179,26 +3350,70 @@ function renderDashboard() {
     type: 'line',
     data: {
       labels: weeks.map(w => 'S' + w.split('W')[1]),
-      datasets: [{ label: 'Horas', data: hrsPerWeek, borderColor: '#c9a84c', backgroundColor: 'rgba(201,168,76,0.08)', fill: true, tension: 0.4, pointBackgroundColor: '#c9a84c', pointRadius: 5 }]
+      datasets: [{ label: 'Horas', data: hrsPerWeek, borderColor: '#2f5c8f', backgroundColor: 'rgba(47,92,143,0.08)', fill: true, tension: 0.4, pointBackgroundColor: '#2f5c8f', pointRadius: 4, pointHoverRadius: 6 }]
     },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.raw + 'h' } } }, scales: { x: { ticks: { color: '#6e7f96', font: { family: 'DM Sans', size: 11 } }, grid: { color: '#e8eaf2' } }, y: { ticks: { color: '#6e7f96', font: { family: 'DM Sans', size: 11 } }, grid: { color: '#e8eaf2' }, beginAtZero: true } } }
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.raw + 'h' } } }, scales: { x: { ticks: { color: '#6e7f96', font: { family: 'DM Sans', size: 10 } }, grid: { display: false } }, y: { ticks: { color: '#6e7f96', font: { family: 'DM Sans', size: 10 } }, grid: { color: '#e8eaf2' }, beginAtZero: true } } }
   });
 
-  // Ranking
-  const hrsByTrainer = sumBy(arr, 'horas', 'trainer');
-  const actsByTrainer = countBy(arr, 'trainer');
-  const sorted = TRAINERS.map(t => ({ name: t, hrs: hrsByTrainer[t]||0, acts: actsByTrainer[t]||0 })).sort((a,b) => b.hrs - a.hrs);
-  const medals = ['gold','silver','bronze','',''];
-  document.getElementById('dash-ranking').innerHTML = sorted.map((t, i) => `
-    <div class="rank-item">
-      <div class="rank-num ${medals[i]}">${i+1}</div>
-      <div style="flex:1;"><div class="rank-name">${t.name}</div></div>
-      <div class="rank-stats">
-        <div><div class="rank-stat-val">${t.hrs}h</div><div class="rank-stat-lbl">horas</div></div>
-        <div><div class="rank-stat-val secondary">${t.acts}</div><div class="rank-stat-lbl">actvs</div></div>
+  // ---- TOP ESPECIFICACIONES ----
+  const espBreakdown = Object.entries(countBy(arr, 'especificacion')).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const maxEspCount = espBreakdown[0]?.[1] || 1;
+  document.getElementById('dash-esp-top').innerHTML = espBreakdown.length ? espBreakdown.map(([esp, count], i) => {
+    const pct = Math.round(count / maxEspCount * 100);
+    const hrsE = arr.filter(r=>r.especificacion===esp).reduce((s,r)=>s+parseFloat(r.horas||0),0);
+    return `<div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:2px;">
+        <span style="font-size:11px;font-weight:600;color:#2c3e54;">${esp}</span>
+        <span style="font-size:11px;color:#8a9bb5;">${hrsE}h · ${count}</span>
       </div>
-    </div>
-  `).join('') || '<div class="empty-state"><p>Sin datos para los filtros seleccionados</p></div>';
+      <div style="height:5px;background:#f0f4fa;border-radius:3px;">
+        <div style="height:100%;width:${pct}%;background:${['#2f5c8f','#c9a84c','#43A047','#8E24AA','#00ACC1','#E67C73','#F9A825','#607d8b'][i%8]};border-radius:3px;"></div>
+      </div>
+    </div>`;
+  }).join('') : '<div style="font-size:12px;color:#b0bec5;">Sin datos</div>';
+
+  // ---- HEATMAP DÍAS DE SEMANA ----
+  const DIAS_LABELS = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+  const weekdayCounts = [0,0,0,0,0,0,0];
+  const weekdayHrs = [0,0,0,0,0,0,0];
+  arr.forEach(r => {
+    if (!r.fecha) return;
+    const d = new Date(r.fecha + 'T12:00:00');
+    const dow = (d.getDay() + 6) % 7; // Lun=0
+    weekdayCounts[dow]++;
+    weekdayHrs[dow] += parseFloat(r.horas||0);
+  });
+  const maxWD = Math.max(...weekdayHrs, 1);
+  document.getElementById('dash-weekday-heatmap').innerHTML = DIAS_LABELS.map((d, i) => {
+    const intensity = Math.round(weekdayHrs[i] / maxWD * 100);
+    const alpha = weekdayHrs[i] > 0 ? Math.max(0.12, intensity/100) : 0;
+    return `<div style="text-align:center;">
+      <div style="background:rgba(47,92,143,${alpha});border-radius:8px;padding:12px 4px;margin-bottom:4px;">
+        <div style="font-size:15px;font-weight:800;color:${weekdayHrs[i]>0?'#0e1a30':'#c5cdd8'};">${weekdayHrs[i]||0}h</div>
+        <div style="font-size:10px;color:#8a9bb5;margin-top:2px;">${weekdayCounts[i]} act.</div>
+      </div>
+      <div style="font-size:11px;color:#6e7f96;font-weight:600;">${d}</div>
+    </div>`;
+  }).join('');
+
+  // ---- ACTIVIDADES RECIENTES ----
+  const recentArr = [...arr].sort((a,b) => (b.fecha||'').localeCompare(a.fecha||'')).slice(0, 8);
+  document.getElementById('dash-total-acts-badge').textContent = arr.length + ' total';
+  document.getElementById('dash-recent-list').innerHTML = recentArr.length ? recentArr.map(r => {
+    const tc = TRAINER_COLORS[r.trainer] || {bg:'#607d8b',init:(r.trainer||'?')[0]};
+    const catCol = CAT_COLORS[r.categoria] || '#607d8b';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:#f8f9fc;border-left:3px solid ${tc.bg};">
+      <span title="${r.trainer}" style="width:28px;height:28px;border-radius:50%;background:${tc.bg};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0;">${tc.init}</span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12px;font-weight:600;color:#0e1a30;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.descripcion||r.especificacion||'—'}</div>
+        <div style="font-size:11px;color:#8a9bb5;">${r.trainer?.split(' ')[0]||''} · ${r.fecha||''}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+        <span style="background:${catCol}18;color:${catCol};font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;">${r.categoria||''}</span>
+        <span style="font-size:12px;font-weight:700;color:#2f5c8f;">${r.horas||0}h</span>
+      </div>
+    </div>`;
+  }).join('') : '<div style="text-align:center;padding:20px;color:#b0bec5;font-size:13px;">Sin actividades para el periodo seleccionado</div>';
 }
 
 function cascadeDashEsp() {
@@ -3244,20 +3459,125 @@ function renderTrainerSelector() {
 function selectTrainer(name) {
   selectedTrainer = name;
   renderTrainerSelector();
-  renderTrainerReport();
   document.getElementById('trainer-report').style.display = 'block';
+  // Inicializar en "Todo" para mostrar toda la data del trainer
+  if (_pdfPeriodo !== 'todo') setPdfPeriodo('todo');
+  else renderTrainerReport();
+}
+
+let _pdfPeriodo = 'todo'; // semana | mes | año | todo
+
+function setPdfPeriodo(p) {
+  _pdfPeriodo = p;
+  const today = new Date();
+
+  // Toggle button styles
+  ['semana','mes','año','todo'].forEach(k => {
+    const btn = document.getElementById('pdf-btn-'+k);
+    if (btn) {
+      btn.style.background = k === p ? 'var(--navy)' : 'transparent';
+      btn.style.color       = k === p ? '#fff'        : 'var(--text-muted)';
+    }
+  });
+
+  // Show/hide pickers
+  const semEl = document.getElementById('trainer-filter-semana');
+  const mesEl = document.getElementById('trainer-filter-mes');
+  const añoEl = document.getElementById('trainer-filter-año');
+  if (semEl) semEl.style.display = p === 'semana' ? 'inline-block' : 'none';
+  if (mesEl) mesEl.style.display = p === 'mes'    ? 'inline-block' : 'none';
+  if (añoEl) añoEl.style.display = p === 'año'    ? 'inline-block' : 'none';
+
+  // Set default values
+  if (p === 'semana' && semEl && !semEl.value) {
+    // Default to current week in YYYY-Www format
+    const yr  = today.getFullYear();
+    const jan1 = new Date(yr, 0, 1);
+    const wk   = Math.ceil(((today - jan1) / 86400000 + jan1.getDay() + 1) / 7);
+    semEl.value = `${yr}-W${String(wk).padStart(2,'0')}`;
+  }
+  if (p === 'mes' && mesEl) mesEl.value = today.getMonth();
+  if (p === 'año' && añoEl) añoEl.value = today.getFullYear();
+
+  renderTrainerReport();
+}
+
+// Get date range for current period selection
+function getTrainerDateRange() {
+  const p = _pdfPeriodo;
+  if (p === 'semana') {
+    const weekVal = document.getElementById('trainer-filter-semana')?.value;
+    if (!weekVal) return null;
+    const [yr, wk] = weekVal.split('-W').map(Number);
+    // ISO week: Monday as first day
+    const jan4 = new Date(yr, 0, 4);
+    const startOfW1 = new Date(jan4);
+    startOfW1.setDate(jan4.getDate() - (jan4.getDay() || 7) + 1);
+    const monday = new Date(startOfW1);
+    monday.setDate(startOfW1.getDate() + (wk-1)*7);
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    return {
+      start: monday.toISOString().split('T')[0],
+      end:   sunday.toISOString().split('T')[0]
+    };
+  }
+  if (p === 'mes') {
+    const mes = parseInt(document.getElementById('trainer-filter-mes')?.value ?? new Date().getMonth());
+    const yr  = new Date().getFullYear();
+    const start = new Date(yr, mes, 1);
+    const end   = new Date(yr, mes+1, 0);
+    return { start: start.toISOString().split('T')[0], end: end.toISOString().split('T')[0] };
+  }
+  if (p === 'año') {
+    const yr = parseInt(document.getElementById('trainer-filter-año')?.value ?? new Date().getFullYear());
+    return { start: `${yr}-01-01`, end: `${yr}-12-31` };
+  }
+  return null; // todo
+}
+
+function downloadTrainerPDF() {
+  if (!selectedTrainer) { toast('Selecciona un trainer primero', 'error'); return; }
+
+  const range    = getTrainerDateRange();
+  const MES_NAMES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const today    = new Date();
+  let periodoLabel = 'Todos los períodos';
+
+  if (_pdfPeriodo === 'semana' && range) {
+    periodoLabel = `Semana del ${fmtDate(range.start)} al ${fmtDate(range.end)}`;
+  } else if (_pdfPeriodo === 'mes' && range) {
+    const mes = parseInt(document.getElementById('trainer-filter-mes')?.value ?? today.getMonth());
+    periodoLabel = `${MES_NAMES[mes]} ${today.getFullYear()}`;
+  } else if (_pdfPeriodo === 'año') {
+    periodoLabel = `Año ${document.getElementById('trainer-filter-año')?.value || today.getFullYear()}`;
+  }
+
+  const hdr = document.getElementById('trainer-pdf-header');
+  if (hdr) {
+    document.getElementById('trainer-pdf-name').textContent    = selectedTrainer;
+    document.getElementById('trainer-pdf-periodo').textContent = periodoLabel;
+    document.getElementById('trainer-pdf-date').textContent    = 'Generado el ' + today.toLocaleDateString('es-MX', {weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+    hdr.style.display = 'block';
+  }
+
+  window.print();
 }
 
 function renderTrainerReport() {
   if (!selectedTrainer) return;
-  const mes  = document.getElementById('trainer-filter-mes').value;
-  const cat  = document.getElementById('trainer-filter-cat').value;
-  const area = document.getElementById('trainer-filter-area').value;
+  const range = getTrainerDateRange();
+  const cat   = document.getElementById('trainer-filter-cat').value;
+  const area  = document.getElementById('trainer-filter-area').value;
   const filters = { trainer: selectedTrainer };
-  if (mes  !== '') filters.mes = mes;
-  if (cat)         filters.categoria = cat;
-  if (area)        filters.area = area;
-  const arr = filterRecords(filters);
+  if (cat)  filters.categoria = cat;
+  if (area) filters.area      = area;
+  let arr = filterRecords(filters);
+
+  // Apply date range filter
+  if (range) {
+    arr = arr.filter(r => r.fecha >= range.start && r.fecha <= range.end);
+  }
   const totalHrs = arr.reduce((s,r) => s + parseFloat(r.horas||0), 0);
 
   const catMap  = countBy(arr, 'categoria');
@@ -3266,7 +3586,12 @@ function renderTrainerReport() {
   const topCats  = topN(catMap,  3).map(c => c[0]);
   const topEsps  = topN(espMap,  3).map(e => e[0]);
   const topAreas = topN(areaMap, 3).map(a => a[0]);
-  const periodoLabel = mes !== '' ? `el mes de ${MESES[parseInt(mes)]}` : 'el período seleccionado';
+  const MES_NAMES_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  let periodoLabel = 'el período seleccionado';
+  if (_pdfPeriodo === 'semana' && range) periodoLabel = `la semana del ${fmtDate(range.start)} al ${fmtDate(range.end)}`;
+  else if (_pdfPeriodo === 'mes') { const m = parseInt(document.getElementById('trainer-filter-mes')?.value ?? new Date().getMonth()); periodoLabel = `el mes de ${MES_NAMES_ES[m]}`; }
+  else if (_pdfPeriodo === 'año') periodoLabel = `el año ${document.getElementById('trainer-filter-año')?.value || new Date().getFullYear()}`;
+  else periodoLabel = 'el período completo';
 
   // Exec summary
   document.getElementById('trainer-exec-summary').innerHTML =
@@ -3399,16 +3724,30 @@ let currentPeriod = 'semana';
 
 function setPeriod(p, btn) {
   currentPeriod = p;
+  // Style toggle buttons (new design uses period-btn-semana etc IDs)
+  ['semana','mes','año'].forEach(k => {
+    const b = document.getElementById('period-btn-'+k);
+    if (b) {
+      b.style.background = k===p ? 'white' : 'transparent';
+      b.style.color = k===p ? 'var(--text)' : 'var(--text-muted)';
+      b.style.boxShadow = k===p ? '0 1px 4px rgba(0,0,0,.08)' : 'none';
+    }
+  });
   document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+  if (btn) btn.classList.add('active');
   populatePeriodSelect();
-  document.getElementById('period-report-content').innerHTML = '<div class="empty-state"><div class="icon">📅</div><p>Selecciona un período para generar el reporte</p></div>';
+  // Auto-render the first period
+  const sel = document.getElementById('period-select');
+  if (sel && sel.options.length > 1) {
+    sel.selectedIndex = 1;
+    renderPeriodReport();
+  }
 }
 
 function populatePeriodSelect() {
   const all = loadData();
   const sel = document.getElementById('period-select');
-  let options = ['<option value="">— Seleccionar período —</option>'];
+  let options = ['<option value="">— Período —</option>'];
 
   if (currentPeriod === 'semana') {
     const weeks = [...new Set(all.map(r => getWeekKey(r.fecha)))].sort().reverse();
@@ -3433,164 +3772,434 @@ function populatePeriodSelect() {
 function renderPeriodReport() {
   const periodVal  = document.getElementById('period-select').value;
   const trainerVal = document.getElementById('period-trainer').value;
-  const catVal     = document.getElementById('period-cat').value;
-  const areaVal    = document.getElementById('period-area').value;
   if (!periodVal) return;
 
   let filters = {};
-  if (trainerVal) filters.trainer  = trainerVal;
-  if (catVal)     filters.categoria = catVal;
-  if (areaVal)    filters.area      = areaVal;
+  if (trainerVal) filters.trainer = trainerVal;
   if (currentPeriod === 'semana') filters.semana = periodVal;
   else if (currentPeriod === 'mes') {
     const [y, m] = periodVal.split('-');
     filters.año = y; filters.mes = String(parseInt(m) - 1);
-  } else { filters.año = periodVal; }
+  } else { filters.año = String(periodVal); }
 
   const arr = filterRecords(filters);
-  const totalHrs = arr.reduce((s,r) => s + parseFloat(r.horas||0), 0);
+  const totalHrs  = Math.round(arr.reduce((s,r) => s + parseFloat(r.horas||0), 0) * 10) / 10;
+  const cont = document.getElementById('period-report-content');
 
-  const catMap  = countBy(arr, 'categoria');
-  const espMap  = countBy(arr, 'especificacion');
-  const areaMap = countBy(arr, 'area');
-  const hrsByT  = sumBy(arr, 'horas', 'trainer');
-  const actsByT = countBy(arr, 'trainer');
-
-  const topCats  = topN(catMap,  3).map(c=>c[0]);
-  const topEsps  = topN(espMap,  3).map(e=>e[0]);
-  const topAreas = topN(areaMap, 3).map(a=>a[0]);
-
+  // Formato del período
+  const MN = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   const periodoFmt = currentPeriod === 'mes'
-    ? (() => { const [y,m] = periodVal.split('-'); return `${MESES[parseInt(m)-1]} ${y}`; })()
-    : periodVal;
+    ? (() => { const [y,m] = periodVal.split('-'); return `${MN[parseInt(m)-1]} ${y}`; })()
+    : currentPeriod === 'semana' ? `Semana ${periodVal}` : `Año ${periodVal}`;
 
-  const conclusion = `En <strong>${periodoFmt}</strong>, el equipo registró <strong>${totalHrs} horas</strong> en <strong>${arr.length} actividades</strong>. Categoría líder: <strong>${topCats[0]||'—'}</strong>. Especificaciones más frecuentes: <strong>${topEsps.join(', ')||'—'}</strong>. Áreas con mayor soporte: <strong>${topAreas.join(', ')||'—'}</strong>.`;
+  // Actualizar label
+  const lbl = document.getElementById('period-titulo-label');
+  if (lbl) lbl.textContent = `${periodoFmt}${trainerVal ? ' · '+trainerVal : ''}`;
 
-  const catTop  = topN(catMap,  4); const maxCat  = catTop[0]?.[1]  || 1;
-  const espTop  = topN(espMap,  8); const maxEsp  = espTop[0]?.[1]  || 1;
-  const areaTop = topN(areaMap, 8); const maxArea = areaTop[0]?.[1] || 1;
+  if (!arr.length) {
+    cont.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>Sin actividades registradas para <strong>${periodoFmt}</strong></p></div>`;
+    return;
+  }
 
-  const makeBar = (items, max, cls='') => items.length
-    ? items.map(x=>`<div class="bar-item"><div class="bar-label" title="${x[0]}">${x[0]}</div><div class="bar-track"><div class="bar-fill ${cls}" style="width:${Math.round(x[1]/max*100)}%"></div></div><div class="bar-val">${x[1]}</div></div>`).join('')
-    : '<div class="empty-state"><p>Sin datos</p></div>';
+  // ── Aggregations ──
+  const catMap   = countBy(arr, 'categoria');
+  const espMap   = countBy(arr, 'especificacion');
+  const areaMap  = countBy(arr, 'area');
+  const hrsByT   = sumBy(arr,  'horas', 'trainer');
+  const actsByT  = countBy(arr, 'trainer');
+  const topCats  = topN(catMap,  3).map(c=>c[0]);
+  const topAreas = topN(areaMap, 3).map(a=>a[0]);
+  const topEsps  = topN(espMap,  3).map(e=>e[0]);
 
-  document.getElementById('period-report-content').innerHTML = `
-    <div class="exec-summary">${conclusion}</div>
+  // Trainer más activo (horas)
+  const trainerLider = TRAINERS.reduce((a,b) => (hrsByT[a]||0) >= (hrsByT[b]||0) ? a : b);
+  const maxHrsT = hrsByT[trainerLider] || 1;
 
-    <div class="stats-row" style="margin-bottom:20px;">
-      <div class="stat-card"><div class="stat-value">${arr.length}</div><div class="stat-label">Actividades</div></div>
-      <div class="stat-card blue"><div class="stat-value">${totalHrs}h</div><div class="stat-label">Horas</div></div>
-      <div class="stat-card lavender"><div class="stat-value">${new Set(arr.map(r=>r.trainer)).size}</div><div class="stat-label">Trainers activos</div></div>
-      <div class="stat-card success"><div class="stat-value">${new Set(arr.map(r=>r.area)).size}</div><div class="stat-label">Áreas atendidas</div></div>
+  // Summary texto
+  const summaryTxt = `En <strong>${periodoFmt}</strong>, el equipo registró <strong>${totalHrs}h</strong> distribuidas en <strong>${arr.length} actividades</strong>. La categoría con mayor presencia fue <strong>${topCats[0]||'—'}</strong>, con principal soporte a las áreas de <strong>${topAreas.slice(0,2).join(' y ')||'—'}</strong>. <strong>${trainerLider}</strong> lideró el período con <strong>${hrsByT[trainerLider]||0}h</strong> registradas.`;
+
+  // Top categorías (todas)
+  const catAll  = topN(catMap,  10);  const maxC  = catAll[0]?.[1]  || 1;
+  const espAll  = topN(espMap,  8);   const maxE  = espAll[0]?.[1]  || 1;
+  const areaAll = topN(areaMap, 8);   const maxA  = areaAll[0]?.[1] || 1;
+  // Horas por trainer (para el panel de comparación)
+  const trainerHrsArr = TRAINERS.map(t => [t, hrsByT[t]||0]).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
+  const maxTH = trainerHrsArr[0]?.[1] || 1;
+
+  const makeBar = (items, max, accentCls='') => items.length
+    ? items.map(([lbl,val]) => {
+        const pct = Math.round(val/max*100);
+        return `<div class="bar-item">
+          <div class="bar-label" title="${lbl}" style="font-size:12px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${lbl}</div>
+          <div class="bar-track" style="flex:1;height:8px;background:#e8eaf2;border-radius:4px;overflow:hidden;">
+            <div class="bar-fill ${accentCls}" style="width:${pct}%;height:100%;border-radius:4px;background:${accentCls==='blue'?'var(--blue)':accentCls==='success'?'var(--success)':accentCls==='lavender'?'var(--lavender)':'var(--gold)'};"></div>
+          </div>
+          <div class="bar-val" style="font-size:12px;font-weight:700;min-width:28px;text-align:right;">${val}</div>
+        </div>`;
+      }).join('')
+    : '<p style="font-size:12px;color:var(--text-muted);padding:8px 0;">Sin datos</p>';
+
+  // Trainer cards del período
+  const trainerCards = TRAINERS.map(t => {
+    const hrs  = hrsByT[t]  || 0;
+    const acts = actsByT[t] || 0;
+    if (!acts && !hrs) return '';
+    const tc   = TRAINER_COLORS[t] || { bg:'#607d8b', init: t[0], light:'rgba(96,125,139,.1)' };
+    const pct  = Math.round((hrs / maxHrsT) * 100);
+    // top cat de este trainer en el período
+    const tArr = arr.filter(r => r.trainer === t);
+    const tCatMap = countBy(tArr, 'categoria');
+    const tTopCat = topN(tCatMap,1)[0]?.[0] || '—';
+    const tTopArea = topN(countBy(tArr,'area'),1)[0]?.[0] || '—';
+    return `
+      <div style="background:white;border-radius:12px;border:1.5px solid var(--border);padding:16px 18px;display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:40px;height:40px;border-radius:50%;background:${tc.bg};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:#fff;flex-shrink:0;">${tc.init}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t}</div>
+            <div style="font-size:11px;color:var(--text-muted);">${acts} act. · ${hrs}h</div>
+          </div>
+          <div style="font-family:var(--font-condensed);font-size:22px;font-weight:700;color:${tc.bg};">${hrs}h</div>
+        </div>
+        <!-- Barra progreso -->
+        <div style="height:6px;background:#e8eaf2;border-radius:3px;overflow:hidden;">
+          <div style="width:${pct}%;height:100%;background:${tc.bg};border-radius:3px;transition:width .5s ease;"></div>
+        </div>
+        <!-- Badges -->
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <span style="background:${tc.light||'rgba(60,100,145,.08)'};color:${tc.bg};border-radius:20px;padding:2px 8px;font-size:10px;font-weight:600;">${tTopCat}</span>
+          <span style="background:#f0f2f7;color:var(--text-muted);border-radius:20px;padding:2px 8px;font-size:10px;">${tTopArea}</span>
+        </div>
+      </div>`;
+  }).filter(Boolean).join('');
+
+  // Tabla actividades
+  const sorted = [...arr].sort((a,b) => b.fecha.localeCompare(a.fecha));
+  const tableRows = sorted.map(r => {
+    const tc = TRAINER_COLORS[r.trainer] || { bg:'#607d8b', init: r.trainer?.[0]||'?', light:'#eee' };
+    return `<tr>
+      <td style="font-size:12px;white-space:nowrap;">${fmtDate(r.fecha)}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <div style="width:24px;height:24px;border-radius:50%;background:${tc.bg};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;">${tc.init}</div>
+          <span style="font-size:12px;font-weight:500;">${r.trainer||'—'}</span>
+        </div>
+      </td>
+      <td><span class="badge ${getTypeBadge(r.categoria)}" style="font-size:10px;">${r.categoria||'—'}</span></td>
+      <td style="font-size:11px;color:var(--text-muted);">${r.especificacion||'—'}</td>
+      <td style="font-size:11px;">${r.area||'—'}</td>
+      <td style="font-family:var(--font-condensed);font-weight:700;color:var(--gold-light);font-size:13px;">${fmtHrs(r.horas)}</td>
+      <td style="font-size:11px;color:var(--text-soft);max-width:200px;" title="${r.descripcion||''}">${(r.descripcion||'—').slice(0,60)}${(r.descripcion||'').length>60?'…':''}</td>
+    </tr>`;
+  }).join('');
+
+  cont.innerHTML = `
+    <!-- RESUMEN EJECUTIVO -->
+    <div style="background:linear-gradient(135deg,#0e1a30 0%,#1a2f52 100%);border-radius:14px;padding:20px 24px;margin-bottom:20px;border-left:4px solid var(--gold);">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <span style="font-size:10px;letter-spacing:2px;color:var(--gold);font-weight:600;text-transform:uppercase;font-family:var(--font-condensed);">Resumen Ejecutivo</span>
+        <span style="font-size:10px;color:rgba(255,255,255,.35);">· ${periodoFmt}</span>
+      </div>
+      <p style="font-size:13.5px;color:rgba(255,255,255,.88);line-height:1.6;margin:0;">${summaryTxt}</p>
     </div>
 
-    <div class="grid-2" style="margin-bottom:20px;">
-      <div class="card">
-        <div class="card-header"><div class="card-title">Por Trainer</div></div>
-        <table style="width:100%;">
-          <thead><tr><th>Trainer</th><th>Horas</th><th>Actividades</th></tr></thead>
-          <tbody>${TRAINERS.map(t=>`
-            <tr>
-              <td class="td-main" style="font-size:13px;">${t}</td>
-              <td style="font-family:var(--font-condensed);font-weight:700;color:var(--gold-light);">${hrsByT[t]||0}h</td>
-              <td>${actsByT[t]||0}</td>
-            </tr>`).join('')}
-          </tbody>
-        </table>
+    <!-- KPI CARDS -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px;">
+      <div style="background:white;border-radius:12px;border:1.5px solid var(--border);padding:16px 18px;border-top:3px solid var(--gold);">
+        <div style="font-family:var(--font-condensed);font-size:30px;font-weight:700;color:var(--gold-light);">${totalHrs}h</div>
+        <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-top:2px;">Horas totales</div>
       </div>
-      <div class="card">
-        <div class="card-header"><div class="card-title">Por Categoría</div></div>
-        <div class="bar-visual">${makeBar(catTop, maxCat)}</div>
+      <div style="background:white;border-radius:12px;border:1.5px solid var(--border);padding:16px 18px;border-top:3px solid var(--blue);">
+        <div style="font-family:var(--font-condensed);font-size:30px;font-weight:700;color:var(--blue);">${arr.length}</div>
+        <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-top:2px;">Actividades</div>
       </div>
-    </div>
-
-    <div class="grid-2" style="margin-bottom:20px;">
-      <div class="card">
-        <div class="card-header"><div class="card-title">Por Especificación</div></div>
-        <div class="bar-visual">${makeBar(espTop, maxEsp, 'blue')}</div>
+      <div style="background:white;border-radius:12px;border:1.5px solid var(--border);padding:16px 18px;border-top:3px solid var(--lavender);">
+        <div style="font-family:var(--font-condensed);font-size:30px;font-weight:700;color:var(--lavender);">${new Set(arr.map(r=>r.trainer).filter(Boolean)).size}</div>
+        <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-top:2px;">Trainers activos</div>
       </div>
-      <div class="card">
-        <div class="card-header"><div class="card-title">Por Área Solicitante</div></div>
-        <div class="bar-visual">${makeBar(areaTop, maxArea, 'success')}</div>
+      <div style="background:white;border-radius:12px;border:1.5px solid var(--border);padding:16px 18px;border-top:3px solid var(--success);">
+        <div style="font-family:var(--font-condensed);font-size:30px;font-weight:700;color:var(--success);">${new Set(arr.map(r=>r.area).filter(Boolean)).size}</div>
+        <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-top:2px;">Áreas atendidas</div>
       </div>
     </div>
 
-    <div class="card">
-      <div class="card-header"><div class="card-title">Tabla de actividades · ${arr.length} registros</div></div>
+    <!-- TRAINER CARDS: contribución individual -->
+    <div style="margin-bottom:20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);">Contribución por trainer</span>
+        <span style="font-size:11px;color:var(--text-muted);">Barra = % del líder del período</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;">
+        ${trainerCards || '<p style="font-size:12px;color:var(--text-muted);">Sin datos de trainer</p>'}
+      </div>
+    </div>
+
+    <!-- QUÉ SE TRABAJÓ (categoría + horas por trainer) -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;">
+      <div style="background:white;border-radius:12px;border:1.5px solid var(--border);padding:18px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);margin-bottom:12px;">Qué se trabajó · Categorías</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">${makeBar(catAll, maxC)}</div>
+      </div>
+      <div style="background:white;border-radius:12px;border:1.5px solid var(--border);padding:18px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);margin-bottom:12px;">Horas registradas · Por trainer</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          ${trainerHrsArr.length ? trainerHrsArr.map(([t, hrs]) => {
+            const tc = TRAINER_COLORS[t] || { bg:'#607d8b', init: t[0], light:'rgba(96,125,139,.1)' };
+            const acts = actsByT[t] || 0;
+            const pct  = Math.round(hrs / maxTH * 100);
+            return `<div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:28px;height:28px;border-radius:50%;background:${tc.bg};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;">${tc.init}</div>
+              <div style="flex:1;min-width:0;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                  <span style="font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t.split(' ')[0]}</span>
+                  <span style="font-family:var(--font-condensed);font-size:13px;font-weight:700;color:${tc.bg};">${hrs}h <span style="font-size:10px;font-weight:400;color:var(--text-muted);">(${acts} act.)</span></span>
+                </div>
+                <div style="height:7px;background:#e8eaf2;border-radius:4px;overflow:hidden;">
+                  <div style="width:${pct}%;height:100%;background:${tc.bg};border-radius:4px;transition:width .5s ease;"></div>
+                </div>
+              </div>
+            </div>`;
+          }).join('') : '<p style="font-size:12px;color:var(--text-muted);">Sin datos</p>'}
+        </div>
+      </div>
+    </div>
+
+    <!-- ESPECIFICACIONES + ÁREAS -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;">
+      <div style="background:white;border-radius:12px;border:1.5px solid var(--border);padding:18px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);margin-bottom:12px;">Especificaciones</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">${makeBar(espAll, maxE, 'lavender')}</div>
+      </div>
+      <div style="background:white;border-radius:12px;border:1.5px solid var(--border);padding:18px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);margin-bottom:12px;">Áreas solicitantes</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">${makeBar(areaAll, maxA, 'success')}</div>
+      </div>
+    </div>
+
+    <!-- TABLA DE ACTIVIDADES -->
+    <div style="background:white;border-radius:12px;border:1.5px solid var(--border);overflow:hidden;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);">
+        <span style="font-size:13px;font-weight:600;">Actividades del período <span style="font-size:12px;color:var(--text-muted);font-weight:400;">(${arr.length} registros)</span></span>
+        <button class="btn btn-ghost btn-sm" onclick="downloadPeriodCSV()" style="font-size:11px;gap:4px;">↓ Exportar CSV</button>
+      </div>
       <div class="table-wrap">
         <table>
           <thead><tr>
             <th>Fecha</th><th>Trainer</th><th>Categoría</th><th>Especificación</th><th>Área</th><th>Hrs</th><th>Descripción</th>
           </tr></thead>
-          <tbody>${arr.length
-            ? [...arr].sort((a,b)=>b.fecha.localeCompare(a.fecha)).map(r=>`
-              <tr>
-                <td>${fmtDate(r.fecha)}</td>
-                <td class="td-main">${r.trainer}</td>
-                <td><span class="badge ${getTypeBadge(r.categoria)}">${r.categoria}</span></td>
-                <td>${r.especificacion||'—'}</td>
-                <td>${r.area}</td>
-                <td>${fmtHrs(r.horas)}</td>
-                <td title="${r.descripcion||''}">${(r.descripcion||'—').slice(0,55)}${(r.descripcion||'').length>55?'…':''}</td>
-              </tr>`).join('')
-            : `<tr><td colspan="7"><div class="empty-state"><p>Sin actividades en este período</p></div></td></tr>`}
-          </tbody>
+          <tbody>${tableRows || `<tr><td colspan="7"><div class="empty-state"><p>Sin actividades</p></div></td></tr>`}</tbody>
         </table>
       </div>
     </div>
   `;
 }
 
+// Exportar CSV del reporte de período actual
+function downloadPeriodCSV() {
+  const periodVal  = document.getElementById('period-select')?.value;
+  const trainerVal = document.getElementById('period-trainer')?.value;
+  if (!periodVal) { toast('Selecciona un período primero', 'error'); return; }
+  let filters = {};
+  if (trainerVal) filters.trainer = trainerVal;
+  if (currentPeriod === 'semana') filters.semana = periodVal;
+  else if (currentPeriod === 'mes') {
+    const [y, m] = periodVal.split('-');
+    filters.año = y; filters.mes = String(parseInt(m) - 1);
+  } else { filters.año = String(periodVal); }
+  const arr = filterRecords(filters);
+  if (!arr.length) { toast('Sin datos para exportar', 'error'); return; }
+  const MN = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const pFmt = currentPeriod==='mes' ? (()=>{const[y,m]=periodVal.split('-');return MN[parseInt(m)-1]+'_'+y;})() : periodVal.replace(/\s/g,'_');
+  const cols = ['Fecha','Trainer','Tipo','Categoría','Especificación','Área','Horas','Descripción','Resultado','Observaciones'];
+  const rows = arr.map(r => [r.fecha,r.trainer,r.tipo,r.categoria,r.especificacion,r.area,r.horas,r.descripcion,r.resultado,r.observaciones].map(v=>`"${(v||'').toString().replace(/"/g,'""')}"`));
+  const csv  = [cols.join(','), ...rows.map(r=>r.join(','))].join('\n');
+  const a    = document.createElement('a');
+  a.href     = 'data:text/csv;charset=utf-8,﻿'+encodeURIComponent(csv);
+  a.download = `TMLF_Reporte_${pFmt}.csv`;
+  a.click();
+  toast('CSV descargado correctamente', 'success');
+}
+
 // ======================================================
 //  COORDINACIÓN
 // ======================================================
 function renderCoordReport() {
-  const now = new Date();
-  document.getElementById('coord-fecha-gen').textContent = now.toLocaleDateString('es-MX', { day:'2-digit', month:'long', year:'numeric' });
+  const mes     = document.getElementById('coord-mes')?.value || '';
+  const trainer = document.getElementById('coord-trainer')?.value || '';
+  const cat     = document.getElementById('coord-cat')?.value || '';
+  const esp     = document.getElementById('coord-esp')?.value || '';
+  const area    = document.getElementById('coord-area')?.value || '';
+  const today   = new Date();
+  const MESES   = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const periodoLabel = mes!==''?`${MESES[parseInt(mes)]} ${today.getFullYear()}`:`${today.getFullYear()}`;
+  const nextMesLabel = MESES[(mes!==''?parseInt(mes):today.getMonth()+1)%12];
 
-  const t    = document.getElementById('coord-trainer').value;
-  const m    = document.getElementById('coord-mes').value;
-  const cat  = document.getElementById('coord-cat').value;
-  const esp  = document.getElementById('coord-esp').value;
-  const area = document.getElementById('coord-area').value;
   const filters = {};
-  if (t)    filters.trainer        = t;
-  if (m !== '') filters.mes        = m;
-  if (cat)  filters.categoria      = cat;
-  if (esp)  filters.especificacion = esp;
-  if (area) filters.area           = area;
-  const arr = filterRecords(filters);
-  const totalHrs = arr.reduce((s,r) => s + parseFloat(r.horas||0), 0);
+  if(trainer)    filters.trainer=trainer;
+  if(mes!=='')   filters.mes=mes;
+  if(cat)        filters.categoria=cat;
+  if(esp)        filters.especificacion=esp;
+  if(area)       filters.area=area;
+  const recs = filterRecords(filters);
+  const preview = document.getElementById('coord-report-preview');
+  if(!preview) return;
+  if(!recs.length){
+    preview.innerHTML=`<div class="rpt-empty"><div style="font-size:40px;margin-bottom:12px;">📋</div><div>Sin datos para los filtros seleccionados</div></div>`;
+    return;
+  }
+  const totalHrs    = Math.round(recs.reduce((s,r)=>s+parseFloat(r.horas||0),0)*10)/10;
+  const totalActs   = recs.length;
+  const trainersArr = [...new Set(recs.map(r=>r.trainer))];
+  const areasArr    = [...new Set(recs.map(r=>r.area))];
+  const hrsByCat={};
+  recs.forEach(r=>{ hrsByCat[r.categoria]=(hrsByCat[r.categoria]||0)+parseFloat(r.horas||0); });
+  const sortedCats=Object.entries(hrsByCat).sort((a,b)=>b[1]-a[1]);
+  const topCat=sortedCats[0];
+  const hrsByTrainer={};const actsByTrainer={};const areasByTrainer={};const catsByTrainer={};
+  recs.forEach(r=>{
+    hrsByTrainer[r.trainer]=(hrsByTrainer[r.trainer]||0)+parseFloat(r.horas||0);
+    actsByTrainer[r.trainer]=(actsByTrainer[r.trainer]||0)+1;
+    if(!areasByTrainer[r.trainer]) areasByTrainer[r.trainer]=new Set();
+    areasByTrainer[r.trainer].add(r.area);
+    if(!catsByTrainer[r.trainer]) catsByTrainer[r.trainer]={};
+    catsByTrainer[r.trainer][r.categoria]=(catsByTrainer[r.trainer][r.categoria]||0)+parseFloat(r.horas||0);
+  });
+  const hrsByArea={};
+  recs.forEach(r=>{ hrsByArea[r.area]=(hrsByArea[r.area]||0)+parseFloat(r.horas||0); });
+  const topAreas=Object.entries(hrsByArea).sort((a,b)=>b[1]-a[1]).map(([a])=>a);
+  const calEvts=loadCalEvents().filter(e=>
+    (!mes||new Date(e.fecha+'T12:00:00').getMonth()===parseInt(mes))&&(!trainer||e.trainer===trainer)
+  ).sort((a,b)=>parseFloat(b.horas||0)-parseFloat(a.horas||0));
+  const featured=calEvts[0];
+  const distMap=[
+    {label:'Impartición de trainings',cats:['Training']},
+    {label:'Desarrollo de materiales',cats:['Desarrollo']},
+    {label:'Acompañamiento / Shadowing',cats:['Acompañamiento / Shadowing']},
+    {label:'Gestión y coordinación',cats:['Gestión']},
+    {label:'Documentación',cats:['Documentación']},
+    {label:'Llamadas',cats:['Llamadas']},
+  ];
+  const distRows=distMap.map(d=>{
+    const h=d.cats.reduce((s,k)=>s+(hrsByCat[k]||0),0);
+    return h>0?{label:d.label,hrs:Math.round(h)}:null;
+  }).filter(Boolean);
+  const equipoNarr=`Un equipo de ${trainersArr.length} trainer${trainersArr.length>1?'s':''} activo${trainersArr.length>1?'s':''} durante ${periodoLabel}. `+
+    trainersArr.map(t=>{
+      const tHrs=Math.round((hrsByTrainer[t]||0)*10)/10;
+      const tCatMap=catsByTrainer[t]||{};
+      const tTopCat=Object.entries(tCatMap).sort((a,b)=>b[1]-a[1])[0];
+      const tAreas=[...(areasByTrainer[t]||[])].slice(0,3).join(', ');
+      return `${t.split(' ')[0]} registró ${tHrs}h en ${actsByTrainer[t]} actividades, principalmente en ${tTopCat?.[0]||'—'}, apoyando en ${tAreas}.`;
+    }).join(' ');
+  const gestionNarr=`${periodoLabel} registró <strong>${totalHrs} horas</strong> en <strong>${totalActs} actividades</strong> en <strong>${areasArr.length} áreas</strong>. El equipo: <strong>${trainersArr.join(', ')}</strong>. Mayor categoría: <strong>${topCat?.[0]||'—'}</strong> (~${Math.round(topCat?.[1]||0)}h). Áreas principales: <strong>${topAreas.slice(0,3).join(', ')}</strong>.`;
+  const proyectos=sortedCats.slice(0,6).map(([c,h])=>({label:`${c} — Actividades del período`,val:`${Math.min(100,Math.round((h/totalHrs)*200))}%`}));
+  const compromisos=[
+    `Seguimiento y evaluación de capacitaciones de ${periodoLabel}.`,
+    `Continuación de desarrollo de materiales pendientes.`,
+    `Completar evaluaciones y certificaciones de equipos.`,
+    `Revisión de avance de proyectos estratégicos activos.`,
+    `Coordinación del cronograma de ${nextMesLabel}.`,
+    `Entrega de reporte mensual de actividades a dirección.`,
+  ];
+  const areaChips=topAreas.map(a=>`<span class="rpt-chip">${a}</span>`).join('');
+  const otherList=calEvts.slice(0,8).map((e,i)=>
+    `<div class="rpt-other-item"><span class="rpt-num">${i+1}</span><div><strong>${e.nombre||e.especificacion||'Training'}</strong> — ${e.trainer.split(' ')[0]}${e.area?`, ${e.area}`:''}, ${fmtHrs(e.horas||0)} (${fmtDate(e.fecha)}).</div></div>`
+  ).join('')||'<div class="rpt-other-item"><span class="rpt-num">—</span><div>Sin trainings de calendario para este período.</div></div>';
 
-  const catMap  = countBy(arr, 'categoria');
-  const espMap  = countBy(arr, 'especificacion');
-  const areaMap = countBy(arr, 'area');
-  const topCats  = topN(catMap,  3).map(c=>c[0]);
-  const topEsps  = topN(espMap,  2).map(e=>e[0]);
-  const topAreas = topN(areaMap, 3).map(a=>a[0]);
-  const periodoLabel  = m !== '' ? `el mes de ${MESES[parseInt(m)]}` : 'el período completo registrado';
-  const trainerLabel  = t ? `la trainer ${t}` : 'el equipo de Training';
-  const catLabel      = cat ? `, con foco en la categoría <strong>${cat}</strong>` : '';
-  const areaLabel     = area ? `, específicamente para el área de <strong>${area}</strong>` : '';
+  const sorted=[...recs].sort((a,b)=>a.fecha.localeCompare(b.fecha)||a.trainer.localeCompare(b.trainer));
+  let lastDate=null,dayHrs=0,tableRows='';
+  sorted.forEach((r,i)=>{
+    if(r.fecha!==lastDate){
+      if(lastDate!==null){
+        tableRows+=`<tr class="rpt-sub"><td colspan="5" style="text-align:right;padding-right:10px;">Subtotal del día</td><td>${dayHrs}h</td></tr>`;
+        dayHrs=0;
+      }
+      const d=new Date(r.fecha+'T12:00:00');
+      const dn=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][d.getDay()];
+      tableRows+=`<tr class="rpt-day-hdr"><td colspan="6">${dn} ${fmtDate(r.fecha)}</td></tr>`;
+      lastDate=r.fecha;
+    }
+    dayHrs=Math.round((dayHrs+parseFloat(r.horas||0))*100)/100;
+    tableRows+=`<tr><td style="font-weight:600;color:#0e1a30;">${r.trainer.split(' ')[0]}</td><td>${r.categoria}</td><td>${r.especificacion||'—'}</td><td>${r.area}</td><td style="font-weight:700;">${fmtHrs(r.horas)}</td><td style="color:#555;">${(r.descripcion||'—').slice(0,70)}${(r.descripcion||'').length>70?'…':''}</td></tr>`;
+  });
+  if(lastDate) tableRows+=`<tr class="rpt-sub"><td colspan="5" style="text-align:right;padding-right:10px;">Subtotal del día</td><td>${dayHrs}h</td></tr>`;
 
-  document.getElementById('coord-exec-summary').innerHTML =
-    `<strong>Informe de coordinación · TMLF Training 2026</strong><br><br>` +
-    `Durante ${periodoLabel}, ${trainerLabel} registró un total de <strong>${totalHrs} horas</strong> en <strong>${arr.length} actividades</strong>${catLabel}${areaLabel}. ` +
-    `Las especificaciones más frecuentes fueron <strong>${topEsps.join(', ') || 'N/A'}</strong>. ` +
-    `Las áreas con mayor soporte: <strong>${topAreas.join(', ') || 'N/A'}</strong>. ` +
-    `Reporte generado el ${now.toLocaleDateString('es-MX', { weekday:'long', day:'2-digit', month:'long', year:'numeric' })}.`;
+  const genDate=today.toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'});
+  const autorLine=`${trainer||'Elaborado por: Coordinación Training'} · ${today.toLocaleDateString('es-MX',{month:'long',year:'numeric'})}`;
+  const firmLine='Mendoza Learning Center · Training e Diseño Instruccional';
 
-  document.getElementById('coord-stats').innerHTML = `
-    <div class="stat-card"><div class="stat-value">${arr.length}</div><div class="stat-label">Actividades</div></div>
-    <div class="stat-card blue"><div class="stat-value">${totalHrs}h</div><div class="stat-label">Horas</div></div>
-    <div class="stat-card lavender"><div class="stat-value">${new Set(arr.map(r=>r.trainer)).size}</div><div class="stat-label">Trainers</div></div>
-    <div class="stat-card success"><div class="stat-value">${new Set(arr.map(r=>r.area)).size}</div><div class="stat-label">Áreas</div></div>
-  `;
+  preview.innerHTML=`
+  <div class="rpt-page">
+    <div class="rpt-cover">
+      <div class="rpt-cover-top">
+        <div><div class="rpt-firm">The Mendoza Law Firm</div><div class="rpt-dept">Mendoza Learning Center · Training e Diseño Instruccional</div></div>
+        <div class="rpt-gendate">Generado el<br>${genDate}</div>
+      </div>
+      <div class="rpt-per-lbl">Período</div>
+      <div class="rpt-per-val">${periodoLabel}</div>
+      <div class="rpt-title">Reporte Mensual<br>de Capacitación</div>
+      <div class="rpt-rule"></div>
+      <div class="rpt-desc">Resumen de actividades de capacitación, desarrollo de materiales y gestión del equipo de Training TMLF.${trainer?`<br><br>Trainer: <strong>${trainer}</strong>`:''}</div>
+    </div>
+    <div class="rpt-kpi-strip" style="margin-top:28px;">
+      <div class="rpt-kpi-grid">
+        <div class="rpt-kpi-sep"><div class="rpt-knum">${trainersArr.length}</div><div class="rpt-klbl">Trainers<br>Activos</div></div>
+        <div class="rpt-kpi-sep"><div class="rpt-knum">${totalHrs}h</div><div class="rpt-klbl">Horas<br>Totales</div></div>
+        <div class="rpt-kpi-sep"><div class="rpt-knum">${totalActs}</div><div class="rpt-klbl">Actividades<br>Registradas</div></div>
+        <div><div class="rpt-knum">${areasArr.length}</div><div class="rpt-klbl">Áreas<br>Atendidas</div></div>
+      </div>
+    </div>
+    <div class="rpt-foot"><span>${firmLine}</span><span>${autorLine}</span></div>
+  </div>
 
-  const sorted = [...arr].sort((a,b) => b.fecha.localeCompare(a.fecha));
-  document.getElementById('coord-table-body').innerHTML = sorted.length
-    ? renderTableByDayCoord(sorted)
-    : `<tr><td colspan="7"><div class="empty-state"><p>Sin registros para los filtros seleccionados</p></div></td></tr>`;
+  <div class="rpt-page">
+    <div class="rpt-inner-hdr"><span class="ti">The Mendoza Law Firm · Mendoza Learning Center</span><span class="pe">Reporte Mensual ${periodoLabel}</span></div>
+    <div class="rpt-inner">
+      <div class="rpt-col2" style="margin-bottom:16px;">
+        <div class="rpt-section">
+          <div class="rpt-stitle">Distribución Global de Horas — ${periodoLabel}</div>
+          <div style="margin-bottom:10px;"><div class="rpt-dist-total">${totalHrs}h</div><div style="font-size:8px;letter-spacing:2px;color:#999;text-transform:uppercase;margin-top:2px;">Horas</div></div>
+          ${distRows.map(d=>`<div class="rpt-dist-row"><span class="rpt-dist-key">${d.label}</span><span class="rpt-dist-val">~${d.hrs}h</span></div>`).join('')}
+        </div>
+        <div class="rpt-section">
+          <div class="rpt-stitle">Capacitación Destacada · ${periodoLabel}</div>
+          <div class="rpt-feat-tag">Participación del equipo</div>
+          <div class="rpt-feat-title">${featured?(featured.nombre||featured.especificacion||'Training del período'):`Capacitaciones de ${periodoLabel}`}</div>
+          <div class="rpt-col3">
+            <div><div class="rpt-feat-col-hdr">Área Principal</div><div class="rpt-feat-text">${featured?.area||topAreas[0]||'—'}${featured?`<br>${fmtDate(featured.fecha)} · ${fmtHrs(featured.horas||0)}`:''}</div></div>
+            <div><div class="rpt-feat-col-hdr">Trainer</div><div class="rpt-feat-text">${featured?.trainer||trainersArr[0]||'—'}</div></div>
+            <div><div class="rpt-feat-col-hdr">Alcance</div><div class="rpt-feat-text">${totalHrs}h totales<br>${areasArr.length} áreas</div></div>
+          </div>
+          <div class="rpt-feat-bullet">${periodoLabel} concentró la mayor parte de las horas en <strong>${topCat?.[0]||'Training'}</strong> (~${Math.round(topCat?.[1]||0)}h), con soporte en <strong>${topAreas.slice(0,2).join(' y ')}</strong>.</div>
+        </div>
+      </div>
+      <div class="rpt-section"><div class="rpt-stitle">Áreas Atendidas</div><div style="margin-top:5px;">${areaChips}</div></div>
+    </div>
+    <div class="rpt-foot"><span>${firmLine}</span><span>${autorLine}</span></div>
+  </div>
+
+  <div class="rpt-page">
+    <div class="rpt-inner-hdr"><span class="ti">The Mendoza Law Firm · Mendoza Learning Center</span><span class="pe">Reporte Mensual ${periodoLabel}</span></div>
+    <div class="rpt-inner">
+      <div class="rpt-col2" style="margin-bottom:14px;">
+        <div class="rpt-section"><div class="rpt-stitle">Equipo y Alcance</div><div class="rpt-equipo-text">${equipoNarr}</div></div>
+        <div class="rpt-section"><div class="rpt-stitle">Otras Capacitaciones Impartidas · ${periodoLabel}</div>${otherList}</div>
+      </div>
+      <div class="rpt-section"><div class="rpt-stitle">Proyectos Estratégicos · Avance Acumulado</div><div class="rpt-col2">${proyectos.map(p=>`<div class="rpt-proj-row"><span class="rpt-proj-lbl">${p.label}</span><span class="rpt-proj-val">${p.val}</span></div>`).join('')}</div></div>
+      <div class="rpt-section"><div class="rpt-stitle">Gestión del Equipo</div><div class="rpt-gest-box">${gestionNarr}</div></div>
+      <div class="rpt-section"><div class="rpt-stitle">Compromisos ${nextMesLabel} ${today.getFullYear()}</div><div class="rpt-comp-grid">${compromisos.map((c,i)=>`<div class="rpt-comp-item"><span class="rpt-comp-num">${i+1}</span><span>${c}</span></div>`).join('')}</div></div>
+    </div>
+    <div class="rpt-foot"><span>${firmLine}</span><span>${autorLine}</span></div>
+  </div>
+
+  <div class="rpt-page">
+    <div class="rpt-inner-hdr"><span class="ti">The Mendoza Law Firm · Mendoza Learning Center</span><span class="pe">Reporte Mensual ${periodoLabel}</span></div>
+    <div class="rpt-inner">
+      <div class="rpt-stitle">Detalle de Actividades Registradas — ${periodoLabel}</div>
+      <table class="rpt-table"><thead><tr><th>Trainer</th><th>Categoría</th><th>Especificación</th><th>Área</th><th>Hrs</th><th>Descripción</th></tr></thead><tbody>${tableRows}</tbody></table>
+    </div>
+    <div class="rpt-foot"><span>${firmLine}</span><span>${autorLine}</span></div>
+  </div>`;
 }
 
 function renderTableByDayCoord(records) {
@@ -3757,23 +4366,396 @@ function copySummary() {
 }
 
 function downloadCoordPDF() {
-  // Actualizar fecha en el header del PDF
-  const dateEl = document.getElementById('pdf-header-date');
-  if (dateEl) {
-    dateEl.textContent = 'Generado el ' + new Date().toLocaleDateString('es-MX', {
-      weekday:'long', day:'2-digit', month:'long', year:'numeric'
-    });
-  }
-  // Navegar a coordinación si no estamos ahí
-  if (!document.getElementById('view-coordinacion').classList.contains('active')) {
-    navigate('coordinacion');
-    setTimeout(() => window.print(), 400);
-  } else {
-    window.print();
-  }
+  const mes     = document.getElementById('coord-mes').value;
+  const trainer = document.getElementById('coord-trainer').value;
+  const cat     = document.getElementById('coord-cat').value;
+  const area    = document.getElementById('coord-area').value;
+  const today   = new Date();
+
+  const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto',
+                  'Septiembre','Octubre','Noviembre','Diciembre'];
+  const MESES_SHORT = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const periodoLabel = mes !== '' ? `${MESES[parseInt(mes)]} ${today.getFullYear()}` : `${today.getFullYear()}`;
+  const nextMesLabel = mes !== '' ? MESES[(parseInt(mes)+1)%12] : MESES[(today.getMonth()+1)%12];
+  const curYear = today.getFullYear();
+
+  const filters = {};
+  if (trainer)    filters.trainer   = trainer;
+  if (mes !== '') filters.mes       = mes;
+  if (cat)        filters.categoria = cat;
+  if (area)       filters.area      = area;
+  const recs = filterRecords(filters);
+  if (!recs.length) { toast('No hay datos para el período seleccionado', 'error'); return; }
+
+  // ── CALCULOS BASE ──────────────────────────────────────────
+  const totalHrs    = Math.round(recs.reduce((s,r)=>s+parseFloat(r.horas||0),0)*10)/10;
+  const totalActs   = recs.length;
+  const trainersArr = [...new Set(recs.map(r=>r.trainer))];
+  const areasArr    = [...new Set(recs.map(r=>r.area))];
+
+  // Horas por categoría → mapeo a labels del reporte
+  const hrsByCat = {};
+  recs.forEach(r=>{ hrsByCat[r.categoria]=(hrsByCat[r.categoria]||0)+parseFloat(r.horas||0); });
+
+  // Horas por especificación para distribución
+  const hrsByEsp = {};
+  recs.forEach(r=>{ hrsByEsp[r.especificacion]=(hrsByEsp[r.especificacion]||0)+parseFloat(r.horas||0); });
+
+  // Distribución agrupada como en el reporte ejemplo
+  const distLabels = [
+    { label: 'Impartición de trainings',     keys: ['Training'],    esp: ['Impartición','Sombra trainee'] },
+    { label: 'Desarrollo de materiales',     keys: ['Desarrollo'],  esp: null },
+    { label: 'Acompañamiento / Shadowing',   keys: ['Acompañamiento / Shadowing'], esp: null },
+    { label: 'Gestión y coordinación',       keys: ['Gestión'],     esp: null },
+    { label: 'Documentación',                keys: ['Documentación'],esp: null },
+    { label: 'Llamadas',                     keys: ['Llamadas'],    esp: null },
+  ];
+  const distRows = distLabels.map(d => {
+    const h = d.keys.reduce((s,k)=>s+(hrsByCat[k]||0),0);
+    return h > 0 ? { label: d.label, hrs: Math.round(h) } : null;
+  }).filter(Boolean);
+
+  // Horas por trainer
+  const hrsByTrainer = {}; const actsByTrainer = {}; const areasByTrainer = {}; const catsByTrainer = {};
+  recs.forEach(r=>{
+    hrsByTrainer[r.trainer]=(hrsByTrainer[r.trainer]||0)+parseFloat(r.horas||0);
+    actsByTrainer[r.trainer]=(actsByTrainer[r.trainer]||0)+1;
+    if(!areasByTrainer[r.trainer]) areasByTrainer[r.trainer]=new Set();
+    areasByTrainer[r.trainer].add(r.area);
+    if(!catsByTrainer[r.trainer]) catsByTrainer[r.trainer]={};
+    catsByTrainer[r.trainer][r.categoria]=(catsByTrainer[r.trainer][r.categoria]||0)+parseFloat(r.horas||0);
+  });
+
+  // Horas por área
+  const hrsByArea = {};
+  recs.forEach(r=>{ hrsByArea[r.area]=(hrsByArea[r.area]||0)+parseFloat(r.horas||0); });
+  const topAreas = Object.entries(hrsByArea).sort((a,b)=>b[1]-a[1]).map(([a])=>a);
+
+  // Calendario del mes para otras capacitaciones
+  const calEvts = loadCalEvents().filter(e=>
+    (!mes||new Date(e.fecha+'T12:00:00').getMonth()===parseInt(mes))&&
+    (!trainer||e.trainer===trainer)
+  ).sort((a,b)=>b.horas-a.horas);
+
+  // Capacitación destacada — evento con más horas del calendario
+  const featured = calEvts[0];
+
+  // Equipo narrativa
+  const topTrainer = Object.entries(hrsByTrainer).sort((a,b)=>b[1]-a[1])[0];
+  const topCat = Object.entries(hrsByCat).sort((a,b)=>b[1]-a[1])[0];
+  const equipoText = `Un equipo de ${trainersArr.length} trainer${trainersArr.length>1?'s':''} activo${trainersArr.length>1?'s':''} durante ${periodoLabel}.
+${trainersArr.map(t=>{
+  const tHrs=Math.round((hrsByTrainer[t]||0)*10)/10;
+  const tCatMap=catsByTrainer[t]||{};
+  const tTopCat=Object.entries(tCatMap).sort((a,b)=>b[1]-a[1])[0];
+  const tAreas=[...(areasByTrainer[t]||[])].slice(0,3).join(', ');
+  return `${t.split(' ')[0]} registró ${tHrs}h en ${actsByTrainer[t]} actividades, principalmente en ${tTopCat?.[0]||'—'}, apoyando en ${tAreas}.`;
+}).join(' ')}`;
+
+  // Gestión del equipo
+  const gestionText = `${periodoLabel} registró <strong>${totalHrs} horas totales</strong> en <strong>${totalActs} actividades</strong> distribuidas en <strong>${areasArr.length} áreas</strong>. El equipo estuvo conformado por <strong>${trainersArr.join(', ')}</strong>. La categoría con mayor dedicación fue <strong>${topCat?.[0]||'—'}</strong> con aproximadamente <strong>${Math.round(topCat?.[1]||0)} horas</strong>. Las áreas con mayor soporte fueron <strong>${topAreas.slice(0,3).join(', ')}</strong>.`;
+
+  // Áreas chips
+  const areaChips = topAreas.map(a=>`<span class="chip">${a}</span>`).join('');
+
+  // Otras capacitaciones (lista del calendario)
+  const otherTrainings = calEvts.slice(0,8).map((e,i)=>
+    `<div class="other-item"><span class="num">${i+1}</span><div>${e.nombre||e.especificacion||'Training'} — <strong>${e.trainer.split(' ')[0]}</strong>${e.area?`: ${e.area}`:''}, ${fmtHrs(e.horas||0)} (${fmtDate(e.fecha)}).</div></div>`
+  ).join('') || '<div class="other-item"><span class="num">—</span><div>Sin trainings planeados en calendario para este período.</div></div>';
+
+  // Proyectos estratégicos (basados en categorías y áreas con mayor actividad)
+  const proyectos = Object.entries(hrsByCat).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([c,h])=>{
+    const pct = Math.min(100, Math.round((h/totalHrs)*200));
+    const label = `${c} — ${periodoLabel}`;
+    const status = pct >= 80 ? `${pct}%` : pct >= 50 ? `${pct}%` : 'En curso';
+    return { label, status, pct };
+  });
+
+  // Compromisos para el siguiente mes
+  const compromisos = [
+    `Seguimiento y evaluación de capacitaciones del mes de ${periodoLabel}.`,
+    `Continuación de desarrollo de materiales pendientes.`,
+    `Completar evaluaciones y certificaciones de los equipos capacitados.`,
+    `Revisión de avance de proyectos estratégicos activos.`,
+    `Coordinación del cronograma de imparticiones de ${nextMesLabel}.`,
+    `Entrega de reporte mensual de actividades a dirección.`,
+  ];
+
+  // Tabla detalle
+  const sorted=[...recs].sort((a,b)=>a.fecha.localeCompare(b.fecha)||a.trainer.localeCompare(b.trainer));
+  let lastDate=null,dayHrs=0,tableRows='';
+  sorted.forEach((r,i)=>{
+    if(r.fecha!==lastDate){
+      if(lastDate!==null){
+        tableRows+=`<tr class="sub"><td colspan="5" style="text-align:right;padding-right:12px;">Subtotal del día</td><td>${dayHrs}h</td></tr>`;
+        dayHrs=0;
+      }
+      const d=new Date(r.fecha+'T12:00:00');
+      const dn=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][d.getDay()];
+      tableRows+=`<tr class="day-hdr"><td colspan="6">${dn} ${fmtDate(r.fecha)}</td></tr>`;
+      lastDate=r.fecha;
+    }
+    dayHrs=Math.round((dayHrs+parseFloat(r.horas||0))*100)/100;
+    tableRows+=`<tr><td>${r.trainer.split(' ')[0]}</td><td>${r.categoria}</td><td>${r.especificacion||'—'}</td><td>${r.area}</td><td>${fmtHrs(r.horas)}</td><td>${(r.descripcion||'—').slice(0,70)}${(r.descripcion||'').length>70?'…':''}</td></tr>`;
+  });
+  if(lastDate) tableRows+=`<tr class="sub"><td colspan="5" style="text-align:right;padding-right:12px;">Subtotal del día</td><td>${dayHrs}h</td></tr>`;
+
+  const genDate = today.toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'});
+  const firmLine = `Mendoza Learning Center · Training e Diseño Instruccional`;
+  const autorLine = `${trainer||'Elaborado por: Coordinación Training'} · ${today.toLocaleDateString('es-MX',{month:'long',year:'numeric'})}`;
+
+  // ────────────────── HTML COMPLETO ──────────────────────────
+  const H = `<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8">
+<title>Reporte Mensual ${periodoLabel} — TMLF Training</title>
+<style>
+@page{size:A4;margin:0}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Arial',sans-serif;font-size:10.5px;color:#1a1a1a;background:#fff;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact}
+
+/* PAGE */
+.page{width:210mm;min-height:297mm;page-break-after:always;break-after:page;
+  display:flex;flex-direction:column;position:relative;overflow:hidden}
+.page:last-child{page-break-after:auto}
+
+/* ══ PORTADA ══════════════════════════════════════════════ */
+.cover-top{padding:22px 28px 0;display:flex;justify-content:space-between;align-items:flex-start}
+.firm{font-size:8.5px;font-weight:700;color:#1a1a1a;letter-spacing:2.5px;text-transform:uppercase}
+.dept{font-size:8px;color:#666;letter-spacing:1px;margin-top:1px;text-transform:uppercase}
+.gen-lbl{font-size:8px;color:#999;text-align:right}
+
+.cover-body{flex:1;padding:50px 28px 30px;display:flex;flex-direction:column;justify-content:flex-start}
+.per-label{font-size:8.5px;letter-spacing:3px;color:#b59240;text-transform:uppercase;font-weight:700}
+.per-val{font-size:42px;font-weight:700;color:#b59240;line-height:1.05;margin:6px 0 2px}
+.rep-title{font-size:34px;font-weight:700;color:#0e1a30;line-height:1.15;margin-top:2px}
+.cover-rule{width:55px;height:3px;background:#b59240;margin:20px 0}
+.cover-desc{font-size:11px;color:#555;line-height:1.7;max-width:340px}
+
+.kpi-strip{background:#0e1a30;padding:18px 28px}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);text-align:center}
+.kpi-sep{border-right:1px solid rgba(255,255,255,.15)}
+.knum{font-size:28px;font-weight:700;color:#b59240;line-height:1}
+.klbl{font-size:7.5px;letter-spacing:1.5px;color:#aaa;text-transform:uppercase;margin-top:5px;line-height:1.4}
+
+.cov-foot{padding:10px 28px;display:flex;justify-content:space-between;border-top:1px solid #e8e8e8}
+.cov-foot span{font-size:8px;color:#999}
+
+/* ══ INNER PAGES ═════════════════════════════════════════ */
+.inner-hdr{background:#0e1a30;padding:9px 22px;display:flex;justify-content:space-between;align-items:center}
+.inner-hdr .ti{font-size:8px;color:#b59240;letter-spacing:2px;text-transform:uppercase}
+.inner-hdr .pe{font-size:8px;color:#ccc}
+.inner-body{flex:1;padding:16px 22px 50px}
+.inner-foot{position:absolute;bottom:0;left:0;right:0;background:#f5f5f5;
+  padding:7px 22px;display:flex;justify-content:space-between;border-top:1px solid #e0e0e0}
+.inner-foot span{font-size:7.5px;color:#999}
+
+/* SECTION TITLES */
+.stitle{font-size:8.5px;font-weight:700;letter-spacing:2px;color:#0e1a30;
+  text-transform:uppercase;padding-bottom:5px;border-bottom:1.5px solid #b59240;margin-bottom:10px}
+
+/* TWO COLUMN */
+.col2{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:14px}
+.col3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+
+/* DISTRIBUTION */
+.dist-total{font-size:30px;font-weight:700;color:#0e1a30;line-height:1}
+.dist-row{display:flex;justify-content:space-between;align-items:baseline;
+  padding:5px 0;border-bottom:1px solid #f0f0f0;font-size:10px}
+.dist-row:last-child{border-bottom:none}
+.dist-key{color:#333;font-weight:500}
+.dist-val{color:#b59240;font-weight:700}
+
+/* FEATURED */
+.feat-tag{font-size:7.5px;letter-spacing:2px;color:#b59240;text-transform:uppercase;font-weight:700;margin-bottom:5px}
+.feat-title{font-size:11px;font-weight:700;color:#0e1a30;line-height:1.4;margin-bottom:8px}
+.feat-col-title{font-size:7.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  color:#666;border-bottom:1px solid #e0e0e0;padding-bottom:4px;margin-bottom:6px}
+.feat-text{font-size:9px;line-height:1.6;color:#444}
+.feat-bullet{background:#f5f7fa;border-left:3px solid #0e1a30;padding:8px 10px;
+  font-size:9px;line-height:1.6;color:#444;margin-top:8px}
+
+/* EQUIPO */
+.equipo-text{font-size:9.5px;line-height:1.7;color:#333}
+
+/* AREAS CHIPS */
+.chip{display:inline-block;padding:2px 9px;border-radius:20px;border:1px solid #0e1a30;
+  font-size:8px;color:#0e1a30;margin:2px;font-weight:500}
+
+/* OTHER TRAININGS */
+.other-item{display:flex;gap:8px;margin-bottom:7px;align-items:flex-start;font-size:9.5px;line-height:1.5}
+.num{min-width:18px;height:18px;background:#0e1a30;border-radius:50%;display:flex;
+  align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#b59240;flex-shrink:0}
+
+/* PROYECTOS */
+.proj-row{display:flex;justify-content:space-between;align-items:center;
+  padding:5px 0;border-bottom:1px solid #f0f0f0;font-size:9.5px}
+.proj-lbl{color:#333;flex:1}
+.proj-val{font-weight:700;color:#0e1a30;min-width:50px;text-align:right;font-size:10px}
+
+/* GESTIÓN */
+.gest-text{font-size:10px;line-height:1.75;color:#333;font-weight:400}
+.gest-box{background:#f5f7fa;padding:12px 14px;border-radius:0 5px 5px 0;
+  border-left:4px solid #0e1a30}
+
+/* COMPROMISOS */
+.comp-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 20px}
+.comp-item{display:flex;gap:8px;font-size:9.5px;line-height:1.5;color:#333;align-items:flex-start}
+.comp-num{min-width:18px;height:18px;background:#b59240;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff}
+
+/* TABLE */
+table.dt{width:100%;border-collapse:collapse;font-size:8.5px}
+table.dt th{background:#0e1a30;color:#fff;padding:5px 7px;font-size:7.5px;
+  letter-spacing:.5px;text-transform:uppercase;text-align:left}
+table.dt td{padding:4px 7px;border-bottom:1px solid #f0f0f0;vertical-align:top;color:#333}
+table.dt tr:nth-child(even) td{background:#fafafa}
+.day-hdr td{background:#0e1a30!important;color:#b59240!important;font-weight:700!important;
+  font-size:8.5px;border-top:2px solid #b59240}
+.sub td{background:#f0f0f0!important;font-style:italic;font-size:8px;color:#666}
+</style></head><body>
+
+<!-- ══════════════ PORTADA ══════════════ -->
+<div class="page">
+  <div class="cover-top">
+    <div><div class="firm">The Mendoza Law Firm</div>
+    <div class="dept">Mendoza Learning Center · Training e Diseño Instruccional</div></div>
+    <div class="gen-lbl">Generado el<br>${genDate}</div>
+  </div>
+  <div class="cover-body">
+    <div class="per-label">Período</div>
+    <div class="per-val">${periodoLabel}</div>
+    <div class="rep-title">Reporte Mensual<br>de Capacitación</div>
+    <div class="cover-rule"></div>
+    <div class="cover-desc">Resumen de actividades de capacitación, desarrollo de materiales y gestión del equipo de Training TMLF.${trainer?`<br><br>Trainer: <strong>${trainer}</strong>`:''}</div>
+  </div>
+  <div class="kpi-strip">
+    <div class="kpi-grid">
+      <div class="kpi-sep"><div class="knum">${trainersArr.length}</div><div class="klbl">Trainers<br>Activos</div></div>
+      <div class="kpi-sep"><div class="knum">${totalHrs}h</div><div class="klbl">Horas<br>Totales</div></div>
+      <div class="kpi-sep"><div class="knum">${totalActs}</div><div class="klbl">Actividades<br>Registradas</div></div>
+      <div><div class="knum">${areasArr.length}</div><div class="klbl">Áreas<br>Atendidas</div></div>
+    </div>
+  </div>
+  <div class="cov-foot">
+    <span>${firmLine}</span>
+    <span>${autorLine}</span>
+  </div>
+</div>
+
+<!-- ══════════════ PÁG 2: DISTRIBUCIÓN + CAPACITACIÓN DESTACADA ══════════════ -->
+<div class="page inner">
+  <div class="inner-hdr"><span class="ti">The Mendoza Law Firm · Mendoza Learning Center</span><span class="pe">Reporte Mensual ${periodoLabel} — TMLF Training</span></div>
+  <div class="inner-body">
+    <div class="col2" style="margin-bottom:16px;">
+      <!-- DISTRIBUCIÓN -->
+      <div>
+        <div class="stitle">Distribución Global de Horas — ${periodoLabel}</div>
+        <div style="margin-bottom:10px;">
+          <div class="dist-total">${totalHrs}h</div>
+          <div style="font-size:8px;letter-spacing:2px;color:#999;text-transform:uppercase;margin-top:2px;">Horas</div>
+        </div>
+        ${distRows.map(d=>`<div class="dist-row"><span class="dist-key">${d.label}</span><span class="dist-val">~${d.hrs}h</span></div>`).join('')}
+      </div>
+      <!-- CAPACITACIÓN DESTACADA -->
+      <div>
+        <div class="stitle">Capacitación Destacada · ${periodoLabel}</div>
+        <div class="feat-tag">Participación del equipo</div>
+        <div class="feat-title">${featured ? (featured.nombre||featured.especificacion||'Training del período') : `Capacitaciones de ${periodoLabel}`}</div>
+        <div class="col3">
+          <div>
+            <div class="feat-col-title">Área Principal</div>
+            <div class="feat-text">${featured?.area||topAreas[0]||'—'}<br>${featured?`${fmtDate(featured.fecha)} · ${fmtHrs(featured.horas||0)}`:''}</div>
+          </div>
+          <div>
+            <div class="feat-col-title">Trainer</div>
+            <div class="feat-text">${featured?.trainer||trainersArr[0]||'—'}<br>${featured?.nombre||''}</div>
+          </div>
+          <div>
+            <div class="feat-col-title">Alcance</div>
+            <div class="feat-text">Categoría: ${featured?.categoria||'Training'}<br>${totalHrs}h en total el mes</div>
+          </div>
+        </div>
+        <div class="feat-bullet">${periodoLabel} concentró la mayor parte de las horas en <strong>${topCat?.[0]||'Training'}</strong> (~${Math.round(topCat?.[1]||0)}h), con soporte en <strong>${topAreas.slice(0,2).join(' y ')}</strong>.</div>
+      </div>
+    </div>
+
+    <!-- ÁREAS ATENDIDAS -->
+    <div style="margin-bottom:0;">
+      <div class="stitle">Áreas Atendidas</div>
+      <div style="margin-top:4px;">${areaChips}</div>
+    </div>
+  </div>
+  <div class="inner-foot"><span>${firmLine}</span><span>${autorLine}</span></div>
+</div>
+
+<!-- ══════════════ PÁG 3: EQUIPO + PROYECTOS + GESTIÓN ══════════════ -->
+<div class="page inner">
+  <div class="inner-hdr"><span class="ti">The Mendoza Law Firm · Mendoza Learning Center</span><span class="pe">Reporte Mensual ${periodoLabel} — TMLF Training</span></div>
+  <div class="inner-body">
+    <div class="col2" style="margin-bottom:14px;">
+      <!-- EQUIPO Y ALCANCE -->
+      <div>
+        <div class="stitle">Equipo y Alcance</div>
+        <div class="equipo-text">${equipoText}</div>
+      </div>
+      <!-- OTRAS CAPACITACIONES -->
+      <div>
+        <div class="stitle">Otras Capacitaciones Impartidas · ${periodoLabel}</div>
+        ${otherTrainings}
+      </div>
+    </div>
+
+    <!-- PROYECTOS ESTRATÉGICOS -->
+    <div style="margin-bottom:14px;">
+      <div class="stitle">Proyectos Estratégicos · Avance Acumulado</div>
+      <div class="col2">
+        ${proyectos.map(p=>`<div class="proj-row"><span class="proj-lbl">${p.label}</span><span class="proj-val">${p.status}</span></div>`).join('')}
+      </div>
+    </div>
+
+    <!-- GESTIÓN DEL EQUIPO -->
+    <div style="margin-bottom:14px;">
+      <div class="stitle">Gestión del Equipo</div>
+      <div class="gest-box"><div class="gest-text">${gestionText}</div></div>
+    </div>
+
+    <!-- COMPROMISOS -->
+    <div>
+      <div class="stitle">Compromisos ${nextMesLabel} ${curYear}</div>
+      <div class="comp-grid">
+        ${compromisos.map((c,i)=>`<div class="comp-item"><span class="comp-num">${i+1}</span><span>${c}</span></div>`).join('')}
+      </div>
+    </div>
+  </div>
+  <div class="inner-foot"><span>${firmLine}</span><span>${autorLine}</span></div>
+</div>
+
+<!-- ══════════════ PÁG 4+: TABLA DETALLE ══════════════ -->
+<div class="page inner">
+  <div class="inner-hdr"><span class="ti">The Mendoza Law Firm · Mendoza Learning Center</span><span class="pe">Reporte Mensual ${periodoLabel} — TMLF Training</span></div>
+  <div class="inner-body">
+    <div class="stitle">Detalle de Actividades Registradas — ${periodoLabel}</div>
+    <table class="dt">
+      <thead><tr><th>Trainer</th><th>Categoría</th><th>Especificación</th><th>Área</th><th>Hrs</th><th>Descripción</th></tr></thead>
+      <tbody>${tableRows}</tbody>
+    </table>
+  </div>
+  <div class="inner-foot"><span>${firmLine}</span><span>${autorLine}</span></div>
+</div>
+
+</body></html>`;
+
+  const win=window.open('','_blank','width=980,height=780,scrollbars=yes');
+  if(!win){toast('Permite ventanas emergentes para generar el PDF','error');return;}
+  win.document.write(H);
+  win.document.close();
+  win.onload=()=>{win.focus();setTimeout(()=>win.print(),500);};
 }
 
 function printDashboard() { downloadCoordPDF(); }
+
+
 
 function exportJSON() {
   const arr = loadData();
@@ -5064,7 +6046,14 @@ function refreshCurrentView() {
     else if (active === 'dashboard')   renderDashboard();
     else if (active === 'trainer' && selectedTrainer) { renderTrainerSelector(); renderTrainerReport(); }
     else if (active === 'trainer')     renderTrainerSelector();
-    else if (active === 'periodos')    { populatePeriodSelect(); renderPeriodReport(); }
+    else if (active === 'periodos')    {
+      populatePeriodSelect();
+      const pSel = document.getElementById('period-select');
+      if (pSel && pSel.value === '' && pSel.options.length > 1) {
+        pSel.selectedIndex = 1;
+      }
+      renderPeriodReport();
+    }
     else if (active === 'coordinacion') renderCoordReport();
     else if (active === 'gestion')     { renderGestionTable(); renderDBStats(); }
   } catch(e) { /* silent */ }
