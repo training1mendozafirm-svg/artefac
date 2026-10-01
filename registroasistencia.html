@@ -2,6 +2,8 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#17181C">
 <title>Registro de Asistencia | Training TMLF</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -360,7 +362,7 @@ function areaCampo(){return esOtra()?"areaOtra":"area";}
 inArea.addEventListener("change",function(){otraWrap.hidden=!esOtra();if(!err.hidden)clearErr();if(esOtra())inOtra.focus();});
 
 /* Enlace de la aplicación web de Apps Script (Implementar → Gestionar implementaciones). */
-var URL_REGISTRO="https://script.google.com/macros/s/AKfycbyInqoh6hvKAnw7myWDH8uqrvYgM4NGJR3ZrxFj3cmpWNurE3V532c4vFggWggzL2_F/exec";
+var URL_REGISTRO="https://script.google.com/macros/s/AKfycbxv5bss67snZI6aCDo5IYuO6j13MsREdNTLtz3zUKVcnp9rFmjrX-w7dxvVVZTdoVxK/exec";
 
 /* Llama a Apps Script por JSONP y recibe la respuesta del servidor. */
 function jsonp(params,ok,fallo,espera){
