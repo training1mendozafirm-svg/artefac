@@ -1,4 +1,4 @@
-<title>Control de Consentimientos TMLF</title>
+<title>Control de Firmas TMLF</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
 <style>
@@ -44,13 +44,30 @@ button,input,select,textarea{font:inherit;color:inherit}
 .dot.ok{background:#4fd39a}.dot.warn{background:#f0b45a}.dot.bad{background:#ff8a8a}.dot.busy{background:#8fb6ff;animation:pulse 1s infinite}
 @keyframes pulse{50%{opacity:.35}}
 @media (prefers-reduced-motion:reduce){.dot.busy{animation:none}}
-.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:20px;border-top:1px solid rgba(255,255,255,.14)}
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));margin-top:20px;border-top:1px solid rgba(255,255,255,.14)}
 .kpi{padding:14px 18px 14px 0;border-right:1px solid rgba(255,255,255,.14)}
 .kpi+.kpi{padding-left:18px}.kpi:last-child{border-right:0}
 .kpi .lbl{font-size:11px;letter-spacing:.12em;font-weight:600;color:var(--on-navy-muted)}
 .kpi .val{font-family:var(--display);font-size:clamp(26px,3.6vw,36px);font-weight:700;line-height:1.1;margin-top:4px}
 .kpi.g .val{color:#6fe0ac}
-@media (max-width:720px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.kpi:nth-child(2){border-right:0}.kpi:nth-child(3){padding-left:0}.kpi:nth-child(n+3){border-top:1px solid rgba(255,255,255,.14)}}
+.kpi .sub{font-size:11.5px;color:var(--on-navy-muted);margin-top:2px}
+.docs-sub{font-size:13px;color:var(--on-navy-muted);margin-top:4px}
+.prog{display:grid;grid-template-columns:1fr 1fr;gap:10px 28px}
+@media (max-width:600px){.prog{grid-template-columns:1fr}}
+.drow{display:flex;flex-direction:column;gap:4px}
+.drow-l{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.dcell{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.dfecha{font-size:11.5px;color:var(--muted);padding-left:4px}
+tr.partial td:first-child{box-shadow:inset 3px 0 0 var(--amber)}
+fieldset.docbox{border:1px solid var(--line);border-radius:8px;padding:10px 14px 14px;margin:0;display:flex;flex-direction:column;gap:10px;min-width:0}
+fieldset.docbox.ok{border-color:var(--green)}
+fieldset.docbox legend{font-weight:700;font-size:13px;padding:0 6px}
+.chk{display:flex;align-items:center;gap:8px;font-size:13.5px;padding:3px 0;cursor:pointer}
+.chk input{width:16px;height:16px;accent-color:var(--green)}
+.miss{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.miss .pill{font-size:11px;padding:2px 8px}
+.regs{display:flex;flex-direction:column;gap:4px;align-items:flex-end}
+@media (max-width:900px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.kpi,.kpi+.kpi{padding:12px 14px 12px 0;border-right:0}.kpi:nth-child(even){padding-left:14px;border-left:1px solid rgba(255,255,255,.14)}.kpi:nth-child(n+3){border-top:1px solid rgba(255,255,255,.14)}.kpi:last-child{grid-column:1/-1;border-left:0;padding-left:0}}
 .prog{padding-block:4px 18px}
 .prog-row{display:flex;justify-content:space-between;font-size:12px;color:var(--on-navy-muted);margin-bottom:6px;gap:12px}
 .bar{height:10px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden}
@@ -112,7 +129,7 @@ main{padding-block:22px 48px}
 
 /* Table */
 .tbox{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow-x:auto}
-table{width:100%;border-collapse:collapse;min-width:900px}
+table{width:100%;border-collapse:collapse;min-width:1040px}
 th{position:sticky;top:0;background:var(--surface-2);text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:0;border-bottom:1px solid var(--line);white-space:nowrap}
 th .sort{background:none;border:0;padding:10px 12px;cursor:pointer;font:inherit;color:inherit;letter-spacing:inherit;text-transform:inherit;display:flex;gap:5px;align-items:center;width:100%}
 th .plain{display:block;padding:10px 12px}
@@ -144,7 +161,7 @@ tr.signed td:first-child{box-shadow:inset 3px 0 0 var(--green)}
 .pgroup{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
 .pgroup h3{margin:0;padding:10px 14px;font-size:13px;letter-spacing:.05em;display:flex;justify-content:space-between;background:var(--surface-2);border-bottom:1px solid var(--line)}
 .pgroup ul{list-style:none;margin:0;padding:4px 0}
-.pgroup li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 14px}
+.pgroup li{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:6px 14px}
 .pgroup li .who{min-width:0}
 .pgroup li .who b{display:block;font-weight:600;font-size:13px}
 .pgroup li .who span{font-size:12px;color:var(--muted)}
@@ -290,11 +307,23 @@ const clean = body => ({
   enlace: typeof body.enlace === "string" ? body.enlace.slice(0, 1000) : "",
   historial: Array.isArray(body.historial) ? body.historial.slice(-HIST_MAX).map(h => ({ ts: String(h.ts || ""), accion: String(h.accion || ""), fecha: String(h.fecha || ""), por: h.por ? String(h.por) : null })) : [],
   actualizado: typeof body.actualizado === "string" ? body.actualizado : "",
+  dir_estado: body.dir_estado === "firmado" ? "firmado" : "pendiente",
+  dir_fecha: typeof body.dir_fecha === "string" ? body.dir_fecha.slice(0, 10) : "",
+  dir_enlace: typeof body.dir_enlace === "string" ? body.dir_enlace.slice(0, 1000) : "",
   nombre: typeof body.nombre === "string" ? body.nombre.slice(0, 200) : "",
   area: typeof body.area === "string" ? body.area.slice(0, 120) : "",
   cargo: typeof body.cargo === "string" ? body.cargo.slice(0, 200) : ""
 });
-const EMPTY = { estado: "pendiente", fecha: "", obs: "", enlace: "", historial: [], actualizado: "" };
+const EMPTY = { estado: "pendiente", fecha: "", enlace: "", dir_estado: "pendiente", dir_fecha: "", dir_enlace: "", obs: "", historial: [], actualizado: "" };
+/* Documentos que firma cada colaborador */
+const DOCS = [
+  { k: "c", label: "Consentimiento informado", short: "Consentimiento", est: "estado", fec: "fecha", enl: "enlace" },
+  { k: "d", label: "Dirección del abogado", short: "Dirección del abogado", est: "dir_estado", fec: "dir_fecha", enl: "dir_enlace" }
+];
+const DOC = Object.fromEntries(DOCS.map(d => [d.k, d]));
+const isSigned = (c, d) => (c || EMPTY)[d.est] === "firmado";
+const nSigned = c => DOCS.filter(d => isSigned(c, d)).length;
+const isComplete = c => nSigned(c) === DOCS.length;
 
 function csvCell(v){ const s = v == null ? "" : String(v); return /[",\n\r;]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
 function toCsv(rows){ return "﻿" + rows.map(r => r.map(csvCell).join(",")).join("\r\n"); }
@@ -483,27 +512,27 @@ function App(){
   pushRef.current = pushList;
   const entry = (accion, fecha) => ({ ts: new Date().toISOString(), accion, fecha: fecha || "", por: meRef.current || null });
 
-  const markSigned = (id) => {
+  const markSigned = (id, d) => {
     const cur = recs[id] || EMPTY;
     const f = today();
-    const body = { ...cur, estado: "firmado", fecha: f, actualizado: new Date().toISOString(), historial: [...cur.historial, entry("Marcado como firmado", f)].slice(-HIST_MAX) };
-    writeRec(id, body).then(ok => { if (ok || mode !== "db") say("Firma registrada: " + BY_ID[id].nombre); });
+    const body = { ...cur, [d.est]: "firmado", [d.fec]: f, actualizado: new Date().toISOString(), historial: [...cur.historial, entry(d.short + ": marcado como firmado", f)].slice(-HIST_MAX) };
+    writeRec(id, body).then(ok => { if (ok || mode !== "db") say(d.short + " registrado: " + BY_ID[id].nombre + (isComplete(body) ? " · ambas firmas completas" : "")); });
   };
-  const doRevert = (id) => {
+  const doRevert = (id, d) => {
     const cur = recs[id] || EMPTY;
-    const body = { ...cur, estado: "pendiente", fecha: "", actualizado: new Date().toISOString(), historial: [...cur.historial, entry("Revertido a pendiente", cur.fecha)].slice(-HIST_MAX) };
-    writeRec(id, body).then(ok => { if (ok || mode !== "db") say(BY_ID[id].nombre + " regresó a pendiente de firma"); });
+    const body = { ...cur, [d.est]: "pendiente", [d.fec]: "", actualizado: new Date().toISOString(), historial: [...cur.historial, entry(d.short + ": revertido a pendiente", cur[d.fec])].slice(-HIST_MAX) };
+    writeRec(id, body).then(ok => { if (ok || mode !== "db") say(d.short + " de " + BY_ID[id].nombre + " regresó a pendiente"); });
   };
-  const askRevert = (id) => setConfirm({
+  const askRevert = (id, d) => setConfirm({
     title: "¿Revertir firma registrada?",
-    msg: html`<p style=${{margin:0}}><b>${BY_ID[id].nombre}</b> tiene firma registrada${recs[id]?.fecha ? " el " + fmtDate(recs[id].fecha) : ""}. Volverá a "Pendiente de firma" y la fecha se quitará. El cambio queda en el historial.</p>`,
-    label: "Revertir a pendiente", danger: true, onOk: () => doRevert(id)
+    msg: html`<p style=${{margin:0}}><b>${BY_ID[id].nombre}</b> tiene registrada la firma de <b>${d.label}</b>${recs[id]?.[d.fec] ? " el " + fmtDate(recs[id][d.fec]) : ""}. Volverá a "Pendiente de firma" y la fecha se quitará. El cambio queda en el historial.</p>`,
+    label: "Revertir a pendiente", danger: true, onOk: () => doRevert(id, d)
   });
-  const setEstado = (id, est) => {
+  const setEstado = (id, d, est) => {
     if (readOnly) return;
-    const cur = (recs[id] || EMPTY).estado;
+    const cur = (recs[id] || EMPTY)[d.est];
     if (cur === est) return;
-    if (est === "firmado") markSigned(id); else askRevert(id);
+    if (est === "firmado") markSigned(id, d); else askRevert(id, d);
   };
 
   /* Alta y baja de colaboradores agregados */
@@ -511,8 +540,9 @@ function App(){
     const id = newExtraId();
     const now = new Date().toISOString();
     const h = [entry("Colaborador agregado", "")];
-    if (p.estado === "firmado") h.push(entry("Marcado como firmado", p.fecha));
-    const body = { ...EMPTY, nombre: p.nombre, area: p.area, cargo: p.cargo, estado: p.estado, fecha: p.estado === "firmado" ? p.fecha : "", obs: p.obs, historial: h, actualizado: now };
+    const body = { ...EMPTY, nombre: p.nombre, area: p.area, cargo: p.cargo, obs: p.obs, actualizado: now };
+    DOCS.forEach(d => { if (p.firmas[d.k]) { body[d.est] = "firmado"; body[d.fec] = p.fecha; h.push(entry(d.short + ": marcado como firmado", p.fecha)); } });
+    body.historial = h;
     EXTRA[id] = { id, nombre: p.nombre, area: p.area, cargo: p.cargo, agregado: true }; rebuildRoster();
     const ok = await writeRec(id, body);
     if (ok !== false) say("Colaborador agregado: " + p.nombre);
@@ -536,34 +566,43 @@ function App(){
 
   /* Derivados */
   const stat = useMemo(() => {
-    const byArea = {}; AREAS.forEach(a => byArea[a] = { total: 0, f: 0 });
-    let f = 0;
-    ROSTER.forEach(r => { byArea[r.area].total++; if ((recs[r.id] || EMPTY).estado === "firmado") { f++; byArea[r.area].f++; } });
-    return { total: ROSTER.length, f, p: ROSTER.length - f, pc: pct(f, ROSTER.length), byArea };
+    const mk = () => ({ total: 0, c: 0, d: 0, comp: 0 });
+    const byArea = {}; AREAS.forEach(a => byArea[a] = mk());
+    const t = mk();
+    ROSTER.forEach(r => {
+      const c = recs[r.id] || EMPTY;
+      [t, byArea[r.area]].forEach(o => { o.total++; if (isSigned(c, DOC.c)) o.c++; if (isSigned(c, DOC.d)) o.d++; if (isComplete(c)) o.comp++; });
+    });
+    const fin = o => { o.firmas = o.c + o.d; o.req = o.total * DOCS.length; o.pc = pct(o.firmas, o.req); o.pend = o.total - o.comp; return o; };
+    AREAS.forEach(a => fin(byArea[a]));
+    return { ...fin(t), byArea };
   }, [recs]);
 
   const cargos = useMemo(() => [...new Set(ROSTER.filter(r => !fArea || r.area === fArea).map(r => r.cargo))].sort((a, b) => a.localeCompare(b, "es")), [fArea, recs]);
   useEffect(() => { if (fCargo && !cargos.includes(fCargo)) setFCargo(""); }, [cargos]);
 
+  const ESTADOS = [["todos", "Todos"], ["completos", "Ambas firmas completas"], ["pendientes", "Con alguna firma pendiente"], ["falta_c", "Falta Consentimiento"], ["falta_d", "Falta Dirección del abogado"], ["ninguna", "Sin ninguna firma"]];
+  const passEstado = (c, f) => f === "todos" ? true : f === "completos" ? isComplete(c) : f === "pendientes" ? !isComplete(c)
+    : f === "falta_c" ? !isSigned(c, DOC.c) : f === "falta_d" ? !isSigned(c, DOC.d) : nSigned(c) === 0;
+
   const rows = useMemo(() => {
     const nq = norm(q).split(/\s+/).filter(Boolean);
     let list = ROSTER.filter(r => {
-      const st = (recs[r.id] || EMPTY).estado;
+      const c = recs[r.id] || EMPTY;
       if (fArea && r.area !== fArea) return false;
       if (fCargo && r.cargo !== fCargo) return false;
-      if (fEstado === "firmados" && st !== "firmado") return false;
-      if (fEstado === "pendientes" && st !== "pendiente") return false;
+      if (!passEstado(c, fEstado)) return false;
       if (nq.length) { const n = norm(r.nombre); if (!nq.every(t => n.includes(t))) return false; }
       return true;
     });
-    const k = sort.key, d = sort.dir;
+    const k = sort.key, dir = sort.dir;
+    const docKey = (c, d) => (isSigned(c, d) ? "1" + (c[d.fec] || "0") : "0");
     list = list.slice().sort((a, b) => {
-      let va, vb;
-      if (k === "estado") { va = (recs[a.id] || EMPTY).estado; vb = (recs[b.id] || EMPTY).estado; }
-      else if (k === "fecha") { va = (recs[a.id] || EMPTY).fecha || "9999"; vb = (recs[b.id] || EMPTY).fecha || "9999"; }
+      let va, vb; const ca = recs[a.id] || EMPTY, cb = recs[b.id] || EMPTY;
+      if (DOC[k]) { va = docKey(ca, DOC[k]); vb = docKey(cb, DOC[k]); }
       else { va = a[k]; vb = b[k]; }
       const c = String(va).localeCompare(String(vb), "es");
-      return c !== 0 ? c * d : a.nombre.localeCompare(b.nombre, "es");
+      return c !== 0 ? c * dir : a.nombre.localeCompare(b.nombre, "es");
     });
     return list;
   }, [recs, q, fArea, fCargo, fEstado, sort]);
@@ -589,40 +628,45 @@ function App(){
     }
     setCopyFallback({ title: filename, text: typeof data === "string" ? data.replace(/^﻿/, "") : "", note: "Este visor no permite descargar archivos. Copia el contenido y pégalo en un archivo con el nombre indicado." });
   };
-  const recRow = r => { const c = recs[r.id] || EMPTY; return [r.id, r.nombre, r.area, r.cargo, c.estado === "firmado" ? "Firmado" : "Pendiente de firma", fmtDate(c.fecha), c.obs, c.enlace, fmtTs(c.actualizado), r.agregado ? "Agregado" : "Plantilla"]; };
-  const HEAD = ["ID", "Nombre", "Área", "Cargo", "Estado", "Fecha de firma", "Observaciones", "Enlace al documento", "Última actualización", "Origen"];
+  const estTxt = (c, d) => isSigned(c, d) ? "Firmado" : "Pendiente de firma";
+  const recRow = r => { const c = recs[r.id] || EMPTY; return [r.id, r.nombre, r.area, r.cargo,
+    ...DOCS.flatMap(d => [estTxt(c, d), fmtDate(c[d.fec]), c[d.enl]]),
+    isComplete(c) ? "Completo" : nSigned(c) ? "Parcial" : "Sin firmas", c.obs, fmtTs(c.actualizado), r.agregado ? "Agregado" : "Plantilla"]; };
+  const HEAD = ["ID", "Nombre", "Área", "Cargo", ...DOCS.flatMap(d => [d.short + " - Estado", d.short + " - Fecha de firma", d.short + " - Enlace"]), "Estatus general", "Observaciones", "Última actualización", "Origen"];
   const stamp = today();
   const exportCsv = which => {
-    const list = ROSTER.filter(r => which === "todos" || (which === "firmados") === ((recs[r.id] || EMPTY).estado === "firmado"));
-    saveFile("Consentimientos_" + which + "_" + stamp + ".csv", toCsv([HEAD, ...list.map(recRow)]));
+    const list = ROSTER.filter(r => passEstado(recs[r.id] || EMPTY, which));
+    saveFile("Firmas_" + which + "_" + stamp + ".csv", toCsv([HEAD, ...list.map(recRow)]));
   };
   const exportAreas = () => {
-    const out = [["Área", "Total", "Firmados", "Pendientes", "% cumplimiento"]];
-    AREAS.forEach(a => { const s = stat.byArea[a]; out.push([a, s.total, s.f, s.total - s.f, fmtPct(pct(s.f, s.total))]); });
-    out.push(["TOTAL", stat.total, stat.f, stat.p, fmtPct(stat.pc)]);
+    const out = [["Área", "Total", "Consentimiento firmados", "Consentimiento pendientes", "Dirección del abogado firmados", "Dirección del abogado pendientes", "Ambas firmas completas", "Con alguna pendiente", "% cumplimiento (firmas registradas / requeridas)"]];
+    const line = (a, s) => [a, s.total, s.c, s.total - s.c, s.d, s.total - s.d, s.comp, s.pend, fmtPct(s.pc)];
+    AREAS.forEach(a => out.push(line(a, stat.byArea[a])));
+    out.push(line("TOTAL", stat));
     out.push([]); out.push(["Generado", fmtTs(new Date().toISOString())]);
-    saveFile("Consentimientos_reporte_por_area_" + stamp + ".csv", toCsv(out));
+    saveFile("Firmas_reporte_por_area_" + stamp + ".csv", toCsv(out));
   };
   const exportJson = () => {
-    const data = { app: APP, version: 1, exportado: new Date().toISOString(), total: ROSTER.length,
+    const data = { app: APP, version: 2, documentos: DOCS.map(d => d.label), exportado: new Date().toISOString(), total: ROSTER.length,
       registros: ROSTER.map(r => ({ ...(recs[r.id] || EMPTY), id: r.id, nombre: r.nombre, area: r.area, cargo: r.cargo, agregado: !!r.agregado })) };
-    saveFile("Consentimientos_respaldo_" + stamp + ".json", JSON.stringify(data, null, 2));
+    saveFile("Firmas_respaldo_" + stamp + ".json", JSON.stringify(data, null, 2));
   };
 
   /* Pendientes por área (texto para portapapeles) */
   const pendText = useMemo(() => {
-    const lines = ["PENDIENTES DE FIRMA — CONSENTIMIENTO INFORMADO", "The Mendoza Law Firm · corte " + fmtDate(today()), "Pendientes: " + stat.p + " de " + stat.total, ""];
+    const lines = ["PENDIENTES DE FIRMA — CONSENTIMIENTO INFORMADO Y DIRECCIÓN DEL ABOGADO", "The Mendoza Law Firm · corte " + fmtDate(today()),
+      "Personas con firmas pendientes: " + stat.pend + " de " + stat.total + " · Falta Consentimiento: " + (stat.total - stat.c) + " · Falta Dirección del abogado: " + (stat.total - stat.d), ""];
     AREAS.forEach(a => {
-      const l = ROSTER.filter(r => r.area === a && (recs[r.id] || EMPTY).estado !== "firmado");
+      const l = ROSTER.filter(r => r.area === a && !isComplete(recs[r.id] || EMPTY));
       if (!l.length) return;
       lines.push(a + " (" + l.length + ")");
-      l.forEach(r => lines.push("• " + r.nombre + " — " + r.cargo));
+      l.forEach(r => { const c = recs[r.id] || EMPTY; lines.push("• " + r.nombre + " — " + r.cargo + " · Falta: " + DOCS.filter(d => !isSigned(c, d)).map(d => d.short).join(" y ")); });
       lines.push("");
     });
     return lines.join("\n").trim();
   }, [recs, stat]);
   const copyPend = async () => {
-    if (await copyText(pendText)) say("Lista de pendientes copiada (" + stat.p + " personas)");
+    if (await copyText(pendText)) say("Lista de pendientes copiada (" + stat.pend + " personas)");
     else setCopyFallback({ title: "Lista de pendientes", text: pendText, note: "No se pudo copiar automáticamente. Selecciona el texto y cópialo." });
   };
 
@@ -639,7 +683,15 @@ function App(){
   } else if (mode === "local") { storeTxt = sheetErr ? "Sin conexión con la hoja" : "Solo en este navegador"; dotCls = sheetErr ? "bad" : "warn"; }
   else { storeTxt = "Sin almacenamiento"; dotCls = "bad"; }
 
-  const TABS = [["panel", "Panel por área"], ["colab", "Colaboradores", stat.total], ["pend", "Pendientes de seguimiento", stat.p], ["resp", "Exportar y respaldo"]];
+  const TABS = [["panel", "Panel por área"], ["colab", "Colaboradores", stat.total], ["pend", "Pendientes de seguimiento", stat.pend], ["resp", "Exportar y respaldo"]];
+  const docCount = d => d.k === "c" ? stat.c : stat.d;
+
+  const DocCell = ({ r, c, d }) => { const f = isSigned(c, d); return html`<div className="dcell">
+    <div className="toggle" role="group" aria-label=${d.label + " de " + r.nombre}>
+      <button className=${"p" + (!f ? " on" : "")} aria-pressed=${!f} disabled=${readOnly} onClick=${() => setEstado(r.id, d, "pendiente")}>Pendiente</button>
+      <button className=${"f" + (f ? " on" : "")} aria-pressed=${f} disabled=${readOnly} onClick=${() => setEstado(r.id, d, "firmado")}>${f ? "✓ Firmado" : "Firmado"}</button>
+    </div>
+    <span className="dfecha num">${f ? (c[d.fec] ? fmtDate(c[d.fec]) : "Sin fecha") : "—"}</span></div>`; };
 
   return html`
   <header className="mast">
@@ -647,19 +699,21 @@ function App(){
       <div className="mast-top">
         <div>
           <div className="firm">THE MENDOZA LAW FIRM</div>
-          <h1>Control de Consentimientos Informados</h1>
+          <h1>Control de Firmas</h1>
+          <div className="docs-sub">${DOCS.map((d, i) => html`<span key=${d.k}>${i ? " · " : ""}${d.label}</span>`)}</div>
         </div>
         <span className="store" role="status"><span className=${"dot " + dotCls}></span>${storeTxt}</span>
       </div>
       <div className="kpis">
-        <div className="kpi"><div className="lbl">TOTAL DE COLABORADORES</div><div className="val num">${stat.total}</div></div>
-        <div className="kpi g"><div className="lbl">CONSENTIMIENTOS FIRMADOS</div><div className="val num">${stat.f}</div></div>
-        <div className="kpi"><div className="lbl">PENDIENTES DE FIRMA</div><div className="val num">${stat.p}</div></div>
-        <div className="kpi"><div className="lbl">PORCENTAJE DE CUMPLIMIENTO</div><div className="val num">${fmtPct(stat.pc)}</div></div>
+        <div className="kpi"><div className="lbl">TOTAL DE COLABORADORES</div><div className="val num">${stat.total}</div><div className="sub num">${stat.comp} con ambas firmas</div></div>
+        ${DOCS.map(d => html`<div key=${d.k} className="kpi g"><div className="lbl">${d.label.toUpperCase()}</div><div className="val num">${docCount(d)}</div><div className="sub num">firmados · ${stat.total - docCount(d)} pendientes</div></div>`)}
+        <div className="kpi"><div className="lbl">PENDIENTES DE FIRMA</div><div className="val num">${stat.pend}</div><div className="sub">personas con al menos una firma pendiente</div></div>
+        <div className="kpi"><div className="lbl">PORCENTAJE DE CUMPLIMIENTO</div><div className="val num">${fmtPct(stat.pc)}</div><div className="sub num">${stat.firmas} de ${stat.req} firmas</div></div>
       </div>
       <div className="prog">
-        <div className="prog-row"><span>Avance global</span><span className="num">${stat.f} de ${stat.total} firmados</span></div>
-        <div className="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow=${stat.pc}><i style=${{ width: stat.pc + "%" }}></i></div>
+        ${DOCS.map(d => { const p = pct(docCount(d), stat.total); return html`<div key=${d.k} className="prog-item">
+          <div className="prog-row"><span>${d.label}</span><span className="num">${docCount(d)} de ${stat.total} · ${fmtPct(p)}</span></div>
+          <div className="bar" role="progressbar" aria-label=${d.label} aria-valuemin="0" aria-valuemax="100" aria-valuenow=${p}><i style=${{ width: p + "%" }}></i></div></div>`; })}
       </div>
       <nav className="tabs" role="tablist">
         ${TABS.map(([k, l, c]) => html`<button key=${k} id=${"tab-" + k} className="tab" role="tab" aria-selected=${tab === k} onClick=${() => setTab(k)}>${l}${c != null ? html`<span className="cnt num">${c}</span>` : null}</button>`)}
@@ -674,16 +728,18 @@ function App(){
     ${mode === "db" && readOnly ? html`<div className="notice warn"><span>🔒</span><div><b>Modo de solo lectura.</b> Puedes consultar y exportar, pero tu nivel de acceso no permite registrar firmas. Pide acceso de colaborador a quien administra la herramienta.</div></div>` : null}
 
     ${tab === "panel" ? html`
-      <div className="sec-h"><div><h2>Avance por área</h2><p>Selecciona un área para ver únicamente a sus colaboradores.</p></div>${readOnly ? null : html`<button className="btn pri" onClick=${() => setAdding(true)}>+ Agregar colaborador</button>`}</div>
+      <div className="sec-h"><div><h2>Avance por área</h2><p>Cada colaborador firma dos documentos. Selecciona un área para ver únicamente a sus colaboradores.</p></div>${readOnly ? null : html`<button className="btn pri" onClick=${() => setAdding(true)}>+ Agregar colaborador</button>`}</div>
       <div className="areas">
-        ${AREAS.map(a => { const s = stat.byArea[a]; const p = pct(s.f, s.total); return html`
-          <button key=${a} className=${"acard" + (s.f === s.total ? " done" : "")} onClick=${() => goArea(a)}>
-            <div className="top"><span className="nm">${a}</span><span className="pc num">${fmtPct(p)}</span></div>
-            <div className="mbar"><i style=${{ width: p + "%" }}></i></div>
-            <div className="meta num"><span><b>${s.total}</b> total</span><span><b>${s.f}</b> firmados</span><span><b>${s.total - s.f}</b> pendientes</span></div>
+        ${AREAS.map(a => { const s = stat.byArea[a]; return html`
+          <button key=${a} className=${"acard" + (s.comp === s.total ? " done" : "")} onClick=${() => goArea(a)}>
+            <div className="top"><span className="nm">${a}</span><span className="pc num">${fmtPct(s.pc)}</span></div>
+            ${DOCS.map(d => { const n = d.k === "c" ? s.c : s.d; const p = pct(n, s.total); return html`<div key=${d.k} className="drow">
+              <div className="drow-l"><span>${d.short}</span><span className="num">${n}/${s.total}</span></div>
+              <div className="mbar"><i style=${{ width: p + "%" }}></i></div></div>`; })}
+            <div className="meta num"><span><b>${s.total}</b> total</span><span><b>${s.comp}</b> completos</span><span><b>${s.pend}</b> con pendientes</span></div>
           </button>`; })}
       </div>
-      <p className="foot">Marcar a una persona como "Firmado" es un registro administrativo de confirmación. No constituye una firma electrónica ni demuestra por sí solo que exista un documento firmado; el documento debe resguardarse en el repositorio autorizado de la firma.</p>
+      <p className="foot">Marcar un documento como "Firmado" es un registro administrativo de confirmación. No constituye una firma electrónica ni demuestra por sí solo que exista un documento firmado; los documentos deben resguardarse en el repositorio autorizado de la firma. El porcentaje de cumplimiento cuenta las firmas registradas sobre las requeridas (dos por colaborador).</p>
     ` : null}
 
     ${tab === "colab" ? html`
@@ -691,29 +747,25 @@ function App(){
         <label className="fld search"><span>Buscar</span><input id="f-q" className="inp" type="search" placeholder="Nombre o apellido" value=${q} onChange=${e => setQ(e.target.value)} /></label>
         <label className="fld"><span>Área</span><select id="f-area" className="sel" value=${fArea} onChange=${e => setFArea(e.target.value)}><option value="">Todas las áreas</option>${AREAS.map(a => html`<option key=${a} value=${a}>${a}</option>`)}</select></label>
         <label className="fld"><span>Cargo</span><select id="f-cargo" className="sel" value=${fCargo} onChange=${e => setFCargo(e.target.value)}><option value="">Todos los cargos</option>${cargos.map(c => html`<option key=${c} value=${c}>${c}</option>`)}</select></label>
-        <div className="fld"><span>Estado</span><div className="seg">${[["todos","Todos"],["firmados","Firmados"],["pendientes","Pendientes"]].map(([k,l]) => html`<button key=${k} aria-pressed=${fEstado === k} onClick=${() => setFEstado(k)}>${l}</button>`)}</div></div>
+        <label className="fld"><span>Estado de firmas</span><select id="f-estado" className="sel" value=${fEstado} onChange=${e => setFEstado(e.target.value)}>${ESTADOS.map(([k, l]) => html`<option key=${k} value=${k}>${l}</option>`)}</select></label>
         <button className="btn" onClick=${clearFilters} disabled=${!filtersOn}>Limpiar filtros</button>
         ${readOnly ? null : html`<button className="btn pri" onClick=${() => setAdding(true)}>+ Agregar colaborador</button>`}
       </div>
       <div className="resline"><span className="num">Mostrando <b>${rows.length}</b> de ${stat.total} colaboradores${fArea ? html`<span className="chipf">Área: ${fArea}</span>` : null}</span>
-        <span className="num">${(() => { const f = rows.filter(r => (recs[r.id] || EMPTY).estado === "firmado").length; return html`En esta vista: <b style=${{color:"var(--green)"}}>${f}</b> firmados · <b>${rows.length - f}</b> pendientes`; })()}</span></div>
+        <span className="num">${(() => { const f = rows.filter(r => isComplete(recs[r.id] || EMPTY)).length; return html`En esta vista: <b style=${{color:"var(--green)"}}>${f}</b> con ambas firmas · <b>${rows.length - f}</b> con pendientes`; })()}</span></div>
       <div className="tbox">
         <table>
           <thead><tr>
-            ${[["nombre","Nombre completo"],["area","Área"],["cargo","Cargo"],["estado","Estado del consentimiento"],["fecha","Fecha de firma"]].map(([k,l]) => html`<th key=${k} aria-sort=${sort.key === k ? (sort.dir > 0 ? "ascending" : "descending") : "none"}><button className="sort" onClick=${() => setSort(s => ({ key: k, dir: s.key === k ? -s.dir : 1 }))}>${l}<span aria-hidden="true">${sort.key === k ? (sort.dir > 0 ? "▲" : "▼") : "↕"}</span></button></th>`)}
+            ${[["nombre","Nombre completo"],["area","Área"],["cargo","Cargo"],["c","Consentimiento informado"],["d","Dirección del abogado"]].map(([k,l]) => html`<th key=${k} aria-sort=${sort.key === k ? (sort.dir > 0 ? "ascending" : "descending") : "none"}><button className="sort" onClick=${() => setSort(s => ({ key: k, dir: s.key === k ? -s.dir : 1 }))}>${l}<span aria-hidden="true">${sort.key === k ? (sort.dir > 0 ? "▲" : "▼") : "↕"}</span></button></th>`)}
             <th><span className="plain">Observaciones</span></th><th><span className="plain">Acciones</span></th>
           </tr></thead>
           <tbody>
-            ${rows.length ? rows.map(r => { const c = recs[r.id] || EMPTY; const f = c.estado === "firmado"; return html`
-              <tr key=${r.id} className=${f ? "signed" : ""}>
+            ${rows.length ? rows.map(r => { const c = recs[r.id] || EMPTY; const n = nSigned(c); return html`
+              <tr key=${r.id} className=${n === DOCS.length ? "signed" : n ? "partial" : ""}>
                 <td><button className="nmbtn" onClick=${() => setOpenId(r.id)}>${r.nombre}</button><span className="idt">${r.id}${r.agregado ? html` <span className="newtag">Agregado</span>` : null}</span></td>
                 <td><span className="area-tag">${r.area}</span></td>
                 <td><div className="cargo">${r.cargo}</div></td>
-                <td><div className="toggle" role="group" aria-label=${"Estado de " + r.nombre}>
-                  <button className=${"p" + (!f ? " on" : "")} aria-pressed=${!f} disabled=${readOnly} onClick=${() => setEstado(r.id, "pendiente")}>Pendiente de firma</button>
-                  <button className=${"f" + (f ? " on" : "")} aria-pressed=${f} disabled=${readOnly} onClick=${() => setEstado(r.id, "firmado")}>${f ? "✓ Firmado" : "Firmado"}</button>
-                </div></td>
-                <td className="num">${f ? fmtDate(c.fecha) || html`<span className="muted">Sin fecha</span>` : html`<span className="muted">—</span>`}</td>
+                ${DOCS.map(d => html`<td key=${d.k}>${DocCell({ r, c, d })}</td>`)}
                 <td><div className="obs" title=${c.obs}>${c.obs || html`<span className="muted">—</span>`}</div></td>
                 <td><button className="btn sm" onClick=${() => setOpenId(r.id)}>${readOnly ? "Ver" : "Ver / editar"}</button></td>
               </tr>`; }) : html`<tr><td colSpan="7"><div className="empty">Ningún colaborador coincide con estos filtros. <button className="btn sm" onClick=${clearFilters}>Limpiar filtros</button></div></td></tr>`}
@@ -723,15 +775,16 @@ function App(){
     ` : null}
 
     ${tab === "pend" ? html`
-      <div className="sec-h"><div><h2>Pendientes de seguimiento</h2><p className="num">${stat.p} colaboradores aún sin consentimiento registrado, agrupados por área.</p></div>
-        <button className="btn pri" onClick=${copyPend} disabled=${!stat.p}>Copiar lista por área</button></div>
-      ${stat.p === 0 ? html`<div className="alldone">Todos los colaboradores tienen su consentimiento registrado.</div>` : html`
+      <div className="sec-h"><div><h2>Pendientes de seguimiento</h2><p className="num">${stat.pend} colaboradores con al menos una firma pendiente · faltan ${stat.total - stat.c} de Consentimiento y ${stat.total - stat.d} de Dirección del abogado.</p></div>
+        <button className="btn pri" onClick=${copyPend} disabled=${!stat.pend}>Copiar lista por área</button></div>
+      ${stat.pend === 0 ? html`<div className="alldone">Todos los colaboradores tienen ambas firmas registradas.</div>` : html`
       <div className="pgrid">
-        ${AREAS.map(a => { const l = ROSTER.filter(r => r.area === a && (recs[r.id] || EMPTY).estado !== "firmado"); if (!l.length) return null; return html`
+        ${AREAS.map(a => { const l = ROSTER.filter(r => r.area === a && !isComplete(recs[r.id] || EMPTY)); if (!l.length) return null; return html`
           <section key=${a} className="pgroup">
             <h3><span>${a}</span><span className="num muted">${l.length} de ${stat.byArea[a].total}</span></h3>
-            <ul>${l.map(r => html`<li key=${r.id}><div className="who"><b>${r.nombre}</b><span>${r.cargo}</span></div>
-              ${readOnly ? null : html`<button className="btn sm" onClick=${() => setEstado(r.id, "firmado")}>Registrar firma</button>`}</li>`)}</ul>
+            <ul>${l.map(r => { const c = recs[r.id] || EMPTY; return html`<li key=${r.id}><div className="who"><b>${r.nombre}</b><span>${r.cargo}</span>
+                <div className="miss">${DOCS.map(d => html`<span key=${d.k} className=${"pill " + (isSigned(c, d) ? "f" : "p")}>${isSigned(c, d) ? "✓ " : ""}${d.short}</span>`)}</div></div>
+              ${readOnly ? null : html`<div className="regs">${DOCS.filter(d => !isSigned(c, d)).map(d => html`<button key=${d.k} className="btn sm" onClick=${() => setEstado(r.id, d, "firmado")}>Registrar ${d.short}</button>`)}</div>`}</li>`; })}</ul>
           </section>`; })}
       </div>`}
     ` : null}
@@ -758,35 +811,48 @@ function Ficha({ id, rec, readOnly, names, onClose, writeRec, say, setConfirm, m
   const dupe = extra && nNombre !== r.nombre ? ROSTER.find(x => x.id !== id && norm(x.nombre) === norm(nNombre)) : null;
   const idOk = !extra || (nNombre.length >= 5 && nArea && nCargo && !dupe);
   const idDirty = extra && (nNombre !== r.nombre || nArea !== r.area || nCargo !== r.cargo);
-  const [estado, setEstado] = useState(rec.estado);
-  const [fecha, setFecha] = useState(rec.fecha || "");
+  const init = k => Object.fromEntries(DOCS.map(d => [d.k, rec[d[k]] || ""]));
+  const [est, setEst] = useState(() => Object.fromEntries(DOCS.map(d => [d.k, rec[d.est] === "firmado" ? "firmado" : "pendiente"])));
+  const [fec, setFec] = useState(() => init("fec"));
+  const [enl, setEnl] = useState(() => init("enl"));
   const [obs, setObs] = useState(rec.obs || "");
-  const [enlace, setEnlace] = useState(rec.enlace || "");
   const [saving, setSaving] = useState(false);
   useEffect(() => { const k = e => { if (e.key === "Escape") onClose(); }; window.addEventListener("keydown", k); return () => window.removeEventListener("keydown", k); }, []);
-  const changeEstado = v => { setEstado(v); if (v === "firmado" && !fecha) setFecha(today()); };
-  const urlOk = isUrl(enlace);
-  const dateBad = estado === "firmado" && fecha && fecha > today();
-  const dirty = idDirty || estado !== rec.estado || (estado === "firmado" && fecha !== (rec.fecha || "")) || obs !== (rec.obs || "") || enlace !== (rec.enlace || "");
+  const changeEst = (d, v) => { setEst(s => ({ ...s, [d.k]: v })); if (v === "firmado" && !fec[d.k]) setFec(s => ({ ...s, [d.k]: today() })); };
+  const prob = d => {
+    if (!isUrl(enl[d.k])) return "url";
+    if (est[d.k] === "firmado" && !fec[d.k]) return "nofecha";
+    if (est[d.k] === "firmado" && fec[d.k] > today()) return "futura";
+    return "";
+  };
+  const anyProb = DOCS.some(d => prob(d));
+  const docDirty = d => est[d.k] !== (rec[d.est] === "firmado" ? "firmado" : "pendiente") || (est[d.k] === "firmado" && fec[d.k] !== (rec[d.fec] || "")) || enl[d.k] !== (rec[d.enl] || "");
+  const dirty = idDirty || obs !== (rec.obs || "") || DOCS.some(docDirty);
+  const reverts = DOCS.filter(d => rec[d.est] === "firmado" && est[d.k] === "pendiente");
   const doSave = async () => {
     const now = new Date().toISOString(); const h = [...rec.historial];
     const por = meRef.current || null;
-    if (estado !== rec.estado) h.push({ ts: now, accion: estado === "firmado" ? "Marcado como firmado" : "Revertido a pendiente", fecha: estado === "firmado" ? fecha : rec.fecha, por });
-    else if (estado === "firmado" && fecha !== rec.fecha) h.push({ ts: now, accion: "Fecha de firma corregida", fecha, por });
-    if (obs !== rec.obs || enlace !== rec.enlace) h.push({ ts: now, accion: "Observaciones / enlace actualizados", fecha: "", por });
-    if (idDirty) h.push({ ts: now, accion: "Datos del colaborador corregidos", fecha: "", por });
-    if (idDirty) { EXTRA[id] = { id, nombre: nNombre, area: nArea, cargo: nCargo, agregado: true }; rebuildRoster(); }
-    const body = { ...(extra ? { nombre: nNombre, area: nArea, cargo: nCargo } : {}), estado, fecha: estado === "firmado" ? fecha : "", obs: obs.trim(), enlace: enlace.trim(), historial: h.slice(-HIST_MAX), actualizado: now };
+    const body = { ...rec };
+    DOCS.forEach(d => {
+      const was = rec[d.est] === "firmado" ? "firmado" : "pendiente";
+      if (est[d.k] !== was) h.push({ ts: now, accion: d.short + (est[d.k] === "firmado" ? ": marcado como firmado" : ": revertido a pendiente"), fecha: est[d.k] === "firmado" ? fec[d.k] : rec[d.fec], por });
+      else if (est[d.k] === "firmado" && fec[d.k] !== rec[d.fec]) h.push({ ts: now, accion: d.short + ": fecha de firma corregida", fecha: fec[d.k], por });
+      if (enl[d.k].trim() !== (rec[d.enl] || "")) h.push({ ts: now, accion: d.short + ": enlace actualizado", fecha: "", por });
+      body[d.est] = est[d.k]; body[d.fec] = est[d.k] === "firmado" ? fec[d.k] : ""; body[d.enl] = enl[d.k].trim();
+    });
+    if (obs.trim() !== (rec.obs || "")) h.push({ ts: now, accion: "Observaciones actualizadas", fecha: "", por });
+    if (idDirty) { h.push({ ts: now, accion: "Datos del colaborador corregidos", fecha: "", por }); EXTRA[id] = { id, nombre: nNombre, area: nArea, cargo: nCargo, agregado: true }; rebuildRoster(); }
+    if (extra) Object.assign(body, { nombre: nNombre, area: nArea, cargo: nCargo });
+    body.obs = obs.trim(); body.historial = h.slice(-HIST_MAX); body.actualizado = now;
     setSaving(true);
     const ok = await writeRec(id, body);
     setSaving(false);
     if (ok !== false) { say("Registro actualizado: " + (extra ? nNombre : r.nombre)); onClose(); }
   };
   const save = () => {
-    if (!urlOk || dateBad || !idOk || (estado === "firmado" && !fecha)) return;
-    if (rec.estado === "firmado" && estado === "pendiente") {
-      setConfirm({ title: "¿Revertir firma registrada?", msg: html`<p style=${{margin:0}}><b>${r.nombre}</b> volverá a "Pendiente de firma". El cambio queda en el historial.</p>`, label: "Revertir y guardar", danger: true, onOk: doSave });
-    } else doSave();
+    if (anyProb || !idOk) return;
+    if (reverts.length) setConfirm({ title: "¿Revertir firma registrada?", msg: html`<p style=${{margin:0}}>La firma de <b>${reverts.map(d => d.label).join(" y ")}</b> de <b>${r.nombre}</b> volverá a "Pendiente de firma". El cambio queda en el historial.</p>`, label: "Revertir y guardar", danger: true, onOk: doSave });
+    else doSave();
   };
   const hist = rec.historial.slice().reverse();
   return html`<div className="scrim" onClick=${e => { if (e.target === e.currentTarget) onClose(); }}>
@@ -803,23 +869,27 @@ function Ficha({ id, rec, readOnly, names, onClose, writeRec, say, setConfirm, m
           <datalist id="dl-areas">${AREAS.map(a => html`<option key=${a} value=${a} />`)}</datalist>
           <datalist id="dl-cargos-m">${[...new Set(ROSTER.filter(x => x.area === nArea).map(x => x.cargo))].map(c => html`<option key=${c} value=${c} />`)}</datalist>
         </div>` : html`<dl className="ro"><dt>Nombre</dt><dd>${r.nombre}</dd><dt>Área</dt><dd>${r.area}</dd><dt>Cargo</dt><dd>${r.cargo}</dd></dl>`}
-        <div className="two">
-          <div className="fld"><span>Estado</span><div className="toggle" role="group">
-            <button className=${"p" + (estado === "pendiente" ? " on" : "")} disabled=${readOnly} onClick=${() => changeEstado("pendiente")}>Pendiente de firma</button>
-            <button className=${"f" + (estado === "firmado" ? " on" : "")} disabled=${readOnly} onClick=${() => changeEstado("firmado")}>Firmado</button></div></div>
-          <label className="fld"><span>Fecha de firma</span><input id="m-fecha" type="date" className="inp" value=${estado === "firmado" ? fecha : ""} max=${today()} disabled=${readOnly || estado !== "firmado"} onChange=${e => setFecha(e.target.value)} />
-            ${dateBad ? html`<span className="err">La fecha no puede ser posterior a hoy.</span>` : estado === "firmado" && !fecha ? html`<span className="err">Indica la fecha de firma.</span>` : null}</label>
-        </div>
-        <label className="fld"><span>Observaciones</span><textarea id="m-obs" className="inp" rows="3" maxLength="2000" disabled=${readOnly} value=${obs} onChange=${e => setObs(e.target.value)} placeholder="Ej. firmó en sesión presencial; pendiente de entregar original"></textarea></label>
-        <label className="fld"><span>Enlace al documento (opcional)</span><input id="m-enlace" type="url" className="inp" disabled=${readOnly} value=${enlace} onChange=${e => setEnlace(e.target.value)} placeholder="https://… (ubicación en el repositorio autorizado)" />
-          ${!urlOk ? html`<span className="err">Escribe un enlace completo que empiece con https://</span>` : html`<span className="hint">Guarda solo el enlace. No pegues ni subas el documento firmado aquí.</span>`}
-          ${rec.enlace && urlOk && enlace === rec.enlace ? html`<a href=${rec.enlace} target="_blank" rel="noopener noreferrer" className="hint">Abrir enlace registrado ↗</a>` : null}</label>
+        ${DOCS.map(d => { const p = prob(d); const f = est[d.k] === "firmado"; return html`<fieldset key=${d.k} className=${"docbox" + (f ? " ok" : "")}>
+          <legend>${d.label}</legend>
+          <div className="two">
+            <div className="fld"><span>Estado</span><div className="toggle" role="group">
+              <button className=${"p" + (!f ? " on" : "")} disabled=${readOnly} onClick=${() => changeEst(d, "pendiente")}>Pendiente de firma</button>
+              <button className=${"f" + (f ? " on" : "")} disabled=${readOnly} onClick=${() => changeEst(d, "firmado")}>Firmado</button></div></div>
+            <label className="fld"><span>Fecha de firma</span><input id=${"m-fecha-" + d.k} type="date" className="inp" value=${f ? fec[d.k] : ""} max=${today()} disabled=${readOnly || !f} onChange=${e => { const v = e.target.value; setFec(s => ({ ...s, [d.k]: v })); }} />
+              ${p === "futura" ? html`<span className="err">La fecha no puede ser posterior a hoy.</span>` : p === "nofecha" ? html`<span className="err">Indica la fecha de firma.</span>` : null}</label>
+          </div>
+          <label className="fld"><span>Enlace al documento (opcional)</span><input id=${"m-enlace-" + d.k} type="url" className="inp" disabled=${readOnly} value=${enl[d.k]} onChange=${e => { const v = e.target.value; setEnl(s => ({ ...s, [d.k]: v })); }} placeholder="https://… (ubicación en el repositorio autorizado)" />
+            ${p === "url" ? html`<span className="err">Escribe un enlace completo que empiece con https://</span>` : null}
+            ${rec[d.enl] && enl[d.k] === rec[d.enl] && isUrl(rec[d.enl]) ? html`<a href=${rec[d.enl]} target="_blank" rel="noopener noreferrer" className="hint">Abrir enlace registrado ↗</a>` : null}</label>
+        </fieldset>`; })}
+        <span className="hint" style=${{marginTop:"-6px"}}>Guarda solo los enlaces. No pegues ni subas los documentos firmados aquí.</span>
+        <label className="fld"><span>Observaciones</span><textarea id="m-obs" className="inp" rows="3" maxLength="2000" disabled=${readOnly} value=${obs} onChange=${e => setObs(e.target.value)} placeholder="Ej. firmó Consentimiento en sesión presencial; Dirección del abogado pendiente de entregar original"></textarea></label>
         <div className="fld"><span>Historial de cambios</span>
           ${hist.length ? html`<ul className="hist">${hist.map((h, i) => html`<li key=${i} className=${h.accion.includes("firmado") ? "f" : ""}><time>${fmtTs(h.ts)}</time> · ${h.accion}${h.fecha ? " (" + fmtDate(h.fecha) + ")" : ""}${h.por ? html` · <span className="muted">${names[h.por] || "Usuario"}</span>` : null}</li>`)}</ul>` : html`<span className="hint">Sin cambios registrados.</span>`}</div>
         <p className="legal">Marcar como "Firmado" es un registro administrativo de confirmación; no es una firma electrónica ni prueba por sí solo la existencia del documento.</p>
       </div>
       <div className="mfoot">${extra && !readOnly ? html`<button className="btn" style=${{marginRight:"auto",color:"var(--red)"}} onClick=${() => onDelete(id)}>Eliminar colaborador</button>` : null}<button className="btn" onClick=${onClose}>${readOnly ? "Cerrar" : "Cancelar"}</button>
-        ${readOnly ? null : html`<button className="btn pri" disabled=${!dirty || saving || !urlOk || dateBad || !idOk || (estado === "firmado" && !fecha)} onClick=${save}>${saving ? "Guardando…" : "Guardar cambios"}</button>`}</div>
+        ${readOnly ? null : html`<button className="btn pri" disabled=${!dirty || saving || anyProb || !idOk} onClick=${save}>${saving ? "Guardando…" : "Guardar cambios"}</button>`}</div>
     </div></div>`;
 }
 
@@ -829,7 +899,7 @@ function AddPerson({ onClose, onSave }){
   const [areaSel, setAreaSel] = useState("");
   const [areaNew, setAreaNew] = useState("");
   const [cargo, setCargo] = useState("");
-  const [estado, setEstado] = useState("pendiente");
+  const [firmas, setFirmas] = useState({ c: false, d: false });
   const [fecha, setFecha] = useState(today());
   const [obs, setObs] = useState("");
   const [tried, setTried] = useState(false);
@@ -838,19 +908,20 @@ function AddPerson({ onClose, onSave }){
   const nNombre = normName(nombre);
   const area = areaSel === "__otra" ? normName(areaNew) : areaSel;
   const nCargo = normName(cargo);
+  const algun = firmas.c || firmas.d;
   const dupe = nNombre ? ROSTER.find(x => norm(x.nombre) === norm(nNombre)) : null;
   const cargosArea = [...new Set(ROSTER.filter(x => x.area === area).map(x => x.cargo))].sort((a, b) => a.localeCompare(b, "es"));
   const errs = {
     nombre: !nNombre ? "Escribe el nombre completo." : nNombre.length < 5 ? "El nombre es demasiado corto." : dupe ? "Ya existe " + dupe.nombre + " en " + dupe.area + " (" + dupe.id + ")." : "",
     area: !area ? "Selecciona o escribe el área." : "",
     cargo: !nCargo ? "Escribe el cargo." : "",
-    fecha: estado === "firmado" && (!fecha || fecha > today()) ? "Indica una fecha de firma válida (no posterior a hoy)." : ""
+    fecha: algun && (!fecha || fecha > today()) ? "Indica una fecha de firma válida (no posterior a hoy)." : ""
   };
   const valid = !Object.values(errs).some(Boolean);
   const submit = async e => {
     e.preventDefault(); setTried(true); if (!valid || saving) return;
     setSaving(true);
-    await onSave({ nombre: nNombre, area, cargo: nCargo, estado, fecha, obs: obs.trim() });
+    await onSave({ nombre: nNombre, area, cargo: nCargo, firmas, fecha, obs: obs.trim() });
     setSaving(false);
   };
   const show = k => (tried || (k === "nombre" && dupe)) && errs[k] ? html`<span className="err">${errs[k]}</span>` : null;
@@ -867,10 +938,10 @@ function AddPerson({ onClose, onSave }){
             <datalist id="dl-cargos">${cargosArea.map(c => html`<option key=${c} value=${c} />`)}</datalist>${show("cargo")}</label>
         </div>
         <div className="two">
-          <div className="fld"><span>Estado inicial</span><div className="toggle" role="group">
-            <button type="button" className=${"p" + (estado === "pendiente" ? " on" : "")} onClick=${() => setEstado("pendiente")}>Pendiente de firma</button>
-            <button type="button" className=${"f" + (estado === "firmado" ? " on" : "")} onClick=${() => setEstado("firmado")}>Firmado</button></div></div>
-          <label className="fld"><span>Fecha de firma</span><input id="a-fecha" type="date" className="inp" max=${today()} disabled=${estado !== "firmado"} value=${estado === "firmado" ? fecha : ""} onChange=${e => setFecha(e.target.value)} />${show("fecha")}</label>
+          <div className="fld"><span>Documentos ya firmados</span>
+            ${DOCS.map(d => html`<label key=${d.k} className="chk"><input type="checkbox" id=${"a-f-" + d.k} checked=${firmas[d.k]} onChange=${e => { const v = e.target.checked; setFirmas(s => ({ ...s, [d.k]: v })); }} /> ${d.label}</label>`)}
+            <span className="hint">Déjalos sin marcar si aún no firma.</span></div>
+          <label className="fld"><span>Fecha de firma</span><input id="a-fecha" type="date" className="inp" max=${today()} disabled=${!algun} value=${algun ? fecha : ""} onChange=${e => setFecha(e.target.value)} />${show("fecha")}</label>
         </div>
         <label className="fld"><span>Observaciones (opcional)</span><textarea id="a-obs" className="inp" rows="2" maxLength="2000" value=${obs} onChange=${e => setObs(e.target.value)} placeholder="Ej. ingreso reciente, no estaba en la lista original"></textarea></label>
       </div>
@@ -914,7 +985,7 @@ function Respaldo({ recs, mode, readOnly, exportCsv, exportAreas, exportJson, st
     return plan.items.filter(({ id, body }) => {
       if (isExtraId(id) && !recs[id]) return true;
       const cur = recs[id] || EMPTY;
-      const same = cur.estado === body.estado && cur.fecha === body.fecha && cur.obs === body.obs && cur.enlace === body.enlace;
+      const same = cur.obs === body.obs && DOCS.every(d => cur[d.est] === body[d.est] && cur[d.fec] === body[d.fec] && cur[d.enl] === body[d.enl]);
       if (same) return false;
       if (policy === "recientes") return (body.actualizado || "") > (cur.actualizado || "");
       return true;
@@ -929,8 +1000,8 @@ function Respaldo({ recs, mode, readOnly, exportCsv, exportAreas, exportJson, st
     setBusy(null); setPlan(null);
     if (mode !== "sheets") say(fails ? "Importación con " + fails + " errores; revisa los registros." : "Respaldo importado: " + changes.length + " registros actualizados", !!fails);
   };
-  const firmadosIn = changes.filter(c => c.body.estado === "firmado").length;
-  const reverts = changes.filter(c => c.body.estado === "pendiente" && (recs[c.id] || EMPTY).estado === "firmado").length;
+  const firmadosIn = changes.reduce((n, c) => n + DOCS.filter(d => isSigned(c.body, d) && !isSigned(recs[c.id], d)).length, 0);
+  const reverts = changes.reduce((n, c) => n + DOCS.filter(d => !isSigned(c.body, d) && isSigned(recs[c.id], d)).length, 0);
   return html`
     <div className="sec-h"><div><h2>Exportar y respaldo</h2><p>Los archivos se generan con los datos vigentes al momento de exportar.</p></div></div>
     <section className="panel" style=${{marginBottom:"14px"}}>
@@ -956,11 +1027,13 @@ function Respaldo({ recs, mode, readOnly, exportCsv, exportAreas, exportJson, st
       </div>
     </section>
     <div className="cols">
-      <section className="panel"><h3>Reportes CSV</h3><p>Se abren en Excel o Google Sheets. Incluyen ID, nombre, área, cargo, estado, fecha, observaciones y enlace.</p>
+      <section className="panel"><h3>Reportes CSV</h3><p>Se abren en Excel o Google Sheets. Incluyen ID, nombre, área, cargo, y estado, fecha y enlace de cada documento.</p>
         <div className="btnlist">
           <button className="btn" onClick=${() => exportCsv("todos")}>Todos los registros <small className="num">${stat.total}</small></button>
-          <button className="btn" onClick=${() => exportCsv("pendientes")}>Solo pendientes <small className="num">${stat.p}</small></button>
-          <button className="btn" onClick=${() => exportCsv("firmados")}>Solo firmados <small className="num">${stat.f}</small></button>
+          <button className="btn" onClick=${() => exportCsv("pendientes")}>Con alguna firma pendiente <small className="num">${stat.pend}</small></button>
+          <button className="btn" onClick=${() => exportCsv("completos")}>Con ambas firmas <small className="num">${stat.comp}</small></button>
+          <button className="btn" onClick=${() => exportCsv("falta_c")}>Falta Consentimiento <small className="num">${stat.total - stat.c}</small></button>
+          <button className="btn" onClick=${() => exportCsv("falta_d")}>Falta Dirección del abogado <small className="num">${stat.total - stat.d}</small></button>
           <button className="btn" onClick=${exportAreas}>Reporte consolidado por área <small className="num">${AREAS.length} áreas</small></button>
         </div></section>
       <section className="panel"><h3>Respaldo JSON</h3>
