@@ -334,7 +334,9 @@ const isSigned = (c, d) => (c || EMPTY)[d.est] === "firmado";
    Para limitarla a ciertas áreas, cambia DIR_TODAS a false y lista las áreas en DIR_AREAS. */
 const DIR_TODAS = true;
 const DIR_AREAS = ["COMPLIANCE", "BACK OFFICE", "LITIGATION", "CALL BACKS", "CASE REVIEW", "LSU", "RFE"];
-const applies = (area, d) => d.k !== "d" || DIR_TODAS || DIR_AREAS.includes(area);
+/* Firma de las formas: NO aplica para estas áreas */
+const FORMAS_EXCLUIDAS = ["CUSTOMER SERVICE", "CALL BACKS", "COLLECTIONS", "DVS", "PMO", "WAES"];
+const applies = (area, d) => d.k === "c" ? !FORMAS_EXCLUIDAS.includes(area) : (DIR_TODAS || DIR_AREAS.includes(area));
 const reqDocs = area => DOCS.filter(d => applies(area, d));
 const nSigned = (c, area) => reqDocs(area).filter(d => isSigned(c, d)).length;
 const isComplete = (c, area) => nSigned(c, area) === reqDocs(area).length;
@@ -580,15 +582,15 @@ function App(){
 
   /* Derivados */
   const stat = useMemo(() => {
-    const mk = () => ({ total: 0, c: 0, d: 0, dReq: 0, comp: 0 });
+    const mk = () => ({ total: 0, c: 0, cReq: 0, d: 0, dReq: 0, comp: 0 });
     const byArea = {}; AREAS.forEach(a => byArea[a] = mk());
     const t = mk();
     ROSTER.forEach(r => {
       const c = recs[r.id] || EMPTY;
-      const ap = applies(r.area, DOC.d);
-      [t, byArea[r.area]].forEach(o => { o.total++; if (isSigned(c, DOC.c)) o.c++; if (ap) { o.dReq++; if (isSigned(c, DOC.d)) o.d++; } if (isComplete(c, r.area)) o.comp++; });
+      const apC = applies(r.area, DOC.c), apD = applies(r.area, DOC.d);
+      [t, byArea[r.area]].forEach(o => { o.total++; if (apC) { o.cReq++; if (isSigned(c, DOC.c)) o.c++; } if (apD) { o.dReq++; if (isSigned(c, DOC.d)) o.d++; } if (isComplete(c, r.area)) o.comp++; });
     });
-    const fin = o => { o.firmas = o.c + o.d; o.req = o.total + o.dReq; o.pc = pct(o.firmas, o.req); o.pend = o.total - o.comp; return o; };
+    const fin = o => { o.firmas = o.c + o.d; o.req = o.cReq + o.dReq; o.pc = pct(o.firmas, o.req); o.pend = o.total - o.comp; return o; };
     AREAS.forEach(a => fin(byArea[a]));
     return { ...fin(t), byArea };
   }, [recs]);
@@ -598,7 +600,7 @@ function App(){
 
   const ESTADOS = [["todos", "Todos"], ["completos", "Firmas completas"], ["pendientes", "Con alguna firma pendiente"], ["falta_c", "Falta Firma de las formas"], ["falta_d", "Falta Dirección del abogado"], ["ninguna", "Sin ninguna firma"]];
   const passEstado = (c, f, area) => f === "todos" ? true : f === "completos" ? isComplete(c, area) : f === "pendientes" ? !isComplete(c, area)
-    : f === "falta_c" ? !isSigned(c, DOC.c) : f === "falta_d" ? applies(area, DOC.d) && !isSigned(c, DOC.d) : nSigned(c, area) === 0;
+    : f === "falta_c" ? applies(area, DOC.c) && !isSigned(c, DOC.c) : f === "falta_d" ? applies(area, DOC.d) && !isSigned(c, DOC.d) : nSigned(c, area) === 0;
 
   const rows = useMemo(() => {
     const nq = norm(q).split(/\s+/).filter(Boolean);
@@ -655,7 +657,7 @@ function App(){
   };
   const exportAreas = () => {
     const out = [["Área", "Total", "Firma de las formas firmados", "Firma de las formas pendientes", "Dirección del abogado firmados", "Dirección del abogado pendientes", "Firmas completas", "Con alguna pendiente", "% cumplimiento (firmas registradas / requeridas)"]];
-    const line = (a, s) => [a, s.total, s.c, s.total - s.c, s.dReq ? s.d : "No aplica", s.dReq ? s.dReq - s.d : "No aplica", s.comp, s.pend, s.total ? fmtPct(s.pc) : "Sin colaboradores"];
+    const line = (a, s) => [a, s.total, s.cReq ? s.c : "No aplica", s.cReq ? s.cReq - s.c : "No aplica", s.dReq ? s.d : "No aplica", s.dReq ? s.dReq - s.d : "No aplica", s.comp, s.pend, s.total ? fmtPct(s.pc) : "Sin colaboradores"];
     AREAS.forEach(a => out.push(line(a, stat.byArea[a])));
     out.push(line("TOTAL", stat));
     out.push([]); out.push(["Generado", fmtTs(new Date().toISOString())]);
@@ -670,7 +672,7 @@ function App(){
   /* Pendientes por área (texto para portapapeles) */
   const pendText = useMemo(() => {
     const lines = ["PENDIENTES DE FIRMA — FIRMA DE LAS FORMAS Y DIRECCIÓN DEL ABOGADO", "The Mendoza Law Firm · corte " + fmtDate(today()),
-      "Personas con firmas pendientes: " + stat.pend + " de " + stat.total + " · Falta Firma de las formas: " + (stat.total - stat.c) + " · Falta Dirección del abogado: " + (stat.dReq - stat.d), ""];
+      "Personas con firmas pendientes: " + stat.pend + " de " + stat.total + " · Falta Firma de las formas: " + (stat.cReq - stat.c) + " · Falta Dirección del abogado: " + (stat.dReq - stat.d), ""];
     AREAS.forEach(a => {
       const l = ROSTER.filter(r => r.area === a && !isComplete(recs[r.id] || EMPTY, r.area));
       if (!l.length) return;
@@ -700,7 +702,7 @@ function App(){
 
   const TABS = [["panel", "Panel por área"], ["colab", "Colaboradores", stat.total], ["pend", "Pendientes de seguimiento", stat.pend], ["resp", "Exportar y respaldo"]];
   const docCount = d => d.k === "c" ? stat.c : stat.d;
-  const docTotal = d => d.k === "c" ? stat.total : stat.dReq;
+  const docTotal = d => d.k === "c" ? stat.cReq : stat.dReq;
 
   const DocCell = ({ r, c, d }) => { const f = isSigned(c, d); return html`<div className="dcell">
     <div className="toggle" role="group" aria-label=${d.label + " de " + r.nombre}>
@@ -716,19 +718,19 @@ function App(){
         <div>
           <div className="firm">THE MENDOZA LAW FIRM</div>
           <h1>Control de Firmas</h1>
-          <div className="docs-sub">${DIR_TODAS ? "Firma de las formas · Dirección del abogado · todas las áreas" : "Firma de las formas (todas las áreas) · Dirección del abogado (" + DIR_AREAS.length + " áreas)"}</div>
+          <div className="docs-sub">Firma de las formas (todas las áreas excepto ${FORMAS_EXCLUIDAS.length}) · Dirección del abogado (todas las áreas)</div>
         </div>
         <span className="store" role="status"><span className=${"dot " + dotCls}></span>${storeTxt}</span>
       </div>
       <div className="kpis">
         <div className="kpi"><div className="lbl">TOTAL DE COLABORADORES</div><div className="val num">${stat.total}</div><div className="sub num">${stat.comp} con firmas completas</div></div>
-        ${DOCS.map(d => html`<div key=${d.k} className="kpi g"><div className="lbl">${d.label.toUpperCase()}</div><div className="val num">${docCount(d)}</div><div className="sub num">firmados · ${docTotal(d) - docCount(d)} pendientes${d.k === "d" && !DIR_TODAS ? " de " + docTotal(d) + " que aplican" : ""}</div></div>`)}
+        ${DOCS.map(d => html`<div key=${d.k} className="kpi g"><div className="lbl">${d.label.toUpperCase()}</div><div className="val num">${docCount(d)}</div><div className="sub num">firmados · ${docTotal(d) - docCount(d)} pendientes${docTotal(d) < stat.total ? " de " + docTotal(d) + " que aplican" : ""}</div></div>`)}
         <div className="kpi"><div className="lbl">PENDIENTES DE FIRMA</div><div className="val num">${stat.pend}</div><div className="sub">personas con al menos una firma pendiente</div></div>
         <div className="kpi"><div className="lbl">PORCENTAJE DE CUMPLIMIENTO</div><div className="val num">${fmtPct(stat.pc)}</div><div className="sub num">${stat.firmas} de ${stat.req} firmas</div></div>
       </div>
       <div className="prog">
         ${DOCS.map(d => { const p = pct(docCount(d), docTotal(d)); return html`<div key=${d.k} className="prog-item">
-          <div className="prog-row"><span>${d.label}${d.k === "d" && !DIR_TODAS ? " · áreas que aplican" : ""}</span><span className="num">${docCount(d)} de ${docTotal(d)} · ${fmtPct(p)}</span></div>
+          <div className="prog-row"><span>${d.label}${docTotal(d) < stat.total ? " · áreas que aplican" : ""}</span><span className="num">${docCount(d)} de ${docTotal(d)} · ${fmtPct(p)}</span></div>
           <div className="bar" role="progressbar" aria-label=${d.label} aria-valuemin="0" aria-valuemax="100" aria-valuenow=${p}><i style=${{ width: p + "%" }}></i></div></div>`; })}
       </div>
       <nav className="tabs" role="tablist">
@@ -744,7 +746,7 @@ function App(){
     ${mode === "db" && readOnly ? html`<div className="notice warn"><span>🔒</span><div><b>Modo de solo lectura.</b> Puedes consultar y exportar, pero tu nivel de acceso no permite registrar firmas. Pide acceso de colaborador a quien administra la herramienta.</div></div>` : null}
 
     ${tab === "panel" ? html`
-      <div className="sec-h"><div><h2>Avance por área</h2><p>${DIR_TODAS ? "Cada colaborador firma Firma de las formas y Dirección del abogado." : "Firma de las formas aplica para todas las áreas; Dirección del abogado solo para " + DIR_AREAS.join(", ") + "."} Selecciona un área para ver a sus colaboradores.</p></div>${readOnly ? null : html`<button className="btn pri" onClick=${() => setAdding(true)}>+ Agregar colaborador</button>`}</div>
+      <div className="sec-h"><div><h2>Avance por área</h2><p>Dirección del abogado aplica para todas las áreas; Firma de las formas no aplica para ${FORMAS_EXCLUIDAS.join(", ")}. Selecciona un área para ver a sus colaboradores.</p></div>${readOnly ? null : html`<button className="btn pri" onClick=${() => setAdding(true)}>+ Agregar colaborador</button>`}</div>
       <div className="areas">
         ${AREAS.map(a => { const s = stat.byArea[a]; const nd = reqDocs(a).length;
           if (!s.total) return html`<div key=${a} className="acard empty-area">
@@ -763,7 +765,7 @@ function App(){
             <div className="meta num"><span><b>${s.total}</b> total</span><span><b>${s.comp}</b> completos</span><span><b>${s.pend}</b> con pendientes</span></div>
           </button>`; })}
       </div>
-      <p className="foot">Marcar un documento como "Firmado" es un registro administrativo de confirmación. No constituye una firma electrónica ni demuestra por sí solo que exista un documento firmado; los documentos deben resguardarse en el repositorio autorizado de la firma. El porcentaje de cumplimiento cuenta las firmas registradas sobre las requeridas: una por colaborador (Firma de las formas) más Dirección del abogado.</p>
+      <p className="foot">Marcar un documento como "Firmado" es un registro administrativo de confirmación. No constituye una firma electrónica ni demuestra por sí solo que exista un documento firmado; los documentos deben resguardarse en el repositorio autorizado de la firma. El porcentaje de cumplimiento cuenta las firmas registradas sobre las requeridas: Dirección del abogado para cada colaborador, más Firma de las formas en las áreas donde aplica.</p>
     ` : null}
 
     ${tab === "colab" ? html`
@@ -799,7 +801,7 @@ function App(){
     ` : null}
 
     ${tab === "pend" ? html`
-      <div className="sec-h"><div><h2>Pendientes de seguimiento</h2><p className="num">${stat.pend} colaboradores con al menos una firma pendiente · faltan ${stat.total - stat.c} de Firma de las formas y ${stat.dReq - stat.d} de Dirección del abogado.</p></div>
+      <div className="sec-h"><div><h2>Pendientes de seguimiento</h2><p className="num">${stat.pend} colaboradores con al menos una firma pendiente · faltan ${stat.cReq - stat.c} de Firma de las formas y ${stat.dReq - stat.d} de Dirección del abogado.</p></div>
         <button className="btn pri" onClick=${copyPend} disabled=${!stat.pend}>Copiar lista por área</button></div>
       ${stat.pend === 0 ? html`<div className="alldone">Todos los colaboradores tienen sus firmas registradas.</div>` : html`
       <div className="pgrid">
@@ -1057,7 +1059,7 @@ function Respaldo({ recs, mode, readOnly, exportCsv, exportAreas, exportJson, st
           <button className="btn" onClick=${() => exportCsv("todos")}>Todos los registros <small className="num">${stat.total}</small></button>
           <button className="btn" onClick=${() => exportCsv("pendientes")}>Con alguna firma pendiente <small className="num">${stat.pend}</small></button>
           <button className="btn" onClick=${() => exportCsv("completos")}>Con firmas completas <small className="num">${stat.comp}</small></button>
-          <button className="btn" onClick=${() => exportCsv("falta_c")}>Falta Firma de las formas <small className="num">${stat.total - stat.c}</small></button>
+          <button className="btn" onClick=${() => exportCsv("falta_c")}>Falta Firma de las formas <small className="num">${stat.cReq - stat.c}</small></button>
           <button className="btn" onClick=${() => exportCsv("falta_d")}>Falta Dirección del abogado <small className="num">${stat.dReq - stat.d}</small></button>
           <button className="btn" onClick=${exportAreas}>Reporte consolidado por área <small className="num">${AREAS.length} áreas</small></button>
         </div></section>
