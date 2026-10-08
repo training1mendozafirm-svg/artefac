@@ -1,0 +1,867 @@
+<title>Control de Consentimientos TMLF</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
+<style>
+/* Layout: navy masthead with a ledger of KPIs, tabbed workspace below (panel / colaboradores / pendientes / respaldo). */
+:root{
+  --navy:#14284b; --navy-2:#1d3864; --ink:#16223a; --muted:#5b6880; --line:#dbe1ea; --line-2:#c9d2df;
+  --bg:#f3f5f8; --surface:#ffffff; --surface-2:#f8f9fb; --chip:#eef2f8;
+  --green:#1f8a5b; --green-soft:#e3f3ea; --green-ink:#146a44;
+  --amber:#a8640f; --amber-soft:#fbf0dd; --red:#b23a3a; --red-soft:#f8e6e6;
+  --on-navy:#ffffff; --on-navy-muted:#b9c5da; --focus:#3d7be0;
+  --display:"Source Serif 4", Georgia, "Times New Roman", serif;
+  --sans:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --r:8px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --navy:#0e1c35; --navy-2:#16284a; --ink:#e6ebf3; --muted:#9aa7bd; --line:#2a3854; --line-2:#36466a;
+  --bg:#0b1426; --surface:#121f38; --surface-2:#172642; --chip:#1c2c4b;
+  --green:#3fbf86; --green-soft:#143829; --green-ink:#7ddcb0;
+  --amber:#e0a14a; --amber-soft:#3a2b14; --red:#e07a7a; --red-soft:#3d1d22;
+  --on-navy:#ffffff; --on-navy-muted:#9fb0cc; --focus:#6aa0f5; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --navy:#0e1c35; --navy-2:#16284a; --ink:#e6ebf3; --muted:#9aa7bd; --line:#2a3854; --line-2:#36466a;
+  --bg:#0b1426; --surface:#121f38; --surface-2:#172642; --chip:#1c2c4b;
+  --green:#3fbf86; --green-soft:#143829; --green-ink:#7ddcb0;
+  --amber:#e0a14a; --amber-soft:#3a2b14; --red:#e07a7a; --red-soft:#3d1d22;
+  --on-navy:#ffffff; --on-navy-muted:#9fb0cc; --focus:#6aa0f5; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:20px}
+@media (max-width:520px){.wrap{padding-inline:16px}}
+
+/* Masthead */
+.mast{background:var(--navy);color:var(--on-navy);padding-block:22px 0}
+.mast-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.firm{font-size:11.5px;letter-spacing:.18em;font-weight:600;color:var(--on-navy-muted)}
+.mast h1{font-family:var(--display);font-weight:700;font-size:clamp(22px,3.2vw,30px);margin:4px 0 0;letter-spacing:.01em;text-wrap:balance}
+.store{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;padding:6px 11px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:var(--on-navy)}
+.dot{width:8px;height:8px;border-radius:50%;background:#7a869c;flex:none}
+.dot.ok{background:#4fd39a}.dot.warn{background:#f0b45a}.dot.bad{background:#ff8a8a}.dot.busy{background:#8fb6ff;animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.dot.busy{animation:none}}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:20px;border-top:1px solid rgba(255,255,255,.14)}
+.kpi{padding:14px 18px 14px 0;border-right:1px solid rgba(255,255,255,.14)}
+.kpi+.kpi{padding-left:18px}.kpi:last-child{border-right:0}
+.kpi .lbl{font-size:11px;letter-spacing:.12em;font-weight:600;color:var(--on-navy-muted)}
+.kpi .val{font-family:var(--display);font-size:clamp(26px,3.6vw,36px);font-weight:700;line-height:1.1;margin-top:4px}
+.kpi.g .val{color:#6fe0ac}
+@media (max-width:720px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.kpi:nth-child(2){border-right:0}.kpi:nth-child(3){padding-left:0}.kpi:nth-child(n+3){border-top:1px solid rgba(255,255,255,.14)}}
+.prog{padding-block:4px 18px}
+.prog-row{display:flex;justify-content:space-between;font-size:12px;color:var(--on-navy-muted);margin-bottom:6px;gap:12px}
+.bar{height:10px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden}
+.bar>i{display:block;height:100%;background:#4fd39a;border-radius:999px;transition:width .4s ease}
+@media (prefers-reduced-motion:reduce){.bar>i{transition:none}}
+.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.tab{background:none;border:0;color:var(--on-navy-muted);padding:11px 16px;font-weight:600;font-size:13.5px;cursor:pointer;border-radius:8px 8px 0 0;white-space:nowrap;display:flex;gap:8px;align-items:center}
+.tab:hover{color:var(--on-navy)}
+.tab[aria-selected="true"]{background:var(--bg);color:var(--ink)}
+.tab .cnt{font-size:11.5px;background:rgba(255,255,255,.12);padding:1px 7px;border-radius:999px}
+.tab[aria-selected="true"] .cnt{background:var(--chip)}
+
+main{padding-block:22px 48px}
+.notice{display:flex;gap:10px;align-items:flex-start;font-size:13px;padding:11px 14px;border-radius:var(--r);border:1px solid var(--line);background:var(--surface);color:var(--muted);margin-bottom:18px}
+.notice b{color:var(--ink)}
+.notice.warn{background:var(--amber-soft);border-color:transparent;color:var(--ink)}
+.notice.bad{background:var(--red-soft);border-color:transparent;color:var(--ink)}
+.sec-h{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin:0 0 14px}
+.sec-h h2{font-family:var(--display);font-size:21px;margin:0;font-weight:700}
+.sec-h p{margin:2px 0 0;color:var(--muted);font-size:13px}
+
+/* Area cards */
+.areas{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.acard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:10px;transition:border-color .15s, transform .15s}
+.acard:hover{border-color:var(--navy-2);transform:translateY(-1px)}
+@media (prefers-reduced-motion:reduce){.acard{transition:none}.acard:hover{transform:none}}
+.acard .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.acard .nm{font-weight:700;letter-spacing:.04em;font-size:13px}
+.acard .pc{font-family:var(--display);font-weight:700;font-size:22px}
+.acard.done .pc{color:var(--green)}
+.mbar{height:6px;background:var(--chip);border-radius:999px;overflow:hidden}
+.mbar>i{display:block;height:100%;background:var(--green);border-radius:999px;transition:width .4s}
+.acard .meta{display:flex;gap:14px;font-size:12px;color:var(--muted)}
+.acard .meta b{color:var(--ink);font-weight:600}
+.acard .go{font-size:12px;color:var(--muted)}
+
+/* Controls */
+.filters{display:grid;grid-template-columns:minmax(0,2fr) repeat(2,minmax(0,1fr)) auto auto;gap:10px;align-items:end;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px;margin-bottom:12px}
+@media (max-width:900px){.filters{grid-template-columns:1fr 1fr}.filters .search{grid-column:1/-1}}
+@media (max-width:480px){.filters{grid-template-columns:1fr}}
+.fld{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fld>span{font-size:11px;letter-spacing:.08em;font-weight:600;color:var(--muted);text-transform:uppercase}
+.inp,.sel,textarea.inp{width:100%;border:1px solid var(--line-2);background:var(--surface);border-radius:6px;padding:8px 10px;min-height:36px}
+.sel{appearance:auto}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:6px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:none;padding:7px 12px;cursor:pointer;font-size:13px;white-space:nowrap}
+.seg button+button{border-left:1px solid var(--line-2)}
+.seg button[aria-pressed="true"]{background:var(--navy-2);color:#fff}
+.btn{border:1px solid var(--line-2);background:var(--surface);border-radius:6px;padding:8px 13px;cursor:pointer;font-weight:500;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;min-height:36px}
+.btn:hover{border-color:var(--navy-2)}
+.btn.pri{background:var(--navy-2);border-color:var(--navy-2);color:#fff}
+.btn.pri:hover{filter:brightness(1.12)}
+.btn.ok{background:var(--green);border-color:var(--green);color:#fff}
+.btn.danger{background:var(--red);border-color:var(--red);color:#fff}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.sm{padding:5px 10px;min-height:30px;font-size:12.5px}
+.resline{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin:4px 2px 10px}
+.chipf{display:inline-flex;gap:6px;align-items:center;background:var(--chip);color:var(--ink);border-radius:999px;padding:3px 10px;font-size:12px;margin-left:6px}
+
+/* Table */
+.tbox{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:900px}
+th{position:sticky;top:0;background:var(--surface-2);text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:0;border-bottom:1px solid var(--line);white-space:nowrap}
+th .sort{background:none;border:0;padding:10px 12px;cursor:pointer;font:inherit;color:inherit;letter-spacing:inherit;text-transform:inherit;display:flex;gap:5px;align-items:center;width:100%}
+th .plain{display:block;padding:10px 12px}
+th .sort:hover{color:var(--ink)}
+td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:var(--surface-2)}
+tr.signed td:first-child{box-shadow:inset 3px 0 0 var(--green)}
+.nmbtn{background:none;border:0;padding:0;text-align:left;cursor:pointer;font-weight:600;color:var(--ink)}
+.nmbtn:hover{text-decoration:underline}
+.idt{font-family:var(--mono);font-size:11px;color:var(--muted);display:block;margin-top:1px}
+.area-tag{font-size:11.5px;font-weight:600;letter-spacing:.04em;background:var(--chip);padding:2px 8px;border-radius:4px;white-space:nowrap}
+.cargo{font-size:12.5px;color:var(--muted);max-width:230px}
+.obs{font-size:12.5px;color:var(--muted);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.toggle{display:inline-flex;border:1px solid var(--line-2);border-radius:999px;padding:2px;background:var(--surface-2);gap:2px}
+.toggle button{border:0;background:none;border-radius:999px;padding:4px 10px;font-size:12px;cursor:pointer;color:var(--muted);white-space:nowrap;font-weight:500}
+.toggle button.on.p{background:var(--amber-soft);color:var(--amber);font-weight:600}
+.toggle button.on.f{background:var(--green);color:#fff;font-weight:600}
+.toggle button:disabled{cursor:not-allowed}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.pill.f{background:var(--green-soft);color:var(--green-ink)}
+.pill.p{background:var(--amber-soft);color:var(--amber)}
+.empty{padding:40px 16px;text-align:center;color:var(--muted)}
+.muted{color:var(--muted)}
+
+/* Pendientes */
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;align-items:start}
+.pgroup{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.pgroup h3{margin:0;padding:10px 14px;font-size:13px;letter-spacing:.05em;display:flex;justify-content:space-between;background:var(--surface-2);border-bottom:1px solid var(--line)}
+.pgroup ul{list-style:none;margin:0;padding:4px 0}
+.pgroup li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 14px}
+.pgroup li .who{min-width:0}
+.pgroup li .who b{display:block;font-weight:600;font-size:13px}
+.pgroup li .who span{font-size:12px;color:var(--muted)}
+.alldone{background:var(--green-soft);color:var(--green-ink);border-radius:var(--r);padding:28px;text-align:center;font-weight:600}
+
+/* Export panel */
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.panel h3{margin:0;font-size:15px}
+.panel p{margin:0;color:var(--muted);font-size:13px;max-width:65ch}
+.btnlist{display:flex;flex-direction:column;gap:8px}
+.btnlist .btn{justify-content:space-between}
+.btnlist .btn small{color:var(--muted);font-weight:400}
+.btn.pri small{color:#d5def0}
+.imp-sum{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 14px;font-size:13px;background:var(--surface-2);border-radius:6px;padding:10px 12px}
+.imp-sum b{font-family:var(--mono)}
+
+/* Modal */
+.scrim{position:fixed;inset:0;background:rgba(8,15,30,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+.modal{background:var(--surface);border-radius:10px;width:min(620px,100%);max-height:calc(100% - 16px);overflow:auto;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.modal.sm{width:min(440px,100%)}
+.mhead{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.mhead h3{margin:0;font-family:var(--display);font-size:19px}
+.mbody{padding:16px 20px;display:flex;flex-direction:column;gap:14px}
+.mfoot{padding:12px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;background:var(--surface-2)}
+.x{background:none;border:0;font-size:22px;line-height:1;cursor:pointer;color:var(--muted);padding:2px 6px}
+.ro{display:grid;grid-template-columns:110px minmax(0,1fr);gap:6px 12px;font-size:13.5px;background:var(--surface-2);border-radius:6px;padding:12px 14px}
+.ro dt{color:var(--muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;padding-top:2px}
+.ro dd{margin:0;font-weight:500}
+.lock{font-size:11.5px;color:var(--muted)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:480px){.two{grid-template-columns:1fr}}
+.hint{font-size:12px;color:var(--muted)}
+.err{font-size:12px;color:var(--red)}
+.hist{list-style:none;margin:0;padding:0;font-size:12.5px;border-left:2px solid var(--line);display:flex;flex-direction:column;gap:6px}
+.hist li{padding-left:12px;position:relative}
+.hist li::before{content:"";position:absolute;left:-5px;top:6px;width:8px;height:8px;border-radius:50%;background:var(--line-2)}
+.hist li.f::before{background:var(--green)}
+.hist time{color:var(--muted);font-family:var(--mono);font-size:11.5px}
+.legal{font-size:12px;color:var(--muted);border-top:1px dashed var(--line-2);padding-top:10px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:13.5px;z-index:60;max-width:calc(100% - 32px);box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.toast.bad{background:var(--red);color:#fff}
+pre.copybox{white-space:pre-wrap;font-family:var(--mono);font-size:12px;background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:10px;max-height:320px;overflow:auto;margin:0}
+.foot{font-size:12px;color:var(--muted);margin-top:28px;padding-top:14px;border-top:1px solid var(--line);max-width:80ch}
+</style>
+
+<div id="root"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/htm@3.1.1/dist/htm.umd.js"></script>
+<script>
+const ROSTER_RAW = [["PACKETS", "PACKETS MANAGER", "JUAN CARLOS SANDOVAL VILLA"], ["PACKETS", "PACKETS COORDINATOR", "VICTOR MANUEL MENDOZA MEDINA"], ["PACKETS", "PARALEGAL PR ATTY SAQUIA", "CLARISA MENDIETA AHUMADA"], ["PACKETS", "CASE REVIEW / ATTY REVIEW TL", "CHRISTIAN PEREZ QUIJADA"], ["PACKETS", "PARALEGAL", "MICHEL DANIELA FLORES TORRES"], ["PACKETS", "PARALEGAL", "AKETZALI MARGARITA GONZALEZ LOPEZ"], ["PACKETS", "PARALEGAL", "ZAIRA YAMILE TIRADO PLIEGO"], ["PACKETS", "PARALEGAL", "GABRIELA HERNANDEZ GARCIA"], ["PACKETS", "PARALEGAL", "LIZETH ESTELA IBAÑEZ LOZADA"], ["PACKETS", "PARALEGAL", "STEPHANIE GIOVANNA ORDUÑA CHAVEZ"], ["PACKETS", "PARALEGAL", "XIMENA QUIROZ GONZALEZ"], ["PACKETS", "PARALEGAL", "FATIMA MONSERRATH PUNARO PARRA"], ["PACKETS", "PARALEGAL", "SUSANA DENNISSE PEDRAZA CANO"], ["PACKETS", "PARALEGAL", "PAULINA ORTIZ GONZALEZ"], ["PACKETS", "PARALEGAL", "MARIA XARENY MENDEZ RUIZ"], ["PACKETS", "PARALEGAL", "ANAHI MONTIEL ARCOS"], ["PACKETS", "PARALEGAL", "ALBERTO LOZADA GONZALEZ"], ["PACKETS", "FINAL REVIEW / ATTY REVIEW TL", "FRIDA LISSETE ALTAMIRANO CAPILLA"], ["PACKETS", "PARALEGAL FINAL ATTY REVIEW", "MIGUEL ANGEL AGUILAR GUERRERO"], ["PACKETS", "PARALEGAL FINAL ATTY REVIEW", "RODRIGO IGNACIO PEREZ RAMIREZ"], ["PACKETS", "PARALEGAL FINAL ATTY REVIEW", "ARTURO CARO CAMPUZANO"], ["PACKETS", "PARALEGAL FINAL ATTY REVIEW", "AMANDA MEGAN RANGEL RESENDIZ"], ["PACKETS", "LEA COOPERATION TL", "KEVIN EMMANUEL MIRANDA PEREZ"], ["PACKETS", "PARALEGAL REMOVALS", "ANGEL DANARIEL CURIEL ARRIAGA"], ["PACKETS", "PARALEGAL REMOVALS", "DIANA GABRIELA HERNANDEZ ARCE"], ["PACKETS", "INCOMMING MAIL RECEIPTS SPECIALIST", "LUZ IVANNIA SALGADO MENDOZA"], ["PACKETS", "PARALEGAL - FBI/PD", "MARCOS GABRIEL NARVAEZ LOPEZ"], ["PACKETS", "PARALEGAL LEA", "FRIDA CAMILA CARRASCO REVUELTAS"], ["PACKETS", "PARALEGAL CASE REVIEW 485 INTERVIEWS", "MEGAL LEON OLVERA"], ["CASE REVIEW", "CASE REVIEW PARALEGAL", "FRANCIS MILENA PACHECO CORREA"], ["CASE REVIEW", "CASE REVIEW PARALEGAL", "DANIEL REYNA CRUZ"], ["CASE REVIEW", "CASE REVIEW PARALEGAL", "VALENTINA ZEPEDA GARCIA"], ["CASE REVIEW", "PARALEGAL CASE REVIEW 485 INTERVIEWS", "CLAUDIA RIVERA ROCHA"], ["PCR", "FU - ENSAMBLE TL", "JUAN MANUEL DELGADO DE LUNA"], ["PCR", "FU - PRE CASE REVIEWER", "LIZBETH PEREA GONZALEZ"], ["PCR", "FU - PRE CASE REVIEWER", "NAOMI RODRIGUEZ NAVA"], ["PCR", "FU - PRE CASE REVIEWER", "ANGELA PAOLA SALGADO MARTINEZ"], ["PCR", "FU - PRE CASE REVIEWER", "MARISOL PALMA SANCHEZ"], ["PCR", "FU - PRE CASE REVIEWER", "URSULA ESTEFANY BERNAL CHAVEZ"], ["PCR", "FU - PRE CASE REVIEWER", "ELIAS DANIEL DELGADO DE LUNA"], ["PCR", "FU - PRE CASE REVIEWER", "HUGO ISAAC CERQUEDA VAZQUEZ"], ["PCR", "FU - PRE CASE REVIEWER", "SERGIO ALEXIS GOMEZ ESPINOSA"], ["PCR", "FU - PRE CASE REVIEWER", "KARINA ISABEL CORRALES PONCE"], ["PWI", "PWI MANAGER", "RAUL ESCALANTE LOPEZ"], ["PWI", "PWI COORDINATOR", "ALICIA SORIA REYES"], ["PWI", "PWI  TL", "TATIANA ITZEL JAIMES AGUIRRE"], ["PWI", "PWI AGENT", "VERONICA ALEXANDRA AVILA LOPEZ"], ["PWI", "PWI AGENT", "CRISTIAN RENE ARREOLA GARCIA"], ["PWI", "PWI AGENT", "ALONDRA LIZETH HUERTA VAZQUEZ"], ["PWI", "PWI AGENT", "DIVIA HUERTA TEODOSIO"], ["PSYCH", "PWI AGENT", "MARTIN MARTINEZ LUNA"], ["PSYCH", "PWI AGENT", "NANCY GABRIELA SOLANO ANGUIANO"], ["PSYCH", "PWI AGENT", "LIZETH ANAHI LEYVA JACOME"], ["PSYCH", "PWI  TL", "JOSE FRANCISCO DIAZ CASTAÑEDA"], ["PWI", "PWI AGENT", "RODRIGO MONROY ZAVALA"], ["PWI", "PWI AGENT", "GUSTAVO DIEGO CAMPOS MARTINEZ"], ["PWI", "PWI AGENT", "KENIA DHAMAR BECERRA PARRA"], ["PWI", "PWI AGENT", "ANGEL VENTURA YAÑEZ"], ["PWI", "PWI AGENT", "GUILLERMO ALBERTO RAMIREZ ROMERO"], ["PWI", "PWI AGENT", "ANGEL ALBERTO MURILLO MEZA"], ["PWI", "PWI AGENT", "FERNANDO DAVID FIERRO DURAN"], ["PSYCH", "PWI  TL", "ALMA ERENDIRA DURAN RIVERA"], ["PSYCH", "PWI AGENT", "NORMA ANGELICA ZAVALA DAVILA"], ["PSYCH", "PWI AGENT", "DIEGO MARTINEZ HIDALGO"], ["PSYCH", "PWI AGENT", "SAMANTHA FONSECA SALAZAR"], ["PSYCH", "PWI AGENT", "KARLA ANGELICA CARDENAS REYES"], ["PSYCH", "PWI AGENT", "SUSLAY YACARANDAY CASTILLO MENDOZA"], ["PSYCH", "PWI AGENT", "ARELY BERENICE RIVERA PALACIOS"], ["PSYCH", "PWI  TL COMPLEX", "DANNEVI GARCIA HERNANDEZ"], ["PSYCH", "PWI AGENT", "LUIS ENRIQUE RICO CASTAÑEDA"], ["PSYCH", "PWI AGENT", "CARLOS ALBERTO CORTES ARELLANO"], ["PSYCH", "PWI AGENT", "DULCE AMAIRANI MARTINEZ BAUTISTA"], ["PSYCH", "PWI AGENT", "ROBERTO SEGURA CONTRERAS"], ["PSYCH", "PWI AGENT", "JENY MACEDO LOPEZ"], ["PSYCH", "PWI AGENT", "CINTYA JOSELYN LOPEZ VILLANUEVA"], ["PSYCH", "PWI AGENT", "DIANA VIDAL HERNANDEZ"], ["PSYCH", "PWI AGENT", "CAROLINA ELIZABETH HERNANDEZ POUPARD"], ["PWI", "PRE WELCOME CALL COORDINATOR JR", "RENATA RAMIREZ FLORES"], ["PCR", "RAPSHEETS TL", "JONATHAN SAUL MIGUEL ROMERO"], ["PCR", "PCR AGENT", "GREGG DALADIER LLUCK CHAVEZ"], ["PCR", "PCR AGENT", "SABDIEL CASTAÑEDA REZA"], ["PCR", "PCR AGENT", "VERONICA DIAZ RICO"], ["PCR", "PCR AGENT", "MIGUEL ANGEL ZAPATA CASTREJON"], ["PCR", "PCR AGENT", "REBECA ITZEL MARTINEZ SANTOS"], ["PCR", "PCR AGENT", "LEONEL LUNA NICOLAS"], ["PCR", "PCR AGENT", "ANDRE ARMENTA GUTIERREZ"], ["FU", "PCR  TL", "GIOVANA LIZETE AYALA GONZALEZ"], ["FU", "PCR AGENT", "EILEEN NAYELLI RAMIREZ DOMINGUEZ"], ["FU", "PCR AGENT", "ANA LIZBETH FIERRO DURAN"], ["FU", "PCR AGENT", "VALERIA BENITEZ MONROY"], ["FU", "PCR AGENT", "ANA KAREN MARTINEZ RUIZ"], ["FU", "PCR AGENT", "NALLELY ALCANTARA MARTINEZ"], ["FU", "PCR AGENT", "DIEGO ALBERTO VAZQUEZ REYES"], ["FU", "PCR AGENT", "WENDY AYLIN VALDOVINOS GONZALEZ"], ["FU", "PCR AGENT", "RAQUEL ANGELINA VALDEZ LARIOS"], ["RFE", "LEGAL INTELLIGENCE AND RFE MANAGER", "BRENDA CASTELLANOS GARCIA"], ["RFE", "RFE COORDINATOR", "VALERIA DAFNE PEREZ CUEVAS"], ["RFE", "PARALEGAL - RFE / DANIEL PATIÑO", "GALILEA DIAZ PIÑON"], ["RFE", "CASE STRATEGIST", "CONSUELO GARCIA GARCIA"], ["RFE", "CASE STRATEGIST", "AGUSTIN NAVA GARCIA"], ["RFE", "PARALEGAL - ATTY ANNA", "DIANA PAULINA GUTIERREZ VELAZQUEZ"], ["RFE", "TL GAMMA", "ANGEL FERNANDO PEREZ NEGRETE"], ["RFE", "PARALEGAL - RFE", "DIANA BONIFACIO DE LA PALMA"], ["RFE", "PARALEGAL - RFE", "PAULINA DEL CARMEN PONCE RODRIGUEZ"], ["RFE", "PARALEGAL - RFE", "BRANDON OSWALDO CERVANTES GARCIA"], ["RFE", "INVESTIGADOR DE ABUSO", "SUSANA ESQUIVEL ALVARADO"], ["RFE", "INVESTIGADOR DE ABUSO", "LUIS FERNANDO MURILLO NARES"], ["RFE", "INVESTIGADOR DE ABUSO", "BARBARA FERNANDA TAPIA INFANTE"], ["RFE", "EVIDENCE ANALYST RFE", "JESUS ALONSO BOCANEGRA VEGA"], ["RFE", "EVIDENCE ANALYST RFE", "PAULA SOFIA BAUTISTA SALAS"], ["RFE", "TL ALPHA", "NAYELI RIOJA PADILLA"], ["RFE", "INVESTIGADOR DE ABUSO", "FERNANDA VALERIA VALS HERNANDEZ"], ["RFE", "INVESTIGADOR DE ABUSO", "ALBERTO DAVID RAMIREZ DIAZ"], ["RFE", "INVESTIGADOR DE ABUSO", "NATALIA MOLINA AYALA"], ["RFE", "PARALEGAL - RFE", "MAYLA NAHOMY PONCE RODRIGUEZ"], ["RFE", "PARALEGAL - RFE", "CARLOS ARTURO MONTOYA CASTILLO"], ["RFE", "PARALEGAL - RFE", "EVELYN JAZMIN LARA MARTINEZ"], ["RFE", "PARALEGAL - RFE", "PAOLA PEREZ YEPEZ"], ["RFE", "EVIDENCE ANALYST RFE", "ANDRES ALONSO RAMIREZ CASAS"], ["RFE", "EVIDENCE ANALYST RFE", "ALEJANDRO ERNESTO GONZALEZ GONZALEZ"], ["RFE", "EVIDENCE ANALYST RFE", "HECTOR JESUS GUTIERREZ CRUZ"], ["RFE", "EVIDENCE ANALYST RFE", "LESLY GABRIELA CAMARGO AGUILAR"], ["RFE", "GOVERNMENT BRANCH  & SPECIAL REPORTS TL", "GERSON YOAV SANCHEZ BERNAL"], ["RFE", "GOVERNMENT BRANCH SUPERVISOR", "JACOB NAVARRETE SANCHEZ"], ["RFE", "PARALEGAL - RFE", "ITZEL CALZADA PEREZ"], ["RFE", "PARALEGAL - RFE", "RENATA SANDOVAL MONTES DE OCA"], ["RFE", "PARALEGAL - RFE", "ARMANDO URIEL MAGAÑA ACEVEDO"], ["RFE", "PARALEGAL - RFE", "ERIK OMAR VAZQUEZ MARCIAL"], ["RFE", "PARALEGAL - RFE", "VIVIANA NYSSEN PEDROZA"], ["RFE", "PARALEGAL - RFE", "MARTHA YARETH CASTRO ROMERO"], ["RFE", "PARALEGAL - RFE", "VIATOR FLORES CABALLERO"], ["RFE", "EVIDENCE ANALYST RFE", "SCARLET REYES LAGUNES"], ["RFE", "SPECIAL REPORTS & TRANSLATIONS SUPERVISOR", "CAROLINA GARCIA MARTINEZ"], ["RFE", "PARALEGAL - RFE", "LUIS ENRIQUE LOPEZ OJEDA"], ["REJECTIONS", "SPECIAL PROCESS TL", "JOSE ROBERTO MALIACHI PUIG"], ["REJECTIONS", "LEGAL STRATEGY ATTORNEY", "DANIELA ROSANA URUETA GONZALEZ"], ["REJECTIONS", "EVIDENCE ANALYST RFE", "RAFAEL VARGAS LANDEROS"], ["REJECTIONS", "PARALEGAL REJECTIONS", "LUCIO JOAQUIN GUTIERREZ URBINA"], ["REJECTIONS", "PARALEGAL - WAIVERS / 245i", "LETICIA ESPERILLA RAMOS"], ["RFE", "PARALEGAL - RFE", "ALEJANDRO ANTONIO RIOS QUINTANA"], ["RFE", "PARALEGAL - RFE", "DIANA LIZBETH HERRERA BARRERA"], ["RFE", "PARALEGAL - RFE", "LUCIA MICHELLE CORZAS CORONA"], ["RFE", "INVESTIGADOR DE ABUSO", "KARLA JUDITH VIGIL ASTUDILLO"], ["RFE", "INVESTIGADOR DE ABUSO", "MARIA FERNANDA LOPEZ SERRATOS"], ["LITIGATION", "LITIGATION SUPERVISOR", "PAULA KARIME GARCIA ROMO"], ["LITIGATION", "LITIGATION SPECIALIST", "BARBARA DANIELA VANEGAS LASCANO"], ["LITIGATION", "LITIGATION SPECIALIST III", "ANDREA ROMERO CASTRO"], ["LITIGATION", "LITIGATION AGENT I", "ERICK ISLAS GUERRERO"], ["LITIGATION", "LITIGATION AGENT I", "MARIO ALONSO PEREZ ELIZALDE"], ["LITIGATION", "LITIGATION AGENT I", "GALA MARIANA JIMENEZ MENDOZA"], ["LITIGATION", "LITIGATION AGENT I", "FERNANDA ABIGAIL SANCHEZ VILLEGAS"], ["BACK OFFICE", "BACK OFFICE SUPERVISOR", "MARIA ELISA URBAN GARCIA"], ["BACK OFFICE", "BACK OFFICE SPECIALIST I", "CRISTOPHER ZEPEDA MENDOZA"], ["BACK OFFICE", "BACK OFFICE SPECIALIST I", "JORGE TORRES ARIZMENDI"], ["BACK OFFICE", "BACK OFFICE SPECIALIST I", "JULIETA RAMIREZ SANCHEZ"], ["BACK OFFICE", "BACK OFFICE AGENT", "BRENDA PIÑA BECERRIL"], ["BACK OFFICE", "BACK OFFICE AGENT", "ALEJANDRA DEL CONSUELO NIETO GARCIA"], ["BACK OFFICE", "BACK OFFICE AGENT", "JOSUE MOSHE HERNANDEZ RAMIREZ"], ["BACK OFFICE", "BACK OFFICE AGENT", "LLUVIA TORRES GOMEZ"], ["BACK OFFICE", "BACK OFFICE AGENT", "FATIMA SOFIA BUENROSTRO CARDOSO"]];
+</script>
+<script>
+(function(){
+const { useState, useEffect, useMemo, useRef, useCallback } = React;
+const html = htm.bind(React.createElement);
+
+/* ---------- Base de colaboradores (archivo original, sin cambios) ---------- */
+const ROSTER = ROSTER_RAW.map((r, i) => ({ id: "C" + String(i + 1).padStart(3, "0"), area: r[0], cargo: r[1], nombre: r[2] }));
+const BY_ID = Object.fromEntries(ROSTER.map(r => [r.id, r]));
+const AREAS = [...new Set(ROSTER.map(r => r.area))];
+const APP = "tmlf-consentimientos";
+const LS_KEY = "tmlf-consentimientos-v1";
+const HIST_MAX = 40;
+
+/* ---------- Conexión con Google Sheets (Apps Script) ----------
+   Pega aquí la URL /exec de tu implementación para que quede fija para todos.
+   También se puede configurar desde la pestaña "Exportar y respaldo". */
+const SHEETS_URL_DEFAULT = "https://script.google.com/macros/s/AKfycbwmWDK7YK50l8bhaKaqjuYrus5fgxgYbjsuCXlPkM4RwYP9kcM6br0wHhMWl0hJUSjMfQ/exec";
+const SHEETS_TOKEN_DEFAULT = "";
+const CFG_KEY = "tmlf-consentimientos-sheets";
+function loadCfg(){
+  try { const c = JSON.parse(localStorage.getItem(CFG_KEY) || "null"); if (c && typeof c.url === "string") return c; } catch (e) {}
+  return { url: SHEETS_URL_DEFAULT, token: SHEETS_TOKEN_DEFAULT };
+}
+function storeCfg(c){ try { localStorage.setItem(CFG_KEY, JSON.stringify(c)); return true; } catch (e) { return false; } }
+async function sheetsGet(cfg){
+  const u = cfg.url + (cfg.url.includes("?") ? "&" : "?") + "action=list&token=" + encodeURIComponent(cfg.token || "") + "&_=" + Date.now();
+  const r = await fetch(u, { method: "GET", redirect: "follow" });
+  const j = await r.json();
+  if (!j.ok) throw new Error(j.error === "unauthorized" ? "Clave (TOKEN) incorrecta" : (j.error || "Respuesta inválida"));
+  return j;
+}
+async function sheetsUpsert(cfg, records, origen){
+  const r = await fetch(cfg.url, { method: "POST", redirect: "follow", headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({ action: "upsert", token: cfg.token || "", origen: origen || "web", records }) });
+  const j = await r.json();
+  if (!j.ok) throw new Error(j.error === "unauthorized" ? "Clave (TOKEN) incorrecta" : (j.error || "Respuesta inválida"));
+  return j;
+}
+const withRoster = (id, body) => ({ id, nombre: BY_ID[id].nombre, area: BY_ID[id].area, cargo: BY_ID[id].cargo, ...body });
+function readLocalCache(){
+  try { const o = JSON.parse(localStorage.getItem(LS_KEY) || "{}"); const out = {}; for (const k in o) if (BY_ID[k]) out[k] = clean(o[k]); return out; } catch (e) { return {}; }
+}
+
+/* ---------- Utilidades ---------- */
+const pad = n => String(n).padStart(2, "0");
+const today = () => { const d = new Date(); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); };
+const fmtDate = s => { if (!s) return ""; const [y, m, d] = s.split("-"); return d + "/" + m + "/" + y; };
+const fmtTs = s => { if (!s) return ""; const d = new Date(s); if (isNaN(d)) return s; return pad(d.getDate()) + "/" + pad(d.getMonth() + 1) + "/" + d.getFullYear() + " " + pad(d.getHours()) + ":" + pad(d.getMinutes()); };
+const norm = s => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+const pct = (a, b) => b ? Math.round((a / b) * 1000) / 10 : 0;
+const fmtPct = n => (Number.isInteger(n) ? n : n.toFixed(1)) + "%";
+const isUrl = s => !s || /^https?:\/\/\S+$/i.test(s.trim());
+const clean = body => ({
+  estado: body.estado === "firmado" ? "firmado" : "pendiente",
+  fecha: typeof body.fecha === "string" ? body.fecha.slice(0, 10) : "",
+  obs: typeof body.obs === "string" ? body.obs.slice(0, 2000) : "",
+  enlace: typeof body.enlace === "string" ? body.enlace.slice(0, 1000) : "",
+  historial: Array.isArray(body.historial) ? body.historial.slice(-HIST_MAX).map(h => ({ ts: String(h.ts || ""), accion: String(h.accion || ""), fecha: String(h.fecha || ""), por: h.por ? String(h.por) : null })) : [],
+  actualizado: typeof body.actualizado === "string" ? body.actualizado : ""
+});
+const EMPTY = { estado: "pendiente", fecha: "", obs: "", enlace: "", historial: [], actualizado: "" };
+
+function csvCell(v){ const s = v == null ? "" : String(v); return /[",\n\r;]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
+function toCsv(rows){ return "﻿" + rows.map(r => r.map(csvCell).join(",")).join("\r\n"); }
+
+async function copyText(text){
+  try { await navigator.clipboard.writeText(text); return true; } catch (e) { return false; }
+}
+
+/* ---------- App ---------- */
+function App(){
+  const [recs, setRecs] = useState({});           // id -> consent body
+  const [mode, setMode] = useState("loading");     // loading | db | local | memory
+  const [readOnly, setReadOnly] = useState(false);
+  const [pending, setPending] = useState(0);
+  const [lastSave, setLastSave] = useState(null);
+  const [tab, setTab] = useState("panel");
+  const [q, setQ] = useState("");
+  const [fArea, setFArea] = useState("");
+  const [fCargo, setFCargo] = useState("");
+  const [fEstado, setFEstado] = useState("todos");
+  const [sort, setSort] = useState({ key: "nombre", dir: 1 });
+  const [openId, setOpenId] = useState(null);
+  const [confirm, setConfirm] = useState(null);
+  const [toast, setToast] = useState(null);
+  const [copyFallback, setCopyFallback] = useState(null);
+  const [names, setNames] = useState({});
+  const [cfg, setCfg] = useState(loadCfg);
+  const [sheetErr, setSheetErr] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
+  const dbRef = useRef(null), userRef = useRef(null), dlRef = useRef(null), meRef = useRef(null);
+  const chains = useRef({});
+  const localRef = useRef({});
+  const recsRef = useRef(recs); recsRef.current = recs;
+
+  const say = useCallback((msg, bad) => { setToast({ msg, bad, k: Date.now() }); }, []);
+  useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(null), toast.bad ? 6000 : 3200); return () => clearTimeout(t); }, [toast]);
+
+  /* Persistencia: db compartida → localStorage → memoria */
+  useEffect(() => {
+    let unsub = null, cancelled = false;
+    const loadLocal = () => {
+      try {
+        const raw = localStorage.getItem(LS_KEY);
+        const obj = raw ? JSON.parse(raw) : {};
+        const out = {}; for (const k in obj) if (BY_ID[k]) out[k] = clean(obj[k]);
+        localRef.current = { ...out }; setRecs(out); setMode("local");
+      } catch (e) { setMode("memory"); }
+    };
+    (async () => {
+      if (cfg.url) {
+        try {
+          const j = await sheetsGet(cfg);
+          if (cancelled) return;
+          const out = {};
+          (j.records || []).forEach(x => { if (BY_ID[x.id]) out[x.id] = clean(x); });
+          setRecs(out); setMode("sheets"); setSheetErr(""); setLastSave(null);
+          // Registros capturados en este navegador más recientes que la hoja
+          const cache = readLocalCache();
+          const newer = Object.keys(cache).filter(id => (cache[id].actualizado || "") > ((out[id] || EMPTY).actualizado || ""));
+          if (newer.length) setConfirm({
+            title: "Registros de este navegador sin subir",
+            msg: html`<p style=${{margin:0}}>Hay <b>${newer.length}</b> registros guardados en este navegador que son más recientes que los de la hoja (${newer.filter(id => cache[id].estado === "firmado").length} con firma). ¿Quieres enviarlos a Google Sheets?</p>`,
+            label: "Enviar " + newer.length + " registros",
+            onOk: () => pushRef.current(newer.map(id => ({ id, body: cache[id] })), "navegador")
+          });
+          return;
+        } catch (e) {
+          if (cancelled) return;
+          setSheetErr(String(e && e.message || e));
+          loadLocal(); return;
+        }
+      }
+      const c = window.claude;
+      if (!c || typeof c.use !== "function") { loadLocal(); return; }
+      let db = null;
+      try { db = await c.use("db"); } catch (e) { db = null; }
+      if (cancelled) return;
+      if (!db) { loadLocal(); return; }
+      dbRef.current = db;
+      try {
+        const u = await c.use("user"); userRef.current = u;
+        if (u) {
+          meRef.current = await u.id();
+          const can = await u.can("data.write");
+          if (can === false) setReadOnly(true);
+        }
+      } catch (e) {}
+      c.use("downloads").then(d => { dlRef.current = d; }).catch(() => {});
+      unsub = db.collection("consents").limit(1000).onSnapshot(snap => {
+        const out = {};
+        snap.docs.forEach(d => { if (BY_ID[d.id] && d.exists) out[d.id] = clean(d.data() || {}); });
+        setRecs(out); setMode("db");
+      }, err => { say("Se perdió la conexión con el almacenamiento compartido. Recarga la página.", true); });
+    })();
+    if (window.claude && window.claude.use) window.claude.use("downloads").then(d => { dlRef.current = d; }).catch(() => {});
+    return () => { cancelled = true; if (unsub) unsub(); };
+  }, [cfg.url, cfg.token, reloadKey]);
+
+  /* Al volver a la pestaña, traer cambios de otras personas */
+  useEffect(() => {
+    if (mode !== "sheets") return;
+    let last = Date.now();
+    const onFocus = () => { if (Date.now() - last < 20000 || pending > 0) return; last = Date.now();
+      sheetsGet(cfgRef.current).then(j => { const out = {}; (j.records || []).forEach(x => { if (BY_ID[x.id]) out[x.id] = clean(x); }); setRecs(out); }).catch(() => {}); };
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [mode, pending]);
+
+  /* Nombres de quién hizo cada cambio (sólo ids guardados) */
+  useEffect(() => {
+    const u = userRef.current; if (!u || !openId) return;
+    const ids = [...new Set((recs[openId]?.historial || []).map(h => h.por).filter(Boolean))];
+    if (!ids.length) return;
+    u.profiles(ids).then(ps => { const m = {}; ids.forEach(id => { m[id] = (ps && ps[id] && ps[id].name) || ""; }); setNames(n => ({ ...n, ...m })); }).catch(() => {});
+  }, [openId, recs]);
+
+  /* Guardado de un registro (serializado por documento) */
+  const cfgRef = useRef(cfg); cfgRef.current = cfg;
+  const pushRef = useRef(null);
+  const writeRec = useCallback((id, body) => {
+    setRecs(r => ({ ...r, [id]: body }));
+    if (mode === "sheets") {
+      setPending(p => p + 1);
+      const prev = chains.current[id] || Promise.resolve();
+      const run = prev.then(() => sheetsUpsert(cfgRef.current, [withRoster(id, body)], "web"))
+        .then(j => {
+          if (j.skipped && j.skipped.length) { say("Alguien más actualizó a " + BY_ID[id].nombre + " antes. Se recargaron los datos de la hoja.", true); setReloadKey(k => k + 1); return false; }
+          setLastSave(new Date()); return true;
+        })
+        .catch(e => { say("No se pudo guardar en Google Sheets (" + BY_ID[id].nombre + "): " + (e && e.message || e) + ". Revisa la conexión e inténtalo de nuevo.", true); return false; })
+        .finally(() => setPending(p => p - 1));
+      chains.current[id] = run;
+      return run;
+    }
+    if (mode === "db" && dbRef.current) {
+      setPending(p => p + 1);
+      const prev = chains.current[id] || Promise.resolve();
+      const run = prev.then(() => dbRef.current.collection("consents").doc(id).set(body))
+        .then(() => { setLastSave(new Date()); return true; })
+        .catch(e => {
+          if (e && e.code === "invalid_argument") { setReadOnly(true); say("No tienes permiso para modificar registros en esta herramienta. El cambio no se guardó.", true); }
+          else if (e && e.code === "quota_exceeded") say("Se alcanzó el límite de almacenamiento. El cambio no se guardó.", true);
+          else say("No se pudo guardar el cambio de " + BY_ID[id].nombre + ". Inténtalo de nuevo.", true);
+          return false;
+        })
+        .finally(() => setPending(p => p - 1));
+      chains.current[id] = run;
+      return run;
+    }
+    if (mode === "local") {
+      try {
+        localRef.current[id] = body;
+        localStorage.setItem(LS_KEY, JSON.stringify(localRef.current));
+        setLastSave(new Date());
+        return Promise.resolve(true);
+      } catch (e) { setMode("memory"); say("El navegador no permitió guardar. Exporta un respaldo JSON para no perder cambios.", true); return Promise.resolve(false); }
+    }
+    return Promise.resolve(true);
+  }, [mode, say]);
+
+  /* Envío en lote (importación y subida de registros locales) */
+  const pushList = useCallback(async (list, origen) => {
+    if (!list.length) return 0;
+    if (mode !== "sheets") { let f = 0; for (const it of list) { const ok = await writeRec(it.id, it.body); if (ok === false) f++; } return f; }
+    setRecs(r => { const n = { ...r }; list.forEach(it => n[it.id] = it.body); return n; });
+    setPending(p => p + 1);
+    let fails = 0, skipped = 0;
+    try {
+      for (let i = 0; i < list.length; i += 50) {
+        const chunk = list.slice(i, i + 50);
+        try { const j = await sheetsUpsert(cfgRef.current, chunk.map(it => withRoster(it.id, it.body)), origen || "importacion"); skipped += (j.skipped || []).length; }
+        catch (e) { fails += chunk.length; }
+      }
+    } finally { setPending(p => p - 1); }
+    setLastSave(new Date());
+    if (skipped || fails) setReloadKey(k => k + 1);
+    say(fails ? fails + " registros no se pudieron enviar a la hoja." : "Enviados " + (list.length - skipped) + " registros a Google Sheets" + (skipped ? " (" + skipped + " ya tenían un cambio más reciente)" : ""), !!fails);
+    return fails;
+  }, [mode, writeRec, say]);
+
+  pushRef.current = pushList;
+  const entry = (accion, fecha) => ({ ts: new Date().toISOString(), accion, fecha: fecha || "", por: meRef.current || null });
+
+  const markSigned = (id) => {
+    const cur = recs[id] || EMPTY;
+    const f = today();
+    const body = { ...cur, estado: "firmado", fecha: f, actualizado: new Date().toISOString(), historial: [...cur.historial, entry("Marcado como firmado", f)].slice(-HIST_MAX) };
+    writeRec(id, body).then(ok => { if (ok || mode !== "db") say("Firma registrada: " + BY_ID[id].nombre); });
+  };
+  const doRevert = (id) => {
+    const cur = recs[id] || EMPTY;
+    const body = { ...cur, estado: "pendiente", fecha: "", actualizado: new Date().toISOString(), historial: [...cur.historial, entry("Revertido a pendiente", cur.fecha)].slice(-HIST_MAX) };
+    writeRec(id, body).then(ok => { if (ok || mode !== "db") say(BY_ID[id].nombre + " regresó a pendiente de firma"); });
+  };
+  const askRevert = (id) => setConfirm({
+    title: "¿Revertir firma registrada?",
+    msg: html`<p style=${{margin:0}}><b>${BY_ID[id].nombre}</b> tiene firma registrada${recs[id]?.fecha ? " el " + fmtDate(recs[id].fecha) : ""}. Volverá a "Pendiente de firma" y la fecha se quitará. El cambio queda en el historial.</p>`,
+    label: "Revertir a pendiente", danger: true, onOk: () => doRevert(id)
+  });
+  const setEstado = (id, est) => {
+    if (readOnly) return;
+    const cur = (recs[id] || EMPTY).estado;
+    if (cur === est) return;
+    if (est === "firmado") markSigned(id); else askRevert(id);
+  };
+
+  /* Derivados */
+  const stat = useMemo(() => {
+    const byArea = {}; AREAS.forEach(a => byArea[a] = { total: 0, f: 0 });
+    let f = 0;
+    ROSTER.forEach(r => { byArea[r.area].total++; if ((recs[r.id] || EMPTY).estado === "firmado") { f++; byArea[r.area].f++; } });
+    return { total: ROSTER.length, f, p: ROSTER.length - f, pc: pct(f, ROSTER.length), byArea };
+  }, [recs]);
+
+  const cargos = useMemo(() => [...new Set(ROSTER.filter(r => !fArea || r.area === fArea).map(r => r.cargo))].sort((a, b) => a.localeCompare(b, "es")), [fArea]);
+  useEffect(() => { if (fCargo && !cargos.includes(fCargo)) setFCargo(""); }, [cargos]);
+
+  const rows = useMemo(() => {
+    const nq = norm(q).split(/\s+/).filter(Boolean);
+    let list = ROSTER.filter(r => {
+      const st = (recs[r.id] || EMPTY).estado;
+      if (fArea && r.area !== fArea) return false;
+      if (fCargo && r.cargo !== fCargo) return false;
+      if (fEstado === "firmados" && st !== "firmado") return false;
+      if (fEstado === "pendientes" && st !== "pendiente") return false;
+      if (nq.length) { const n = norm(r.nombre); if (!nq.every(t => n.includes(t))) return false; }
+      return true;
+    });
+    const k = sort.key, d = sort.dir;
+    list = list.slice().sort((a, b) => {
+      let va, vb;
+      if (k === "estado") { va = (recs[a.id] || EMPTY).estado; vb = (recs[b.id] || EMPTY).estado; }
+      else if (k === "fecha") { va = (recs[a.id] || EMPTY).fecha || "9999"; vb = (recs[b.id] || EMPTY).fecha || "9999"; }
+      else { va = a[k]; vb = b[k]; }
+      const c = String(va).localeCompare(String(vb), "es");
+      return c !== 0 ? c * d : a.nombre.localeCompare(b.nombre, "es");
+    });
+    return list;
+  }, [recs, q, fArea, fCargo, fEstado, sort]);
+
+  const filtersOn = q || fArea || fCargo || fEstado !== "todos";
+  const clearFilters = () => { setQ(""); setFArea(""); setFCargo(""); setFEstado("todos"); };
+  const goArea = a => { setFArea(a); setFCargo(""); setQ(""); setFEstado("todos"); setTab("colab"); window.scrollTo({ top: 0, behavior: "smooth" }); };
+
+  /* Exportación */
+  const saveFile = async (filename, data) => {
+    const dl = dlRef.current;
+    if (dl) {
+      try { await dl.save({ filename, data }); say("Archivo listo: " + filename); return; }
+      catch (e) { if (e && e.code === "declined") return; if (e && e.code === "rate_limited") { say("Ya hay una descarga esperando confirmación.", true); return; } }
+    }
+    if (!window.claude) {
+      try {
+        const type = filename.endsWith(".json") ? "application/json" : "text/csv;charset=utf-8";
+        const url = URL.createObjectURL(new Blob([data], { type }));
+        const a = document.createElement("a"); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 2000); say("Archivo descargado: " + filename); return;
+      } catch (e) {}
+    }
+    setCopyFallback({ title: filename, text: typeof data === "string" ? data.replace(/^﻿/, "") : "", note: "Este visor no permite descargar archivos. Copia el contenido y pégalo en un archivo con el nombre indicado." });
+  };
+  const recRow = r => { const c = recs[r.id] || EMPTY; return [r.id, r.nombre, r.area, r.cargo, c.estado === "firmado" ? "Firmado" : "Pendiente de firma", fmtDate(c.fecha), c.obs, c.enlace, fmtTs(c.actualizado)]; };
+  const HEAD = ["ID", "Nombre", "Área", "Cargo", "Estado", "Fecha de firma", "Observaciones", "Enlace al documento", "Última actualización"];
+  const stamp = today();
+  const exportCsv = which => {
+    const list = ROSTER.filter(r => which === "todos" || (which === "firmados") === ((recs[r.id] || EMPTY).estado === "firmado"));
+    saveFile("Consentimientos_" + which + "_" + stamp + ".csv", toCsv([HEAD, ...list.map(recRow)]));
+  };
+  const exportAreas = () => {
+    const out = [["Área", "Total", "Firmados", "Pendientes", "% cumplimiento"]];
+    AREAS.forEach(a => { const s = stat.byArea[a]; out.push([a, s.total, s.f, s.total - s.f, fmtPct(pct(s.f, s.total))]); });
+    out.push(["TOTAL", stat.total, stat.f, stat.p, fmtPct(stat.pc)]);
+    out.push([]); out.push(["Generado", fmtTs(new Date().toISOString())]);
+    saveFile("Consentimientos_reporte_por_area_" + stamp + ".csv", toCsv(out));
+  };
+  const exportJson = () => {
+    const data = { app: APP, version: 1, exportado: new Date().toISOString(), total: ROSTER.length,
+      registros: ROSTER.map(r => ({ id: r.id, nombre: r.nombre, area: r.area, cargo: r.cargo, ...(recs[r.id] || EMPTY) })) };
+    saveFile("Consentimientos_respaldo_" + stamp + ".json", JSON.stringify(data, null, 2));
+  };
+
+  /* Pendientes por área (texto para portapapeles) */
+  const pendText = useMemo(() => {
+    const lines = ["PENDIENTES DE FIRMA — CONSENTIMIENTO INFORMADO", "The Mendoza Law Firm · corte " + fmtDate(today()), "Pendientes: " + stat.p + " de " + stat.total, ""];
+    AREAS.forEach(a => {
+      const l = ROSTER.filter(r => r.area === a && (recs[r.id] || EMPTY).estado !== "firmado");
+      if (!l.length) return;
+      lines.push(a + " (" + l.length + ")");
+      l.forEach(r => lines.push("• " + r.nombre + " — " + r.cargo));
+      lines.push("");
+    });
+    return lines.join("\n").trim();
+  }, [recs, stat]);
+  const copyPend = async () => {
+    if (await copyText(pendText)) say("Lista de pendientes copiada (" + stat.p + " personas)");
+    else setCopyFallback({ title: "Lista de pendientes", text: pendText, note: "No se pudo copiar automáticamente. Selecciona el texto y cópialo." });
+  };
+
+  /* Estado del almacenamiento */
+  let storeTxt, dotCls;
+  if (mode === "loading") { storeTxt = "Conectando…"; dotCls = "busy"; }
+  else if (mode === "db") {
+    if (readOnly) { storeTxt = "Solo lectura"; dotCls = "warn"; }
+    else if (pending > 0) { storeTxt = "Guardando…"; dotCls = "busy"; }
+    else { storeTxt = lastSave ? "Guardado " + pad(lastSave.getHours()) + ":" + pad(lastSave.getMinutes()) + " · compartido" : "Almacenamiento compartido activo"; dotCls = "ok"; }
+  } else if (mode === "sheets") {
+    if (pending > 0) { storeTxt = "Guardando en Google Sheets…"; dotCls = "busy"; }
+    else { storeTxt = lastSave ? "Google Sheets · guardado " + pad(lastSave.getHours()) + ":" + pad(lastSave.getMinutes()) : "Conectado a Google Sheets"; dotCls = "ok"; }
+  } else if (mode === "local") { storeTxt = sheetErr ? "Sin conexión con la hoja" : "Solo en este navegador"; dotCls = sheetErr ? "bad" : "warn"; }
+  else { storeTxt = "Sin almacenamiento"; dotCls = "bad"; }
+
+  const TABS = [["panel", "Panel por área"], ["colab", "Colaboradores", stat.total], ["pend", "Pendientes de seguimiento", stat.p], ["resp", "Exportar y respaldo"]];
+
+  return html`
+  <header className="mast">
+    <div className="wrap">
+      <div className="mast-top">
+        <div>
+          <div className="firm">THE MENDOZA LAW FIRM</div>
+          <h1>Control de Consentimientos Informados</h1>
+        </div>
+        <span className="store" role="status"><span className=${"dot " + dotCls}></span>${storeTxt}</span>
+      </div>
+      <div className="kpis">
+        <div className="kpi"><div className="lbl">TOTAL DE COLABORADORES</div><div className="val num">${stat.total}</div></div>
+        <div className="kpi g"><div className="lbl">CONSENTIMIENTOS FIRMADOS</div><div className="val num">${stat.f}</div></div>
+        <div className="kpi"><div className="lbl">PENDIENTES DE FIRMA</div><div className="val num">${stat.p}</div></div>
+        <div className="kpi"><div className="lbl">PORCENTAJE DE CUMPLIMIENTO</div><div className="val num">${fmtPct(stat.pc)}</div></div>
+      </div>
+      <div className="prog">
+        <div className="prog-row"><span>Avance global</span><span className="num">${stat.f} de ${stat.total} firmados</span></div>
+        <div className="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow=${stat.pc}><i style=${{ width: stat.pc + "%" }}></i></div>
+      </div>
+      <nav className="tabs" role="tablist">
+        ${TABS.map(([k, l, c]) => html`<button key=${k} id=${"tab-" + k} className="tab" role="tab" aria-selected=${tab === k} onClick=${() => setTab(k)}>${l}${c != null ? html`<span className="cnt num">${c}</span>` : null}</button>`)}
+      </nav>
+    </div>
+  </header>
+
+  <main className="wrap">
+    ${mode === "local" && sheetErr ? html`<div className="notice bad"><span>⚠</span><div><b>No se pudo conectar con Google Sheets</b> (${sheetErr}). Estás trabajando con la copia de este navegador; al recuperar la conexión se te ofrecerá enviar estos cambios a la hoja. <button className="btn sm" onClick=${() => setReloadKey(k => k + 1)}>Reintentar</button></div></div>` : null}
+    ${mode === "local" && !sheetErr ? html`<div className="notice warn"><span>⚠</span><div><b>Los cambios se guardan solo en este navegador.</b> No se comparten con otras personas ni otros equipos y se pierden si se borran los datos del navegador. Exporta un respaldo JSON al terminar cada sesión de captura, o conecta Google Sheets en la pestaña "Exportar y respaldo".</div></div>` : null}
+    ${mode === "memory" ? html`<div className="notice bad"><span>⚠</span><div><b>Este navegador no permite guardar.</b> Los cambios desaparecerán al cerrar la página. Exporta un respaldo JSON antes de salir e impórtalo la próxima vez.</div></div>` : null}
+    ${mode === "db" && readOnly ? html`<div className="notice warn"><span>🔒</span><div><b>Modo de solo lectura.</b> Puedes consultar y exportar, pero tu nivel de acceso no permite registrar firmas. Pide acceso de colaborador a quien administra la herramienta.</div></div>` : null}
+
+    ${tab === "panel" ? html`
+      <div className="sec-h"><div><h2>Avance por área</h2><p>Selecciona un área para ver únicamente a sus colaboradores.</p></div></div>
+      <div className="areas">
+        ${AREAS.map(a => { const s = stat.byArea[a]; const p = pct(s.f, s.total); return html`
+          <button key=${a} className=${"acard" + (s.f === s.total ? " done" : "")} onClick=${() => goArea(a)}>
+            <div className="top"><span className="nm">${a}</span><span className="pc num">${fmtPct(p)}</span></div>
+            <div className="mbar"><i style=${{ width: p + "%" }}></i></div>
+            <div className="meta num"><span><b>${s.total}</b> total</span><span><b>${s.f}</b> firmados</span><span><b>${s.total - s.f}</b> pendientes</span></div>
+          </button>`; })}
+      </div>
+      <p className="foot">Marcar a una persona como "Firmado" es un registro administrativo de confirmación. No constituye una firma electrónica ni demuestra por sí solo que exista un documento firmado; el documento debe resguardarse en el repositorio autorizado de la firma.</p>
+    ` : null}
+
+    ${tab === "colab" ? html`
+      <div className="filters">
+        <label className="fld search"><span>Buscar</span><input id="f-q" className="inp" type="search" placeholder="Nombre o apellido" value=${q} onChange=${e => setQ(e.target.value)} /></label>
+        <label className="fld"><span>Área</span><select id="f-area" className="sel" value=${fArea} onChange=${e => setFArea(e.target.value)}><option value="">Todas las áreas</option>${AREAS.map(a => html`<option key=${a} value=${a}>${a}</option>`)}</select></label>
+        <label className="fld"><span>Cargo</span><select id="f-cargo" className="sel" value=${fCargo} onChange=${e => setFCargo(e.target.value)}><option value="">Todos los cargos</option>${cargos.map(c => html`<option key=${c} value=${c}>${c}</option>`)}</select></label>
+        <div className="fld"><span>Estado</span><div className="seg">${[["todos","Todos"],["firmados","Firmados"],["pendientes","Pendientes"]].map(([k,l]) => html`<button key=${k} aria-pressed=${fEstado === k} onClick=${() => setFEstado(k)}>${l}</button>`)}</div></div>
+        <button className="btn" onClick=${clearFilters} disabled=${!filtersOn}>Limpiar filtros</button>
+      </div>
+      <div className="resline"><span className="num">Mostrando <b>${rows.length}</b> de ${stat.total} colaboradores${fArea ? html`<span className="chipf">Área: ${fArea}</span>` : null}</span>
+        <span className="num">${(() => { const f = rows.filter(r => (recs[r.id] || EMPTY).estado === "firmado").length; return html`En esta vista: <b style=${{color:"var(--green)"}}>${f}</b> firmados · <b>${rows.length - f}</b> pendientes`; })()}</span></div>
+      <div className="tbox">
+        <table>
+          <thead><tr>
+            ${[["nombre","Nombre completo"],["area","Área"],["cargo","Cargo"],["estado","Estado del consentimiento"],["fecha","Fecha de firma"]].map(([k,l]) => html`<th key=${k} aria-sort=${sort.key === k ? (sort.dir > 0 ? "ascending" : "descending") : "none"}><button className="sort" onClick=${() => setSort(s => ({ key: k, dir: s.key === k ? -s.dir : 1 }))}>${l}<span aria-hidden="true">${sort.key === k ? (sort.dir > 0 ? "▲" : "▼") : "↕"}</span></button></th>`)}
+            <th><span className="plain">Observaciones</span></th><th><span className="plain">Acciones</span></th>
+          </tr></thead>
+          <tbody>
+            ${rows.length ? rows.map(r => { const c = recs[r.id] || EMPTY; const f = c.estado === "firmado"; return html`
+              <tr key=${r.id} className=${f ? "signed" : ""}>
+                <td><button className="nmbtn" onClick=${() => setOpenId(r.id)}>${r.nombre}</button><span className="idt">${r.id}</span></td>
+                <td><span className="area-tag">${r.area}</span></td>
+                <td><div className="cargo">${r.cargo}</div></td>
+                <td><div className="toggle" role="group" aria-label=${"Estado de " + r.nombre}>
+                  <button className=${"p" + (!f ? " on" : "")} aria-pressed=${!f} disabled=${readOnly} onClick=${() => setEstado(r.id, "pendiente")}>Pendiente de firma</button>
+                  <button className=${"f" + (f ? " on" : "")} aria-pressed=${f} disabled=${readOnly} onClick=${() => setEstado(r.id, "firmado")}>${f ? "✓ Firmado" : "Firmado"}</button>
+                </div></td>
+                <td className="num">${f ? fmtDate(c.fecha) || html`<span className="muted">Sin fecha</span>` : html`<span className="muted">—</span>`}</td>
+                <td><div className="obs" title=${c.obs}>${c.obs || html`<span className="muted">—</span>`}</div></td>
+                <td><button className="btn sm" onClick=${() => setOpenId(r.id)}>${readOnly ? "Ver" : "Ver / editar"}</button></td>
+              </tr>`; }) : html`<tr><td colSpan="7"><div className="empty">Ningún colaborador coincide con estos filtros. <button className="btn sm" onClick=${clearFilters}>Limpiar filtros</button></div></td></tr>`}
+          </tbody>
+        </table>
+      </div>
+    ` : null}
+
+    ${tab === "pend" ? html`
+      <div className="sec-h"><div><h2>Pendientes de seguimiento</h2><p className="num">${stat.p} colaboradores aún sin consentimiento registrado, agrupados por área.</p></div>
+        <button className="btn pri" onClick=${copyPend} disabled=${!stat.p}>Copiar lista por área</button></div>
+      ${stat.p === 0 ? html`<div className="alldone">Todos los colaboradores tienen su consentimiento registrado.</div>` : html`
+      <div className="pgrid">
+        ${AREAS.map(a => { const l = ROSTER.filter(r => r.area === a && (recs[r.id] || EMPTY).estado !== "firmado"); if (!l.length) return null; return html`
+          <section key=${a} className="pgroup">
+            <h3><span>${a}</span><span className="num muted">${l.length} de ${stat.byArea[a].total}</span></h3>
+            <ul>${l.map(r => html`<li key=${r.id}><div className="who"><b>${r.nombre}</b><span>${r.cargo}</span></div>
+              ${readOnly ? null : html`<button className="btn sm" onClick=${() => setEstado(r.id, "firmado")}>Registrar firma</button>`}</li>`)}</ul>
+          </section>`; })}
+      </div>`}
+    ` : null}
+
+    ${tab === "resp" ? html`<${Respaldo} recs=${recs} mode=${mode} readOnly=${readOnly} exportCsv=${exportCsv} exportAreas=${exportAreas} exportJson=${exportJson} stat=${stat} writeRec=${writeRec} pushList=${pushList} say=${say} setConfirm=${setConfirm} meRef=${meRef} cfg=${cfg} setCfg=${setCfg} sheetErr=${sheetErr} reload=${() => setReloadKey(k => k + 1)} />` : null}
+  </main>
+
+  ${openId ? html`<${Ficha} id=${openId} rec=${recs[openId] || EMPTY} readOnly=${readOnly} names=${names} onClose=${() => setOpenId(null)} writeRec=${writeRec} say=${say} setConfirm=${setConfirm} meRef=${meRef} />` : null}
+  ${confirm ? html`<${Confirm} ...${confirm} onClose=${() => setConfirm(null)} />` : null}
+  ${copyFallback ? html`<${CopyBox} ...${copyFallback} onClose=${() => setCopyFallback(null)} />` : null}
+  ${toast ? html`<div key=${toast.k} className=${"toast" + (toast.bad ? " bad" : "")} role="status">${toast.msg}</div>` : null}
+  `;
+}
+
+/* ---------- Ficha individual ---------- */
+function Ficha({ id, rec, readOnly, names, onClose, writeRec, say, setConfirm, meRef }){
+  const r = BY_ID[id];
+  const [estado, setEstado] = useState(rec.estado);
+  const [fecha, setFecha] = useState(rec.fecha || "");
+  const [obs, setObs] = useState(rec.obs || "");
+  const [enlace, setEnlace] = useState(rec.enlace || "");
+  const [saving, setSaving] = useState(false);
+  useEffect(() => { const k = e => { if (e.key === "Escape") onClose(); }; window.addEventListener("keydown", k); return () => window.removeEventListener("keydown", k); }, []);
+  const changeEstado = v => { setEstado(v); if (v === "firmado" && !fecha) setFecha(today()); };
+  const urlOk = isUrl(enlace);
+  const dateBad = estado === "firmado" && fecha && fecha > today();
+  const dirty = estado !== rec.estado || (estado === "firmado" && fecha !== (rec.fecha || "")) || obs !== (rec.obs || "") || enlace !== (rec.enlace || "");
+  const doSave = async () => {
+    const now = new Date().toISOString(); const h = [...rec.historial];
+    const por = meRef.current || null;
+    if (estado !== rec.estado) h.push({ ts: now, accion: estado === "firmado" ? "Marcado como firmado" : "Revertido a pendiente", fecha: estado === "firmado" ? fecha : rec.fecha, por });
+    else if (estado === "firmado" && fecha !== rec.fecha) h.push({ ts: now, accion: "Fecha de firma corregida", fecha, por });
+    if (obs !== rec.obs || enlace !== rec.enlace) h.push({ ts: now, accion: "Observaciones / enlace actualizados", fecha: "", por });
+    const body = { estado, fecha: estado === "firmado" ? fecha : "", obs: obs.trim(), enlace: enlace.trim(), historial: h.slice(-HIST_MAX), actualizado: now };
+    setSaving(true);
+    const ok = await writeRec(id, body);
+    setSaving(false);
+    if (ok !== false) { say("Registro actualizado: " + r.nombre); onClose(); }
+  };
+  const save = () => {
+    if (!urlOk || dateBad || (estado === "firmado" && !fecha)) return;
+    if (rec.estado === "firmado" && estado === "pendiente") {
+      setConfirm({ title: "¿Revertir firma registrada?", msg: html`<p style=${{margin:0}}><b>${r.nombre}</b> volverá a "Pendiente de firma". El cambio queda en el historial.</p>`, label: "Revertir y guardar", danger: true, onOk: doSave });
+    } else doSave();
+  };
+  const hist = rec.historial.slice().reverse();
+  return html`<div className="scrim" onClick=${e => { if (e.target === e.currentTarget) onClose(); }}>
+    <div className="modal" role="dialog" aria-modal="true" aria-labelledby="ficha-t">
+      <div className="mhead"><div><h3 id="ficha-t">Registro individual</h3><span className="lock">${r.id} · los datos del colaborador vienen de la plantilla y no se editan aquí</span></div><button className="x" aria-label="Cerrar" onClick=${onClose}>×</button></div>
+      <div className="mbody">
+        <dl className="ro"><dt>Nombre</dt><dd>${r.nombre}</dd><dt>Área</dt><dd>${r.area}</dd><dt>Cargo</dt><dd>${r.cargo}</dd></dl>
+        <div className="two">
+          <div className="fld"><span>Estado</span><div className="toggle" role="group">
+            <button className=${"p" + (estado === "pendiente" ? " on" : "")} disabled=${readOnly} onClick=${() => changeEstado("pendiente")}>Pendiente de firma</button>
+            <button className=${"f" + (estado === "firmado" ? " on" : "")} disabled=${readOnly} onClick=${() => changeEstado("firmado")}>Firmado</button></div></div>
+          <label className="fld"><span>Fecha de firma</span><input id="m-fecha" type="date" className="inp" value=${estado === "firmado" ? fecha : ""} max=${today()} disabled=${readOnly || estado !== "firmado"} onChange=${e => setFecha(e.target.value)} />
+            ${dateBad ? html`<span className="err">La fecha no puede ser posterior a hoy.</span>` : estado === "firmado" && !fecha ? html`<span className="err">Indica la fecha de firma.</span>` : null}</label>
+        </div>
+        <label className="fld"><span>Observaciones</span><textarea id="m-obs" className="inp" rows="3" maxLength="2000" disabled=${readOnly} value=${obs} onChange=${e => setObs(e.target.value)} placeholder="Ej. firmó en sesión presencial; pendiente de entregar original"></textarea></label>
+        <label className="fld"><span>Enlace al documento (opcional)</span><input id="m-enlace" type="url" className="inp" disabled=${readOnly} value=${enlace} onChange=${e => setEnlace(e.target.value)} placeholder="https://… (ubicación en el repositorio autorizado)" />
+          ${!urlOk ? html`<span className="err">Escribe un enlace completo que empiece con https://</span>` : html`<span className="hint">Guarda solo el enlace. No pegues ni subas el documento firmado aquí.</span>`}
+          ${rec.enlace && urlOk && enlace === rec.enlace ? html`<a href=${rec.enlace} target="_blank" rel="noopener noreferrer" className="hint">Abrir enlace registrado ↗</a>` : null}</label>
+        <div className="fld"><span>Historial de cambios</span>
+          ${hist.length ? html`<ul className="hist">${hist.map((h, i) => html`<li key=${i} className=${h.accion.includes("firmado") ? "f" : ""}><time>${fmtTs(h.ts)}</time> · ${h.accion}${h.fecha ? " (" + fmtDate(h.fecha) + ")" : ""}${h.por ? html` · <span className="muted">${names[h.por] || "Usuario"}</span>` : null}</li>`)}</ul>` : html`<span className="hint">Sin cambios registrados.</span>`}</div>
+        <p className="legal">Marcar como "Firmado" es un registro administrativo de confirmación; no es una firma electrónica ni prueba por sí solo la existencia del documento.</p>
+      </div>
+      <div className="mfoot"><button className="btn" onClick=${onClose}>${readOnly ? "Cerrar" : "Cancelar"}</button>
+        ${readOnly ? null : html`<button className="btn pri" disabled=${!dirty || saving || !urlOk || dateBad || (estado === "firmado" && !fecha)} onClick=${save}>${saving ? "Guardando…" : "Guardar cambios"}</button>`}</div>
+    </div></div>`;
+}
+
+/* ---------- Exportar / respaldo ---------- */
+function Respaldo({ recs, mode, readOnly, exportCsv, exportAreas, exportJson, stat, writeRec, pushList, say, setConfirm, meRef, cfg, setCfg, sheetErr, reload }){
+  const [url, setUrl] = useState(cfg.url || "");
+  const [tok, setTok] = useState(cfg.token || "");
+  const [testing, setTesting] = useState(false);
+  const [testMsg, setTestMsg] = useState("");
+  const [plan, setPlan] = useState(null);
+  const [policy, setPolicy] = useState("recientes");
+  const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(null);
+  const onFile = e => {
+    const file = e.target.files && e.target.files[0]; e.target.value = ""; setErr(""); setPlan(null);
+    if (!file) return;
+    const fr = new FileReader();
+    fr.onload = () => {
+      let data; try { data = JSON.parse(fr.result); } catch (x) { setErr("El archivo no es un JSON válido."); return; }
+      if (!data || data.app !== APP || !Array.isArray(data.registros)) { setErr("Este archivo no es un respaldo de Control de Consentimientos."); return; }
+      const seen = new Set(); const items = []; let ign = 0, dup = 0;
+      data.registros.forEach(x => {
+        const r = x && BY_ID[x.id];
+        if (!r || norm(r.nombre) !== norm(x.nombre)) { ign++; return; }
+        if (seen.has(x.id)) { dup++; return; }
+        seen.add(x.id); items.push({ id: x.id, body: clean(x) });
+      });
+      setPlan({ file: file.name, exportado: data.exportado, items, ign, dup });
+    };
+    fr.onerror = () => setErr("No se pudo leer el archivo.");
+    fr.readAsText(file);
+  };
+  const changes = useMemo(() => {
+    if (!plan) return [];
+    return plan.items.filter(({ id, body }) => {
+      const cur = recs[id] || EMPTY;
+      const same = cur.estado === body.estado && cur.fecha === body.fecha && cur.obs === body.obs && cur.enlace === body.enlace;
+      if (same) return false;
+      if (policy === "recientes") return (body.actualizado || "") > (cur.actualizado || "");
+      return true;
+    });
+  }, [plan, recs, policy]);
+  const apply = async () => {
+    setBusy({ done: 0, total: changes.length });
+    const now = new Date().toISOString();
+    const list = changes.map(({ id, body }) => ({ id, body: { ...body, actualizado: now, historial: [...body.historial, { ts: now, accion: "Restaurado desde respaldo", fecha: body.fecha, por: meRef.current || null }].slice(-HIST_MAX) } }));
+    const fails = await pushList(list, "importacion");
+    setBusy(null); setPlan(null);
+    if (mode !== "sheets") say(fails ? "Importación con " + fails + " errores; revisa los registros." : "Respaldo importado: " + changes.length + " registros actualizados", !!fails);
+  };
+  const firmadosIn = changes.filter(c => c.body.estado === "firmado").length;
+  const reverts = changes.filter(c => c.body.estado === "pendiente" && (recs[c.id] || EMPTY).estado === "firmado").length;
+  return html`
+    <div className="sec-h"><div><h2>Exportar y respaldo</h2><p>Los archivos se generan con los datos vigentes al momento de exportar.</p></div></div>
+    <section className="panel" style=${{marginBottom:"14px"}}>
+      <h3>Conexión con Google Sheets ${mode === "sheets" ? html`<span className="pill f" style=${{marginLeft:"8px"}}>Conectado</span>` : cfg.url ? html`<span className="pill p" style=${{marginLeft:"8px"}}>Sin conexión</span>` : null}</h3>
+      <p>Con la URL de la aplicación web de Apps Script, cada firma y cada cambio se guardan en la hoja "Consentimientos" y quedan en la "Bitacora". Todas las personas que usen esta misma URL ven los mismos datos.</p>
+      <div className="two">
+        <label className="fld"><span>URL de la aplicación web (/exec)</span><input id="cfg-url" className="inp" type="url" placeholder="https://script.google.com/macros/s/…/exec" value=${url} onChange=${e => setUrl(e.target.value)} /></label>
+        <label className="fld"><span>Clave TOKEN (si la configuraste)</span><input id="cfg-tok" className="inp" type="password" autoComplete="off" value=${tok} onChange=${e => setTok(e.target.value)} /></label>
+      </div>
+      ${testMsg ? html`<span className=${testMsg.startsWith("✓") ? "hint" : "err"}>${testMsg}</span>` : null}
+      <div style=${{display:"flex",gap:"8px",flexWrap:"wrap"}}>
+        <button className="btn pri" disabled=${testing || !/^https:\/\/script\.google(usercontent)?\.com\/.+/.test(url.trim())} onClick=${async () => {
+          setTesting(true); setTestMsg("");
+          const c = { url: url.trim(), token: tok };
+          try { const j = await sheetsGet(c); setTestMsg("✓ Conectado. La hoja tiene " + (j.records || []).length + " registros."); storeCfg(c); setCfg(c); }
+          catch (e) { setTestMsg("No se pudo conectar: " + (e && e.message || e) + ". Revisa que la implementación tenga acceso para \"Cualquier usuario\"."); }
+          setTesting(false);
+        }}>${testing ? "Probando…" : "Probar y conectar"}</button>
+        ${mode === "sheets" ? html`
+          <button className="btn" onClick=${reload}>Actualizar desde la hoja</button>
+          <button className="btn" disabled=${readOnly} onClick=${() => setConfirm({ title: "¿Enviar todo a la hoja?", msg: html`<p style=${{margin:0}}>Se envían los <b>${stat.total}</b> colaboradores con su estado actual. Útil para llenar la hoja por primera vez. No sobrescribe cambios más recientes que ya estén en la hoja.</p>`, label: "Enviar " + stat.total + " registros", onOk: () => pushList(ROSTER.map(r => ({ id: r.id, body: recs[r.id] || { ...EMPTY, actualizado: "2000-01-01T00:00:00.000Z" } })), "carga-inicial") })}>Enviar todos los registros</button>` : null}
+        ${cfg.url ? html`<button className="btn" onClick=${() => { const c = { url: "", token: "" }; storeCfg(c); setCfg(c); setUrl(""); setTok(""); setTestMsg(""); }}>Desconectar</button>` : null}
+      </div>
+    </section>
+    <div className="cols">
+      <section className="panel"><h3>Reportes CSV</h3><p>Se abren en Excel o Google Sheets. Incluyen ID, nombre, área, cargo, estado, fecha, observaciones y enlace.</p>
+        <div className="btnlist">
+          <button className="btn" onClick=${() => exportCsv("todos")}>Todos los registros <small className="num">${stat.total}</small></button>
+          <button className="btn" onClick=${() => exportCsv("pendientes")}>Solo pendientes <small className="num">${stat.p}</small></button>
+          <button className="btn" onClick=${() => exportCsv("firmados")}>Solo firmados <small className="num">${stat.f}</small></button>
+          <button className="btn" onClick=${exportAreas}>Reporte consolidado por área <small className="num">${AREAS.length} áreas</small></button>
+        </div></section>
+      <section className="panel"><h3>Respaldo JSON</h3>
+        <p>${mode === "sheets" ? "Los registros se guardan en Google Sheets. Descarga un respaldo periódico como copia adicional." : mode === "db" ? "Los registros se guardan en el almacenamiento compartido de esta herramienta y se conservan al cerrarla. Aun así, descarga un respaldo periódico como copia de seguridad." : "Los cambios no se comparten fuera de este navegador. Descarga un respaldo al terminar cada sesión de captura."}</p>
+        <div className="btnlist"><button className="btn pri" onClick=${exportJson}>Descargar respaldo JSON <small className="num">${stat.total} registros</small></button></div>
+        <div className="fld"><span>Importar respaldo</span>
+          <input id="imp-file" type="file" accept=".json,application/json" className="inp" disabled=${readOnly || !!busy} onChange=${onFile} />
+          <span className="hint">Nunca se eliminan registros: solo se actualizan colaboradores que coinciden por ID y nombre. Verás un resumen antes de aplicar.</span>
+          ${err ? html`<span className="err">${err}</span>` : null}</div>
+        ${plan ? html`<div className="fld">
+          <span>Resumen de ${plan.file}</span>
+          <div className="imp-sum num">
+            <span>Exportado</span><b>${fmtTs(plan.exportado) || "—"}</b>
+            <span>Coincidencias</span><b>${plan.items.length}</b>
+            <span>Cambios a aplicar</span><b>${changes.length}</b>
+            <span>Firmas que se registran</span><b>${firmadosIn}</b>
+            <span>Firmas que se revierten</span><b style=${reverts ? {color:"var(--red)"} : null}>${reverts}</b>
+            <span>Ignorados / duplicados</span><b>${plan.ign} / ${plan.dup}</b>
+          </div>
+          <div className="seg" style=${{marginTop:"6px"}}>
+            <button aria-pressed=${policy === "recientes"} onClick=${() => setPolicy("recientes")}>Solo si el respaldo es más reciente</button>
+            <button aria-pressed=${policy === "todo"} onClick=${() => setPolicy("todo")}>Reemplazar con el respaldo</button></div>
+          <div style=${{display:"flex",gap:"8px",marginTop:"8px",flexWrap:"wrap"}}>
+            <button className="btn" onClick=${() => setPlan(null)} disabled=${!!busy}>Cancelar</button>
+            <button className=${"btn " + (reverts ? "danger" : "ok")} disabled=${!changes.length || !!busy} onClick=${() => setConfirm({ title: "¿Aplicar respaldo?", msg: html`<p style=${{margin:0}}>Se actualizarán <b>${changes.length}</b> registros${reverts ? html`, incluidas <b>${reverts}</b> firmas que volverán a pendiente` : ""}. Los demás colaboradores no cambian.</p>`, label: "Aplicar " + changes.length + " cambios", danger: !!reverts, onOk: apply })}>
+              ${busy ? "Aplicando " + busy.done + "/" + busy.total + "…" : "Aplicar " + changes.length + " cambios"}</button>
+          </div></div>` : null}
+      </section>
+    </div>`;
+}
+
+function Confirm({ title, msg, label, danger, onOk, onClose }){
+  useEffect(() => { const k = e => { if (e.key === "Escape") onClose(); }; window.addEventListener("keydown", k); return () => window.removeEventListener("keydown", k); }, []);
+  return html`<div className="scrim" style=${{zIndex:55}} onClick=${e => { if (e.target === e.currentTarget) onClose(); }}>
+    <div className="modal sm" role="alertdialog" aria-modal="true" aria-labelledby="cf-t">
+      <div className="mhead"><h3 id="cf-t">${title}</h3></div>
+      <div className="mbody">${msg}</div>
+      <div className="mfoot"><button className="btn" onClick=${onClose}>Cancelar</button><button className=${"btn " + (danger ? "danger" : "pri")} autoFocus onClick=${() => { onClose(); onOk(); }}>${label}</button></div>
+    </div></div>`;
+}
+
+function CopyBox({ title, text, note, onClose }){
+  const ref = useRef(null);
+  useEffect(() => { if (ref.current) { const s = window.getSelection(); const rg = document.createRange(); rg.selectNodeContents(ref.current); s.removeAllRanges(); s.addRange(rg); } }, []);
+  return html`<div className="scrim" onClick=${e => { if (e.target === e.currentTarget) onClose(); }}>
+    <div className="modal" role="dialog" aria-modal="true"><div className="mhead"><h3>${title}</h3><button className="x" aria-label="Cerrar" onClick=${onClose}>×</button></div>
+    <div className="mbody"><p className="hint" style=${{margin:0}}>${note}</p><pre className="copybox" ref=${ref}>${text}</pre></div>
+    <div className="mfoot"><button className="btn pri" onClick=${onClose}>Listo</button></div></div></div>`;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(html`<${App} />`);
+})();
+</script>
