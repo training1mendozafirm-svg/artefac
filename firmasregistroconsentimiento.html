@@ -329,9 +329,11 @@ const DOCS = [
 ];
 const DOC = Object.fromEntries(DOCS.map(d => [d.k, d]));
 const isSigned = (c, d) => (c || EMPTY)[d.est] === "firmado";
-/* Dirección del abogado solo aplica para estas áreas */
+/* Dirección del abogado: aplica para TODAS las áreas.
+   Para limitarla a ciertas áreas, cambia DIR_TODAS a false y lista las áreas en DIR_AREAS. */
+const DIR_TODAS = true;
 const DIR_AREAS = ["COMPLIANCE", "BACK OFFICE", "LITIGATION", "CALL BACKS", "CASE REVIEW", "LSU", "RFE"];
-const applies = (area, d) => d.k !== "d" || DIR_AREAS.includes(area);
+const applies = (area, d) => d.k !== "d" || DIR_TODAS || DIR_AREAS.includes(area);
 const reqDocs = area => DOCS.filter(d => applies(area, d));
 const nSigned = (c, area) => reqDocs(area).filter(d => isSigned(c, d)).length;
 const isComplete = (c, area) => nSigned(c, area) === reqDocs(area).length;
@@ -713,19 +715,19 @@ function App(){
         <div>
           <div className="firm">THE MENDOZA LAW FIRM</div>
           <h1>Control de Firmas</h1>
-          <div className="docs-sub">Consentimiento informado (todas las áreas) · Dirección del abogado (${DIR_AREAS.length} áreas)</div>
+          <div className="docs-sub">${DIR_TODAS ? "Consentimiento informado · Dirección del abogado · todas las áreas" : "Consentimiento informado (todas las áreas) · Dirección del abogado (" + DIR_AREAS.length + " áreas)"}</div>
         </div>
         <span className="store" role="status"><span className=${"dot " + dotCls}></span>${storeTxt}</span>
       </div>
       <div className="kpis">
         <div className="kpi"><div className="lbl">TOTAL DE COLABORADORES</div><div className="val num">${stat.total}</div><div className="sub num">${stat.comp} con firmas completas</div></div>
-        ${DOCS.map(d => html`<div key=${d.k} className="kpi g"><div className="lbl">${d.label.toUpperCase()}</div><div className="val num">${docCount(d)}</div><div className="sub num">firmados · ${docTotal(d) - docCount(d)} pendientes${d.k === "d" ? " de " + docTotal(d) + " que aplican" : ""}</div></div>`)}
+        ${DOCS.map(d => html`<div key=${d.k} className="kpi g"><div className="lbl">${d.label.toUpperCase()}</div><div className="val num">${docCount(d)}</div><div className="sub num">firmados · ${docTotal(d) - docCount(d)} pendientes${d.k === "d" && !DIR_TODAS ? " de " + docTotal(d) + " que aplican" : ""}</div></div>`)}
         <div className="kpi"><div className="lbl">PENDIENTES DE FIRMA</div><div className="val num">${stat.pend}</div><div className="sub">personas con al menos una firma pendiente</div></div>
         <div className="kpi"><div className="lbl">PORCENTAJE DE CUMPLIMIENTO</div><div className="val num">${fmtPct(stat.pc)}</div><div className="sub num">${stat.firmas} de ${stat.req} firmas</div></div>
       </div>
       <div className="prog">
         ${DOCS.map(d => { const p = pct(docCount(d), docTotal(d)); return html`<div key=${d.k} className="prog-item">
-          <div className="prog-row"><span>${d.label}${d.k === "d" ? " · áreas que aplican" : ""}</span><span className="num">${docCount(d)} de ${docTotal(d)} · ${fmtPct(p)}</span></div>
+          <div className="prog-row"><span>${d.label}${d.k === "d" && !DIR_TODAS ? " · áreas que aplican" : ""}</span><span className="num">${docCount(d)} de ${docTotal(d)} · ${fmtPct(p)}</span></div>
           <div className="bar" role="progressbar" aria-label=${d.label} aria-valuemin="0" aria-valuemax="100" aria-valuenow=${p}><i style=${{ width: p + "%" }}></i></div></div>`; })}
       </div>
       <nav className="tabs" role="tablist">
@@ -741,7 +743,7 @@ function App(){
     ${mode === "db" && readOnly ? html`<div className="notice warn"><span>🔒</span><div><b>Modo de solo lectura.</b> Puedes consultar y exportar, pero tu nivel de acceso no permite registrar firmas. Pide acceso de colaborador a quien administra la herramienta.</div></div>` : null}
 
     ${tab === "panel" ? html`
-      <div className="sec-h"><div><h2>Avance por área</h2><p>Consentimiento informado aplica para todas las áreas; Dirección del abogado solo para ${DIR_AREAS.join(", ")}. Selecciona un área para ver a sus colaboradores.</p></div>${readOnly ? null : html`<button className="btn pri" onClick=${() => setAdding(true)}>+ Agregar colaborador</button>`}</div>
+      <div className="sec-h"><div><h2>Avance por área</h2><p>${DIR_TODAS ? "Cada colaborador firma Consentimiento informado y Dirección del abogado." : "Consentimiento informado aplica para todas las áreas; Dirección del abogado solo para " + DIR_AREAS.join(", ") + "."} Selecciona un área para ver a sus colaboradores.</p></div>${readOnly ? null : html`<button className="btn pri" onClick=${() => setAdding(true)}>+ Agregar colaborador</button>`}</div>
       <div className="areas">
         ${AREAS.map(a => { const s = stat.byArea[a]; const nd = reqDocs(a).length;
           if (!s.total) return html`<div key=${a} className="acard empty-area">
@@ -760,7 +762,7 @@ function App(){
             <div className="meta num"><span><b>${s.total}</b> total</span><span><b>${s.comp}</b> completos</span><span><b>${s.pend}</b> con pendientes</span></div>
           </button>`; })}
       </div>
-      <p className="foot">Marcar un documento como "Firmado" es un registro administrativo de confirmación. No constituye una firma electrónica ni demuestra por sí solo que exista un documento firmado; los documentos deben resguardarse en el repositorio autorizado de la firma. El porcentaje de cumplimiento cuenta las firmas registradas sobre las requeridas: una por colaborador (Consentimiento) más Dirección del abogado en las áreas donde aplica.</p>
+      <p className="foot">Marcar un documento como "Firmado" es un registro administrativo de confirmación. No constituye una firma electrónica ni demuestra por sí solo que exista un documento firmado; los documentos deben resguardarse en el repositorio autorizado de la firma. El porcentaje de cumplimiento cuenta las firmas registradas sobre las requeridas: una por colaborador (Consentimiento) más Dirección del abogado.</p>
     ` : null}
 
     ${tab === "colab" ? html`
