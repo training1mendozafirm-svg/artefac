@@ -8,7 +8,7 @@
   --bg:#f3f5f8; --surface:#ffffff; --surface-2:#f8f9fb; --chip:#eef2f8;
   --green:#1f8a5b; --green-soft:#e3f3ea; --green-ink:#146a44;
   --amber:#a8640f; --amber-soft:#fbf0dd; --red:#b23a3a; --red-soft:#f8e6e6;
-  --on-navy:#ffffff; --on-navy-muted:#b9c5da; --focus:#3d7be0;
+  --on-navy:#ffffff; --on-navy-muted:#b9c5da; --focus:#3d7be0; --tagfg:#1d3864;
   --display:"Source Serif 4", Georgia, "Times New Roman", serif;
   --sans:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
   --mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
@@ -19,13 +19,13 @@
   --bg:#0b1426; --surface:#121f38; --surface-2:#172642; --chip:#1c2c4b;
   --green:#3fbf86; --green-soft:#143829; --green-ink:#7ddcb0;
   --amber:#e0a14a; --amber-soft:#3a2b14; --red:#e07a7a; --red-soft:#3d1d22;
-  --on-navy:#ffffff; --on-navy-muted:#9fb0cc; --focus:#6aa0f5; color-scheme:dark}}
+  --on-navy:#ffffff; --on-navy-muted:#9fb0cc; --focus:#6aa0f5; --tagfg:#b9c9ea; color-scheme:dark}}
 :root[data-theme="dark"]{
   --navy:#0e1c35; --navy-2:#16284a; --ink:#e6ebf3; --muted:#9aa7bd; --line:#2a3854; --line-2:#36466a;
   --bg:#0b1426; --surface:#121f38; --surface-2:#172642; --chip:#1c2c4b;
   --green:#3fbf86; --green-soft:#143829; --green-ink:#7ddcb0;
   --amber:#e0a14a; --amber-soft:#3a2b14; --red:#e07a7a; --red-soft:#3d1d22;
-  --on-navy:#ffffff; --on-navy-muted:#9fb0cc; --focus:#6aa0f5; color-scheme:dark}
+  --on-navy:#ffffff; --on-navy-muted:#9fb0cc; --focus:#6aa0f5; --tagfg:#b9c9ea; color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.45}
 button,input,select,textarea{font:inherit;color:inherit}
@@ -88,7 +88,7 @@ main{padding-block:22px 48px}
 .acard .go{font-size:12px;color:var(--muted)}
 
 /* Controls */
-.filters{display:grid;grid-template-columns:minmax(0,2fr) repeat(2,minmax(0,1fr)) auto auto;gap:10px;align-items:end;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px;margin-bottom:12px}
+.filters{display:grid;grid-template-columns:minmax(0,2fr) repeat(2,minmax(0,1fr)) auto auto auto;gap:10px;align-items:end;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px;margin-bottom:12px}
 @media (max-width:900px){.filters{grid-template-columns:1fr 1fr}.filters .search{grid-column:1/-1}}
 @media (max-width:480px){.filters{grid-template-columns:1fr}}
 .fld{display:flex;flex-direction:column;gap:4px;min-width:0}
@@ -123,6 +123,7 @@ tbody tr:hover td{background:var(--surface-2)}
 tr.signed td:first-child{box-shadow:inset 3px 0 0 var(--green)}
 .nmbtn{background:none;border:0;padding:0;text-align:left;cursor:pointer;font-weight:600;color:var(--ink)}
 .nmbtn:hover{text-decoration:underline}
+.newtag{font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:var(--chip);color:var(--tagfg);padding:1px 6px;border-radius:4px;margin-left:4px}
 .idt{font-family:var(--mono);font-size:11px;color:var(--muted);display:block;margin-top:1px}
 .area-tag{font-size:11.5px;font-weight:600;letter-spacing:.04em;background:var(--chip);padding:2px 8px;border-radius:4px;white-space:nowrap}
 .cargo{font-size:12.5px;color:var(--muted);max-width:230px}
@@ -204,9 +205,34 @@ const { useState, useEffect, useMemo, useRef, useCallback } = React;
 const html = htm.bind(React.createElement);
 
 /* ---------- Base de colaboradores (archivo original, sin cambios) ---------- */
-const ROSTER = ROSTER_RAW.map((r, i) => ({ id: "C" + String(i + 1).padStart(3, "0"), area: r[0], cargo: r[1], nombre: r[2] }));
-const BY_ID = Object.fromEntries(ROSTER.map(r => [r.id, r]));
-const AREAS = [...new Set(ROSTER.map(r => r.area))];
+const BASE = ROSTER_RAW.map((r, i) => ({ id: "C" + String(i + 1).padStart(3, "0"), area: r[0], cargo: r[1], nombre: r[2] }));
+const BASE_IDS = new Set(BASE.map(r => r.id));
+/* Colaboradores agregados después (IDs que empiezan con N); se guardan junto con su registro */
+let ROSTER = BASE.slice();
+let BY_ID = Object.fromEntries(ROSTER.map(r => [r.id, r]));
+let AREAS = [...new Set(ROSTER.map(r => r.area))];
+const EXTRA = {};
+const isExtraId = id => /^N[0-9A-Z]{4,14}$/.test(String(id || ""));
+const okRecord = (id, x) => BASE_IDS.has(id) || (isExtraId(id) && !!x && typeof x.nombre === "string" && !!x.nombre.trim() && !!x.area);
+function rebuildRoster(){
+  const extras = Object.values(EXTRA).sort((a, b) => a.id.localeCompare(b.id));
+  ROSTER = BASE.concat(extras);
+  BY_ID = Object.fromEntries(ROSTER.map(r => [r.id, r]));
+  AREAS = [...new Set(ROSTER.map(r => r.area))];
+}
+function addExtras(map){
+  let ch = false;
+  for (const id in map) {
+    const b = map[id]; if (!isExtraId(id) || !b || !b.nombre) continue;
+    const e = EXTRA[id];
+    if (!e || e.nombre !== b.nombre || e.area !== b.area || e.cargo !== b.cargo) { EXTRA[id] = { id, nombre: b.nombre, area: b.area, cargo: b.cargo || "", agregado: true }; ch = true; }
+  }
+  if (ch) rebuildRoster();
+}
+function resetExtras(map){ for (const k in EXTRA) delete EXTRA[k]; rebuildRoster(); addExtras(map); }
+function removeExtra(id){ delete EXTRA[id]; rebuildRoster(); }
+const newExtraId = () => "N" + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 36).toString(36).toUpperCase();
+const normName = s => (s || "").toUpperCase().replace(/\s+/g, " ").trim();
 const APP = "tmlf-consentimientos";
 const LS_KEY = "tmlf-consentimientos-v1";
 const HIST_MAX = 40;
@@ -236,9 +262,16 @@ async function sheetsUpsert(cfg, records, origen){
   if (!j.ok) throw new Error(j.error === "unauthorized" ? "Clave (TOKEN) incorrecta" : (j.error || "Respuesta inválida"));
   return j;
 }
-const withRoster = (id, body) => ({ id, nombre: BY_ID[id].nombre, area: BY_ID[id].area, cargo: BY_ID[id].cargo, ...body });
+async function sheetsDelete(cfg, id){
+  const r = await fetch(cfg.url, { method: "POST", redirect: "follow", headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({ action: "delete", token: cfg.token || "", id }) });
+  const j = await r.json();
+  if (!j.ok) throw new Error(j.error === "unauthorized" ? "Clave (TOKEN) incorrecta" : (j.error || "Respuesta inválida"));
+  return j;
+}
+const withRoster = (id, body) => { const r = BY_ID[id] || body; return { ...body, id, nombre: r.nombre, area: r.area, cargo: r.cargo }; };
 function readLocalCache(){
-  try { const o = JSON.parse(localStorage.getItem(LS_KEY) || "{}"); const out = {}; for (const k in o) if (BY_ID[k]) out[k] = clean(o[k]); return out; } catch (e) { return {}; }
+  try { const o = JSON.parse(localStorage.getItem(LS_KEY) || "{}"); const out = {}; for (const k in o) if (okRecord(k, o[k])) out[k] = clean(o[k]); return out; } catch (e) { return {}; }
 }
 
 /* ---------- Utilidades ---------- */
@@ -256,7 +289,10 @@ const clean = body => ({
   obs: typeof body.obs === "string" ? body.obs.slice(0, 2000) : "",
   enlace: typeof body.enlace === "string" ? body.enlace.slice(0, 1000) : "",
   historial: Array.isArray(body.historial) ? body.historial.slice(-HIST_MAX).map(h => ({ ts: String(h.ts || ""), accion: String(h.accion || ""), fecha: String(h.fecha || ""), por: h.por ? String(h.por) : null })) : [],
-  actualizado: typeof body.actualizado === "string" ? body.actualizado : ""
+  actualizado: typeof body.actualizado === "string" ? body.actualizado : "",
+  nombre: typeof body.nombre === "string" ? body.nombre.slice(0, 200) : "",
+  area: typeof body.area === "string" ? body.area.slice(0, 120) : "",
+  cargo: typeof body.cargo === "string" ? body.cargo.slice(0, 200) : ""
 });
 const EMPTY = { estado: "pendiente", fecha: "", obs: "", enlace: "", historial: [], actualizado: "" };
 
@@ -288,11 +324,13 @@ function App(){
   const [cfg, setCfg] = useState(loadCfg);
   const [sheetErr, setSheetErr] = useState("");
   const [reloadKey, setReloadKey] = useState(0);
+  const [adding, setAdding] = useState(false);
   const dbRef = useRef(null), userRef = useRef(null), dlRef = useRef(null), meRef = useRef(null);
   const chains = useRef({});
   const localRef = useRef({});
   const recsRef = useRef(recs); recsRef.current = recs;
 
+  addExtras(recs);
   const say = useCallback((msg, bad) => { setToast({ msg, bad, k: Date.now() }); }, []);
   useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(null), toast.bad ? 6000 : 3200); return () => clearTimeout(t); }, [toast]);
 
@@ -303,7 +341,8 @@ function App(){
       try {
         const raw = localStorage.getItem(LS_KEY);
         const obj = raw ? JSON.parse(raw) : {};
-        const out = {}; for (const k in obj) if (BY_ID[k]) out[k] = clean(obj[k]);
+        const out = {}; for (const k in obj) if (okRecord(k, obj[k])) out[k] = clean(obj[k]);
+        resetExtras(out);
         localRef.current = { ...out }; setRecs(out); setMode("local");
       } catch (e) { setMode("memory"); }
     };
@@ -313,7 +352,8 @@ function App(){
           const j = await sheetsGet(cfg);
           if (cancelled) return;
           const out = {};
-          (j.records || []).forEach(x => { if (BY_ID[x.id]) out[x.id] = clean(x); });
+          (j.records || []).forEach(x => { if (okRecord(x.id, x)) out[x.id] = clean(x); });
+          resetExtras(out);
           setRecs(out); setMode("sheets"); setSheetErr(""); setLastSave(null);
           // Registros capturados en este navegador más recientes que la hoja
           const cache = readLocalCache();
@@ -322,7 +362,7 @@ function App(){
             title: "Registros de este navegador sin subir",
             msg: html`<p style=${{margin:0}}>Hay <b>${newer.length}</b> registros guardados en este navegador que son más recientes que los de la hoja (${newer.filter(id => cache[id].estado === "firmado").length} con firma). ¿Quieres enviarlos a Google Sheets?</p>`,
             label: "Enviar " + newer.length + " registros",
-            onOk: () => pushRef.current(newer.map(id => ({ id, body: cache[id] })), "navegador")
+            onOk: () => { addExtras(cache); pushRef.current(newer.map(id => ({ id, body: cache[id] })), "navegador"); }
           });
           return;
         } catch (e) {
@@ -349,7 +389,8 @@ function App(){
       c.use("downloads").then(d => { dlRef.current = d; }).catch(() => {});
       unsub = db.collection("consents").limit(1000).onSnapshot(snap => {
         const out = {};
-        snap.docs.forEach(d => { if (BY_ID[d.id] && d.exists) out[d.id] = clean(d.data() || {}); });
+        snap.docs.forEach(d => { if (d.exists && okRecord(d.id, d.data())) out[d.id] = clean(d.data() || {}); });
+        resetExtras(out);
         setRecs(out); setMode("db");
       }, err => { say("Se perdió la conexión con el almacenamiento compartido. Recarga la página.", true); });
     })();
@@ -362,7 +403,7 @@ function App(){
     if (mode !== "sheets") return;
     let last = Date.now();
     const onFocus = () => { if (Date.now() - last < 20000 || pending > 0) return; last = Date.now();
-      sheetsGet(cfgRef.current).then(j => { const out = {}; (j.records || []).forEach(x => { if (BY_ID[x.id]) out[x.id] = clean(x); }); setRecs(out); }).catch(() => {}); };
+      sheetsGet(cfgRef.current).then(j => { const out = {}; (j.records || []).forEach(x => { if (okRecord(x.id, x)) out[x.id] = clean(x); }); resetExtras(out); setRecs(out); }).catch(() => {}); };
     window.addEventListener("focus", onFocus);
     return () => window.removeEventListener("focus", onFocus);
   }, [mode, pending]);
@@ -465,6 +506,34 @@ function App(){
     if (est === "firmado") markSigned(id); else askRevert(id);
   };
 
+  /* Alta y baja de colaboradores agregados */
+  const addPerson = async (p) => {
+    const id = newExtraId();
+    const now = new Date().toISOString();
+    const h = [entry("Colaborador agregado", "")];
+    if (p.estado === "firmado") h.push(entry("Marcado como firmado", p.fecha));
+    const body = { ...EMPTY, nombre: p.nombre, area: p.area, cargo: p.cargo, estado: p.estado, fecha: p.estado === "firmado" ? p.fecha : "", obs: p.obs, historial: h, actualizado: now };
+    EXTRA[id] = { id, nombre: p.nombre, area: p.area, cargo: p.cargo, agregado: true }; rebuildRoster();
+    const ok = await writeRec(id, body);
+    if (ok !== false) say("Colaborador agregado: " + p.nombre);
+    return id;
+  };
+  const deletePerson = (id) => {
+    const r = BY_ID[id]; if (!r || !isExtraId(id)) return;
+    setConfirm({ title: "¿Eliminar colaborador agregado?", danger: true, label: "Eliminar",
+      msg: html`<p style=${{margin:0}}>Se quitará a <b>${r.nombre}</b> (${r.area}) de la lista y de los indicadores. ${mode === "sheets" ? "También se borra su fila en la hoja; la baja queda en la Bitacora." : ""} Esta acción no se puede deshacer.</p>`,
+      onOk: async () => {
+        try {
+          if (mode === "sheets") await sheetsDelete(cfgRef.current, id);
+          else if (mode === "db" && dbRef.current) await dbRef.current.collection("consents").doc(id).delete();
+          else if (mode === "local") { delete localRef.current[id]; try { localStorage.setItem(LS_KEY, JSON.stringify(localRef.current)); } catch (e) {} }
+          setRecs(rr => { const n = { ...rr }; delete n[id]; return n; });
+          removeExtra(id); setOpenId(null);
+          say("Colaborador eliminado: " + r.nombre);
+        } catch (e) { say("No se pudo eliminar: " + (e && e.message || e), true); }
+      } });
+  };
+
   /* Derivados */
   const stat = useMemo(() => {
     const byArea = {}; AREAS.forEach(a => byArea[a] = { total: 0, f: 0 });
@@ -473,7 +542,7 @@ function App(){
     return { total: ROSTER.length, f, p: ROSTER.length - f, pc: pct(f, ROSTER.length), byArea };
   }, [recs]);
 
-  const cargos = useMemo(() => [...new Set(ROSTER.filter(r => !fArea || r.area === fArea).map(r => r.cargo))].sort((a, b) => a.localeCompare(b, "es")), [fArea]);
+  const cargos = useMemo(() => [...new Set(ROSTER.filter(r => !fArea || r.area === fArea).map(r => r.cargo))].sort((a, b) => a.localeCompare(b, "es")), [fArea, recs]);
   useEffect(() => { if (fCargo && !cargos.includes(fCargo)) setFCargo(""); }, [cargos]);
 
   const rows = useMemo(() => {
@@ -520,8 +589,8 @@ function App(){
     }
     setCopyFallback({ title: filename, text: typeof data === "string" ? data.replace(/^﻿/, "") : "", note: "Este visor no permite descargar archivos. Copia el contenido y pégalo en un archivo con el nombre indicado." });
   };
-  const recRow = r => { const c = recs[r.id] || EMPTY; return [r.id, r.nombre, r.area, r.cargo, c.estado === "firmado" ? "Firmado" : "Pendiente de firma", fmtDate(c.fecha), c.obs, c.enlace, fmtTs(c.actualizado)]; };
-  const HEAD = ["ID", "Nombre", "Área", "Cargo", "Estado", "Fecha de firma", "Observaciones", "Enlace al documento", "Última actualización"];
+  const recRow = r => { const c = recs[r.id] || EMPTY; return [r.id, r.nombre, r.area, r.cargo, c.estado === "firmado" ? "Firmado" : "Pendiente de firma", fmtDate(c.fecha), c.obs, c.enlace, fmtTs(c.actualizado), r.agregado ? "Agregado" : "Plantilla"]; };
+  const HEAD = ["ID", "Nombre", "Área", "Cargo", "Estado", "Fecha de firma", "Observaciones", "Enlace al documento", "Última actualización", "Origen"];
   const stamp = today();
   const exportCsv = which => {
     const list = ROSTER.filter(r => which === "todos" || (which === "firmados") === ((recs[r.id] || EMPTY).estado === "firmado"));
@@ -536,7 +605,7 @@ function App(){
   };
   const exportJson = () => {
     const data = { app: APP, version: 1, exportado: new Date().toISOString(), total: ROSTER.length,
-      registros: ROSTER.map(r => ({ id: r.id, nombre: r.nombre, area: r.area, cargo: r.cargo, ...(recs[r.id] || EMPTY) })) };
+      registros: ROSTER.map(r => ({ ...(recs[r.id] || EMPTY), id: r.id, nombre: r.nombre, area: r.area, cargo: r.cargo, agregado: !!r.agregado })) };
     saveFile("Consentimientos_respaldo_" + stamp + ".json", JSON.stringify(data, null, 2));
   };
 
@@ -605,7 +674,7 @@ function App(){
     ${mode === "db" && readOnly ? html`<div className="notice warn"><span>🔒</span><div><b>Modo de solo lectura.</b> Puedes consultar y exportar, pero tu nivel de acceso no permite registrar firmas. Pide acceso de colaborador a quien administra la herramienta.</div></div>` : null}
 
     ${tab === "panel" ? html`
-      <div className="sec-h"><div><h2>Avance por área</h2><p>Selecciona un área para ver únicamente a sus colaboradores.</p></div></div>
+      <div className="sec-h"><div><h2>Avance por área</h2><p>Selecciona un área para ver únicamente a sus colaboradores.</p></div>${readOnly ? null : html`<button className="btn pri" onClick=${() => setAdding(true)}>+ Agregar colaborador</button>`}</div>
       <div className="areas">
         ${AREAS.map(a => { const s = stat.byArea[a]; const p = pct(s.f, s.total); return html`
           <button key=${a} className=${"acard" + (s.f === s.total ? " done" : "")} onClick=${() => goArea(a)}>
@@ -624,6 +693,7 @@ function App(){
         <label className="fld"><span>Cargo</span><select id="f-cargo" className="sel" value=${fCargo} onChange=${e => setFCargo(e.target.value)}><option value="">Todos los cargos</option>${cargos.map(c => html`<option key=${c} value=${c}>${c}</option>`)}</select></label>
         <div className="fld"><span>Estado</span><div className="seg">${[["todos","Todos"],["firmados","Firmados"],["pendientes","Pendientes"]].map(([k,l]) => html`<button key=${k} aria-pressed=${fEstado === k} onClick=${() => setFEstado(k)}>${l}</button>`)}</div></div>
         <button className="btn" onClick=${clearFilters} disabled=${!filtersOn}>Limpiar filtros</button>
+        ${readOnly ? null : html`<button className="btn pri" onClick=${() => setAdding(true)}>+ Agregar colaborador</button>`}
       </div>
       <div className="resline"><span className="num">Mostrando <b>${rows.length}</b> de ${stat.total} colaboradores${fArea ? html`<span className="chipf">Área: ${fArea}</span>` : null}</span>
         <span className="num">${(() => { const f = rows.filter(r => (recs[r.id] || EMPTY).estado === "firmado").length; return html`En esta vista: <b style=${{color:"var(--green)"}}>${f}</b> firmados · <b>${rows.length - f}</b> pendientes`; })()}</span></div>
@@ -636,7 +706,7 @@ function App(){
           <tbody>
             ${rows.length ? rows.map(r => { const c = recs[r.id] || EMPTY; const f = c.estado === "firmado"; return html`
               <tr key=${r.id} className=${f ? "signed" : ""}>
-                <td><button className="nmbtn" onClick=${() => setOpenId(r.id)}>${r.nombre}</button><span className="idt">${r.id}</span></td>
+                <td><button className="nmbtn" onClick=${() => setOpenId(r.id)}>${r.nombre}</button><span className="idt">${r.id}${r.agregado ? html` <span className="newtag">Agregado</span>` : null}</span></td>
                 <td><span className="area-tag">${r.area}</span></td>
                 <td><div className="cargo">${r.cargo}</div></td>
                 <td><div className="toggle" role="group" aria-label=${"Estado de " + r.nombre}>
@@ -669,7 +739,8 @@ function App(){
     ${tab === "resp" ? html`<${Respaldo} recs=${recs} mode=${mode} readOnly=${readOnly} exportCsv=${exportCsv} exportAreas=${exportAreas} exportJson=${exportJson} stat=${stat} writeRec=${writeRec} pushList=${pushList} say=${say} setConfirm=${setConfirm} meRef=${meRef} cfg=${cfg} setCfg=${setCfg} sheetErr=${sheetErr} reload=${() => setReloadKey(k => k + 1)} />` : null}
   </main>
 
-  ${openId ? html`<${Ficha} id=${openId} rec=${recs[openId] || EMPTY} readOnly=${readOnly} names=${names} onClose=${() => setOpenId(null)} writeRec=${writeRec} say=${say} setConfirm=${setConfirm} meRef=${meRef} />` : null}
+  ${adding ? html`<${AddPerson} onClose=${() => setAdding(false)} onSave=${async p => { await addPerson(p); setAdding(false); }} />` : null}
+  ${openId && BY_ID[openId] ? html`<${Ficha} key=${openId} id=${openId} rec=${recs[openId] || EMPTY} readOnly=${readOnly} onDelete=${deletePerson} names=${names} onClose=${() => setOpenId(null)} writeRec=${writeRec} say=${say} setConfirm=${setConfirm} meRef=${meRef} />` : null}
   ${confirm ? html`<${Confirm} ...${confirm} onClose=${() => setConfirm(null)} />` : null}
   ${copyFallback ? html`<${CopyBox} ...${copyFallback} onClose=${() => setCopyFallback(null)} />` : null}
   ${toast ? html`<div key=${toast.k} className=${"toast" + (toast.bad ? " bad" : "")} role="status">${toast.msg}</div>` : null}
@@ -677,8 +748,16 @@ function App(){
 }
 
 /* ---------- Ficha individual ---------- */
-function Ficha({ id, rec, readOnly, names, onClose, writeRec, say, setConfirm, meRef }){
+function Ficha({ id, rec, readOnly, names, onClose, writeRec, say, setConfirm, meRef, onDelete }){
   const r = BY_ID[id];
+  const extra = !!r.agregado;
+  const [nombre, setNombre] = useState(r.nombre);
+  const [area, setArea] = useState(r.area);
+  const [cargo, setCargo] = useState(r.cargo);
+  const nNombre = normName(nombre), nArea = normName(area), nCargo = normName(cargo);
+  const dupe = extra && nNombre !== r.nombre ? ROSTER.find(x => x.id !== id && norm(x.nombre) === norm(nNombre)) : null;
+  const idOk = !extra || (nNombre.length >= 5 && nArea && nCargo && !dupe);
+  const idDirty = extra && (nNombre !== r.nombre || nArea !== r.area || nCargo !== r.cargo);
   const [estado, setEstado] = useState(rec.estado);
   const [fecha, setFecha] = useState(rec.fecha || "");
   const [obs, setObs] = useState(rec.obs || "");
@@ -688,21 +767,23 @@ function Ficha({ id, rec, readOnly, names, onClose, writeRec, say, setConfirm, m
   const changeEstado = v => { setEstado(v); if (v === "firmado" && !fecha) setFecha(today()); };
   const urlOk = isUrl(enlace);
   const dateBad = estado === "firmado" && fecha && fecha > today();
-  const dirty = estado !== rec.estado || (estado === "firmado" && fecha !== (rec.fecha || "")) || obs !== (rec.obs || "") || enlace !== (rec.enlace || "");
+  const dirty = idDirty || estado !== rec.estado || (estado === "firmado" && fecha !== (rec.fecha || "")) || obs !== (rec.obs || "") || enlace !== (rec.enlace || "");
   const doSave = async () => {
     const now = new Date().toISOString(); const h = [...rec.historial];
     const por = meRef.current || null;
     if (estado !== rec.estado) h.push({ ts: now, accion: estado === "firmado" ? "Marcado como firmado" : "Revertido a pendiente", fecha: estado === "firmado" ? fecha : rec.fecha, por });
     else if (estado === "firmado" && fecha !== rec.fecha) h.push({ ts: now, accion: "Fecha de firma corregida", fecha, por });
     if (obs !== rec.obs || enlace !== rec.enlace) h.push({ ts: now, accion: "Observaciones / enlace actualizados", fecha: "", por });
-    const body = { estado, fecha: estado === "firmado" ? fecha : "", obs: obs.trim(), enlace: enlace.trim(), historial: h.slice(-HIST_MAX), actualizado: now };
+    if (idDirty) h.push({ ts: now, accion: "Datos del colaborador corregidos", fecha: "", por });
+    if (idDirty) { EXTRA[id] = { id, nombre: nNombre, area: nArea, cargo: nCargo, agregado: true }; rebuildRoster(); }
+    const body = { ...(extra ? { nombre: nNombre, area: nArea, cargo: nCargo } : {}), estado, fecha: estado === "firmado" ? fecha : "", obs: obs.trim(), enlace: enlace.trim(), historial: h.slice(-HIST_MAX), actualizado: now };
     setSaving(true);
     const ok = await writeRec(id, body);
     setSaving(false);
-    if (ok !== false) { say("Registro actualizado: " + r.nombre); onClose(); }
+    if (ok !== false) { say("Registro actualizado: " + (extra ? nNombre : r.nombre)); onClose(); }
   };
   const save = () => {
-    if (!urlOk || dateBad || (estado === "firmado" && !fecha)) return;
+    if (!urlOk || dateBad || !idOk || (estado === "firmado" && !fecha)) return;
     if (rec.estado === "firmado" && estado === "pendiente") {
       setConfirm({ title: "¿Revertir firma registrada?", msg: html`<p style=${{margin:0}}><b>${r.nombre}</b> volverá a "Pendiente de firma". El cambio queda en el historial.</p>`, label: "Revertir y guardar", danger: true, onOk: doSave });
     } else doSave();
@@ -710,9 +791,18 @@ function Ficha({ id, rec, readOnly, names, onClose, writeRec, say, setConfirm, m
   const hist = rec.historial.slice().reverse();
   return html`<div className="scrim" onClick=${e => { if (e.target === e.currentTarget) onClose(); }}>
     <div className="modal" role="dialog" aria-modal="true" aria-labelledby="ficha-t">
-      <div className="mhead"><div><h3 id="ficha-t">Registro individual</h3><span className="lock">${r.id} · los datos del colaborador vienen de la plantilla y no se editan aquí</span></div><button className="x" aria-label="Cerrar" onClick=${onClose}>×</button></div>
+      <div className="mhead"><div><h3 id="ficha-t">Registro individual</h3><span className="lock">${r.id} · ${extra ? "colaborador agregado: puedes corregir sus datos" : "los datos del colaborador vienen de la plantilla y no se editan aquí"}</span></div><button className="x" aria-label="Cerrar" onClick=${onClose}>×</button></div>
       <div className="mbody">
-        <dl className="ro"><dt>Nombre</dt><dd>${r.nombre}</dd><dt>Área</dt><dd>${r.area}</dd><dt>Cargo</dt><dd>${r.cargo}</dd></dl>
+        ${extra && !readOnly ? html`<div className="fld" style=${{gap:"10px"}}>
+          <label className="fld"><span>Nombre completo</span><input id="m-nombre" className="inp" value=${nombre} onChange=${e => setNombre(e.target.value)} />
+            ${dupe ? html`<span className="err">Ya existe ${dupe.nombre} en ${dupe.area}.</span>` : nNombre.length < 5 ? html`<span className="err">Escribe el nombre completo.</span>` : null}</label>
+          <div className="two">
+            <label className="fld"><span>Área</span><input id="m-area" className="inp" list="dl-areas" value=${area} onChange=${e => setArea(e.target.value)} /></label>
+            <label className="fld"><span>Cargo</span><input id="m-cargo" className="inp" list="dl-cargos-m" value=${cargo} onChange=${e => setCargo(e.target.value)} /></label>
+          </div>
+          <datalist id="dl-areas">${AREAS.map(a => html`<option key=${a} value=${a} />`)}</datalist>
+          <datalist id="dl-cargos-m">${[...new Set(ROSTER.filter(x => x.area === nArea).map(x => x.cargo))].map(c => html`<option key=${c} value=${c} />`)}</datalist>
+        </div>` : html`<dl className="ro"><dt>Nombre</dt><dd>${r.nombre}</dd><dt>Área</dt><dd>${r.area}</dd><dt>Cargo</dt><dd>${r.cargo}</dd></dl>`}
         <div className="two">
           <div className="fld"><span>Estado</span><div className="toggle" role="group">
             <button className=${"p" + (estado === "pendiente" ? " on" : "")} disabled=${readOnly} onClick=${() => changeEstado("pendiente")}>Pendiente de firma</button>
@@ -728,9 +818,64 @@ function Ficha({ id, rec, readOnly, names, onClose, writeRec, say, setConfirm, m
           ${hist.length ? html`<ul className="hist">${hist.map((h, i) => html`<li key=${i} className=${h.accion.includes("firmado") ? "f" : ""}><time>${fmtTs(h.ts)}</time> · ${h.accion}${h.fecha ? " (" + fmtDate(h.fecha) + ")" : ""}${h.por ? html` · <span className="muted">${names[h.por] || "Usuario"}</span>` : null}</li>`)}</ul>` : html`<span className="hint">Sin cambios registrados.</span>`}</div>
         <p className="legal">Marcar como "Firmado" es un registro administrativo de confirmación; no es una firma electrónica ni prueba por sí solo la existencia del documento.</p>
       </div>
-      <div className="mfoot"><button className="btn" onClick=${onClose}>${readOnly ? "Cerrar" : "Cancelar"}</button>
-        ${readOnly ? null : html`<button className="btn pri" disabled=${!dirty || saving || !urlOk || dateBad || (estado === "firmado" && !fecha)} onClick=${save}>${saving ? "Guardando…" : "Guardar cambios"}</button>`}</div>
+      <div className="mfoot">${extra && !readOnly ? html`<button className="btn" style=${{marginRight:"auto",color:"var(--red)"}} onClick=${() => onDelete(id)}>Eliminar colaborador</button>` : null}<button className="btn" onClick=${onClose}>${readOnly ? "Cerrar" : "Cancelar"}</button>
+        ${readOnly ? null : html`<button className="btn pri" disabled=${!dirty || saving || !urlOk || dateBad || !idOk || (estado === "firmado" && !fecha)} onClick=${save}>${saving ? "Guardando…" : "Guardar cambios"}</button>`}</div>
     </div></div>`;
+}
+
+/* ---------- Agregar colaborador ---------- */
+function AddPerson({ onClose, onSave }){
+  const [nombre, setNombre] = useState("");
+  const [areaSel, setAreaSel] = useState("");
+  const [areaNew, setAreaNew] = useState("");
+  const [cargo, setCargo] = useState("");
+  const [estado, setEstado] = useState("pendiente");
+  const [fecha, setFecha] = useState(today());
+  const [obs, setObs] = useState("");
+  const [tried, setTried] = useState(false);
+  const [saving, setSaving] = useState(false);
+  useEffect(() => { const k = e => { if (e.key === "Escape") onClose(); }; window.addEventListener("keydown", k); return () => window.removeEventListener("keydown", k); }, []);
+  const nNombre = normName(nombre);
+  const area = areaSel === "__otra" ? normName(areaNew) : areaSel;
+  const nCargo = normName(cargo);
+  const dupe = nNombre ? ROSTER.find(x => norm(x.nombre) === norm(nNombre)) : null;
+  const cargosArea = [...new Set(ROSTER.filter(x => x.area === area).map(x => x.cargo))].sort((a, b) => a.localeCompare(b, "es"));
+  const errs = {
+    nombre: !nNombre ? "Escribe el nombre completo." : nNombre.length < 5 ? "El nombre es demasiado corto." : dupe ? "Ya existe " + dupe.nombre + " en " + dupe.area + " (" + dupe.id + ")." : "",
+    area: !area ? "Selecciona o escribe el área." : "",
+    cargo: !nCargo ? "Escribe el cargo." : "",
+    fecha: estado === "firmado" && (!fecha || fecha > today()) ? "Indica una fecha de firma válida (no posterior a hoy)." : ""
+  };
+  const valid = !Object.values(errs).some(Boolean);
+  const submit = async e => {
+    e.preventDefault(); setTried(true); if (!valid || saving) return;
+    setSaving(true);
+    await onSave({ nombre: nNombre, area, cargo: nCargo, estado, fecha, obs: obs.trim() });
+    setSaving(false);
+  };
+  const show = k => (tried || (k === "nombre" && dupe)) && errs[k] ? html`<span className="err">${errs[k]}</span>` : null;
+  return html`<div className="scrim" onClick=${e => { if (e.target === e.currentTarget) onClose(); }}>
+    <form className="modal" role="dialog" aria-modal="true" aria-labelledby="add-t" onSubmit=${submit} noValidate>
+      <div className="mhead"><div><h3 id="add-t">Agregar colaborador</h3><span className="lock">Para personas que no vienen en la plantilla original. Se identifican como "Agregado".</span></div><button type="button" className="x" aria-label="Cerrar" onClick=${onClose}>×</button></div>
+      <div className="mbody">
+        <label className="fld"><span>Nombre completo</span><input id="a-nombre" className="inp" autoFocus value=${nombre} onChange=${e => setNombre(e.target.value)} placeholder="NOMBRE(S) APELLIDO PATERNO APELLIDO MATERNO" />${show("nombre")}<span className="hint">Se guarda en mayúsculas, igual que la plantilla.</span></label>
+        <div className="two">
+          <label className="fld"><span>Área</span><select id="a-area" className="sel" value=${areaSel} onChange=${e => { setAreaSel(e.target.value); setCargo(""); }}>
+            <option value="">Selecciona…</option>${AREAS.map(a => html`<option key=${a} value=${a}>${a}</option>`)}<option value="__otra">Otra área…</option></select>
+            ${areaSel === "__otra" ? html`<input id="a-area-new" className="inp" style=${{marginTop:"6px"}} placeholder="Nombre de la nueva área" value=${areaNew} onChange=${e => setAreaNew(e.target.value)} />` : null}${show("area")}</label>
+          <label className="fld"><span>Cargo</span><input id="a-cargo" className="inp" list="dl-cargos" value=${cargo} onChange=${e => setCargo(e.target.value)} placeholder=${cargosArea[0] || "Ej. PARALEGAL"} />
+            <datalist id="dl-cargos">${cargosArea.map(c => html`<option key=${c} value=${c} />`)}</datalist>${show("cargo")}</label>
+        </div>
+        <div className="two">
+          <div className="fld"><span>Estado inicial</span><div className="toggle" role="group">
+            <button type="button" className=${"p" + (estado === "pendiente" ? " on" : "")} onClick=${() => setEstado("pendiente")}>Pendiente de firma</button>
+            <button type="button" className=${"f" + (estado === "firmado" ? " on" : "")} onClick=${() => setEstado("firmado")}>Firmado</button></div></div>
+          <label className="fld"><span>Fecha de firma</span><input id="a-fecha" type="date" className="inp" max=${today()} disabled=${estado !== "firmado"} value=${estado === "firmado" ? fecha : ""} onChange=${e => setFecha(e.target.value)} />${show("fecha")}</label>
+        </div>
+        <label className="fld"><span>Observaciones (opcional)</span><textarea id="a-obs" className="inp" rows="2" maxLength="2000" value=${obs} onChange=${e => setObs(e.target.value)} placeholder="Ej. ingreso reciente, no estaba en la lista original"></textarea></label>
+      </div>
+      <div className="mfoot"><button type="button" className="btn" onClick=${onClose}>Cancelar</button><button type="submit" className="btn pri" disabled=${saving}>${saving ? "Guardando…" : "Agregar colaborador"}</button></div>
+    </form></div>`;
 }
 
 /* ---------- Exportar / respaldo ---------- */
@@ -752,8 +897,10 @@ function Respaldo({ recs, mode, readOnly, exportCsv, exportAreas, exportJson, st
       if (!data || data.app !== APP || !Array.isArray(data.registros)) { setErr("Este archivo no es un respaldo de Control de Consentimientos."); return; }
       const seen = new Set(); const items = []; let ign = 0, dup = 0;
       data.registros.forEach(x => {
-        const r = x && BY_ID[x.id];
-        if (!r || norm(r.nombre) !== norm(x.nombre)) { ign++; return; }
+        if (!x || !okRecord(x.id, x)) { ign++; return; }
+        const r = BY_ID[x.id];
+        if (r && norm(r.nombre) !== norm(x.nombre)) { ign++; return; }
+        if (!r && ROSTER.some(o => norm(o.nombre) === norm(x.nombre))) { ign++; return; }
         if (seen.has(x.id)) { dup++; return; }
         seen.add(x.id); items.push({ id: x.id, body: clean(x) });
       });
@@ -765,6 +912,7 @@ function Respaldo({ recs, mode, readOnly, exportCsv, exportAreas, exportJson, st
   const changes = useMemo(() => {
     if (!plan) return [];
     return plan.items.filter(({ id, body }) => {
+      if (isExtraId(id) && !recs[id]) return true;
       const cur = recs[id] || EMPTY;
       const same = cur.estado === body.estado && cur.fecha === body.fecha && cur.obs === body.obs && cur.enlace === body.enlace;
       if (same) return false;
@@ -776,6 +924,7 @@ function Respaldo({ recs, mode, readOnly, exportCsv, exportAreas, exportJson, st
     setBusy({ done: 0, total: changes.length });
     const now = new Date().toISOString();
     const list = changes.map(({ id, body }) => ({ id, body: { ...body, actualizado: now, historial: [...body.historial, { ts: now, accion: "Restaurado desde respaldo", fecha: body.fecha, por: meRef.current || null }].slice(-HIST_MAX) } }));
+    addExtras(Object.fromEntries(list.map(it => [it.id, it.body])));
     const fails = await pushList(list, "importacion");
     setBusy(null); setPlan(null);
     if (mode !== "sheets") say(fails ? "Importación con " + fails + " errores; revisa los registros." : "Respaldo importado: " + changes.length + " registros actualizados", !!fails);
@@ -826,6 +975,7 @@ function Respaldo({ recs, mode, readOnly, exportCsv, exportAreas, exportJson, st
           <div className="imp-sum num">
             <span>Exportado</span><b>${fmtTs(plan.exportado) || "—"}</b>
             <span>Coincidencias</span><b>${plan.items.length}</b>
+            <span>Colaboradores agregados nuevos</span><b>${changes.filter(c => isExtraId(c.id) && !recs[c.id]).length}</b>
             <span>Cambios a aplicar</span><b>${changes.length}</b>
             <span>Firmas que se registran</span><b>${firmadosIn}</b>
             <span>Firmas que se revierten</span><b style=${reverts ? {color:"var(--red)"} : null}>${reverts}</b>
