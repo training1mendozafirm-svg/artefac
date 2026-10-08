@@ -188,7 +188,8 @@ body.standalone #btnPrint{display:inline-flex}
 .fk p{font-size:11.5px;line-height:1.3;font-weight:600}
 .fk .r{font-size:10.5px;color:var(--graphite);font-weight:400}
 .fk .r::before{content:"→ "}
-.band{grid-column:1/-1}
+.band{grid-column:1/-1;position:relative}
+.loop-lbl{position:absolute;left:50%;top:38px;transform:translate(-50%,-50%);white-space:nowrap;background:var(--red);color:var(--white);font:700 10px/1 var(--f-display);letter-spacing:.08em;text-transform:uppercase;padding:5px 14px;border-radius:999px;box-shadow:0 0 0 3px var(--white)}
 .band svg{display:block;width:100%;height:52px;overflow:visible}
 .rule-strip{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;background:var(--red-bg);border:1px solid var(--red-line);border-radius:10px;padding:10px 14px}
 .rule-strip p{font-size:11.5px;color:#3c1d1a;line-height:1.4}
@@ -586,9 +587,8 @@ html.mobile .app{width:100vw;max-width:100%}
           </defs>
           <path d="M1062.4 0 V14 H105.6 V50" fill="none" stroke="#C5A06A" stroke-width="2" marker-end="url(#mg)"/>
           <path d="M344.8 52 V38 H823.2 V3" fill="none" stroke="#B23A33" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#mr)"/>
-          <rect x="452" y="29" width="264" height="18" rx="9" fill="#B23A33"/>
-          <text x="584" y="42" text-anchor="middle" font-family="Montserrat,Arial,sans-serif" font-size="9.5" font-weight="700" letter-spacing=".6" fill="#FFFFFF">FALLA EL CONTROL (7) → NUEVA FIRMA DESDE EL PASO 4</text>
-        </svg>
+                  </svg>
+        <span class="loop-lbl">Si falla el paso 7 → nueva firma desde el paso 4</span>
       </div>
 
       <div class="rc"><div class="top"><span class="node par">6</span><span class="chip chip-par">Paralegal</span></div>
