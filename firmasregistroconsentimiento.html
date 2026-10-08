@@ -55,6 +55,11 @@ button,input,select,textarea{font:inherit;color:inherit}
 .prog{display:grid;grid-template-columns:1fr 1fr;gap:10px 28px}
 @media (max-width:600px){.prog{grid-template-columns:1fr}}
 .drow{display:flex;flex-direction:column;gap:4px}
+.drow.na .drow-l span:last-child{font-style:italic}
+.doctag{align-self:flex-start;font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line-2);border-radius:4px;padding:1px 6px}
+.acard.empty-area{cursor:default;border-style:dashed;background:var(--surface-2)}
+.acard.empty-area:hover{transform:none;border-color:var(--line)}
+.na-cell{font-size:12px;color:var(--muted);font-style:italic}
 .drow-l{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
 .dcell{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
 .dfecha{font-size:11.5px;color:var(--muted);padding-left:4px}
@@ -214,7 +219,7 @@ pre.copybox{white-space:pre-wrap;font-family:var(--mono);font-size:12px;backgrou
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/htm@3.1.1/dist/htm.umd.js"></script>
 <script>
-const ROSTER_RAW = [["PACKETS", "PACKETS MANAGER", "JUAN CARLOS SANDOVAL VILLA"], ["PACKETS", "PACKETS COORDINATOR", "VICTOR MANUEL MENDOZA MEDINA"], ["PACKETS", "PARALEGAL PR ATTY SAQUIA", "CLARISA MENDIETA AHUMADA"], ["PACKETS", "CASE REVIEW / ATTY REVIEW TL", "CHRISTIAN PEREZ QUIJADA"], ["PACKETS", "PARALEGAL", "MICHEL DANIELA FLORES TORRES"], ["PACKETS", "PARALEGAL", "AKETZALI MARGARITA GONZALEZ LOPEZ"], ["PACKETS", "PARALEGAL", "ZAIRA YAMILE TIRADO PLIEGO"], ["PACKETS", "PARALEGAL", "GABRIELA HERNANDEZ GARCIA"], ["PACKETS", "PARALEGAL", "LIZETH ESTELA IBAÑEZ LOZADA"], ["PACKETS", "PARALEGAL", "STEPHANIE GIOVANNA ORDUÑA CHAVEZ"], ["PACKETS", "PARALEGAL", "XIMENA QUIROZ GONZALEZ"], ["PACKETS", "PARALEGAL", "FATIMA MONSERRATH PUNARO PARRA"], ["PACKETS", "PARALEGAL", "SUSANA DENNISSE PEDRAZA CANO"], ["PACKETS", "PARALEGAL", "PAULINA ORTIZ GONZALEZ"], ["PACKETS", "PARALEGAL", "MARIA XARENY MENDEZ RUIZ"], ["PACKETS", "PARALEGAL", "ANAHI MONTIEL ARCOS"], ["PACKETS", "PARALEGAL", "ALBERTO LOZADA GONZALEZ"], ["PACKETS", "FINAL REVIEW / ATTY REVIEW TL", "FRIDA LISSETE ALTAMIRANO CAPILLA"], ["PACKETS", "PARALEGAL FINAL ATTY REVIEW", "MIGUEL ANGEL AGUILAR GUERRERO"], ["PACKETS", "PARALEGAL FINAL ATTY REVIEW", "RODRIGO IGNACIO PEREZ RAMIREZ"], ["PACKETS", "PARALEGAL FINAL ATTY REVIEW", "ARTURO CARO CAMPUZANO"], ["PACKETS", "PARALEGAL FINAL ATTY REVIEW", "AMANDA MEGAN RANGEL RESENDIZ"], ["PACKETS", "LEA COOPERATION TL", "KEVIN EMMANUEL MIRANDA PEREZ"], ["PACKETS", "PARALEGAL REMOVALS", "ANGEL DANARIEL CURIEL ARRIAGA"], ["PACKETS", "PARALEGAL REMOVALS", "DIANA GABRIELA HERNANDEZ ARCE"], ["PACKETS", "INCOMMING MAIL RECEIPTS SPECIALIST", "LUZ IVANNIA SALGADO MENDOZA"], ["PACKETS", "PARALEGAL - FBI/PD", "MARCOS GABRIEL NARVAEZ LOPEZ"], ["PACKETS", "PARALEGAL LEA", "FRIDA CAMILA CARRASCO REVUELTAS"], ["PACKETS", "PARALEGAL CASE REVIEW 485 INTERVIEWS", "MEGAL LEON OLVERA"], ["CASE REVIEW", "CASE REVIEW PARALEGAL", "FRANCIS MILENA PACHECO CORREA"], ["CASE REVIEW", "CASE REVIEW PARALEGAL", "DANIEL REYNA CRUZ"], ["CASE REVIEW", "CASE REVIEW PARALEGAL", "VALENTINA ZEPEDA GARCIA"], ["CASE REVIEW", "PARALEGAL CASE REVIEW 485 INTERVIEWS", "CLAUDIA RIVERA ROCHA"], ["PCR", "FU - ENSAMBLE TL", "JUAN MANUEL DELGADO DE LUNA"], ["PCR", "FU - PRE CASE REVIEWER", "LIZBETH PEREA GONZALEZ"], ["PCR", "FU - PRE CASE REVIEWER", "NAOMI RODRIGUEZ NAVA"], ["PCR", "FU - PRE CASE REVIEWER", "ANGELA PAOLA SALGADO MARTINEZ"], ["PCR", "FU - PRE CASE REVIEWER", "MARISOL PALMA SANCHEZ"], ["PCR", "FU - PRE CASE REVIEWER", "URSULA ESTEFANY BERNAL CHAVEZ"], ["PCR", "FU - PRE CASE REVIEWER", "ELIAS DANIEL DELGADO DE LUNA"], ["PCR", "FU - PRE CASE REVIEWER", "HUGO ISAAC CERQUEDA VAZQUEZ"], ["PCR", "FU - PRE CASE REVIEWER", "SERGIO ALEXIS GOMEZ ESPINOSA"], ["PCR", "FU - PRE CASE REVIEWER", "KARINA ISABEL CORRALES PONCE"], ["PWI", "PWI MANAGER", "RAUL ESCALANTE LOPEZ"], ["PWI", "PWI COORDINATOR", "ALICIA SORIA REYES"], ["PWI", "PWI  TL", "TATIANA ITZEL JAIMES AGUIRRE"], ["PWI", "PWI AGENT", "VERONICA ALEXANDRA AVILA LOPEZ"], ["PWI", "PWI AGENT", "CRISTIAN RENE ARREOLA GARCIA"], ["PWI", "PWI AGENT", "ALONDRA LIZETH HUERTA VAZQUEZ"], ["PWI", "PWI AGENT", "DIVIA HUERTA TEODOSIO"], ["PSYCH", "PWI AGENT", "MARTIN MARTINEZ LUNA"], ["PSYCH", "PWI AGENT", "NANCY GABRIELA SOLANO ANGUIANO"], ["PSYCH", "PWI AGENT", "LIZETH ANAHI LEYVA JACOME"], ["PSYCH", "PWI  TL", "JOSE FRANCISCO DIAZ CASTAÑEDA"], ["PWI", "PWI AGENT", "RODRIGO MONROY ZAVALA"], ["PWI", "PWI AGENT", "GUSTAVO DIEGO CAMPOS MARTINEZ"], ["PWI", "PWI AGENT", "KENIA DHAMAR BECERRA PARRA"], ["PWI", "PWI AGENT", "ANGEL VENTURA YAÑEZ"], ["PWI", "PWI AGENT", "GUILLERMO ALBERTO RAMIREZ ROMERO"], ["PWI", "PWI AGENT", "ANGEL ALBERTO MURILLO MEZA"], ["PWI", "PWI AGENT", "FERNANDO DAVID FIERRO DURAN"], ["PSYCH", "PWI  TL", "ALMA ERENDIRA DURAN RIVERA"], ["PSYCH", "PWI AGENT", "NORMA ANGELICA ZAVALA DAVILA"], ["PSYCH", "PWI AGENT", "DIEGO MARTINEZ HIDALGO"], ["PSYCH", "PWI AGENT", "SAMANTHA FONSECA SALAZAR"], ["PSYCH", "PWI AGENT", "KARLA ANGELICA CARDENAS REYES"], ["PSYCH", "PWI AGENT", "SUSLAY YACARANDAY CASTILLO MENDOZA"], ["PSYCH", "PWI AGENT", "ARELY BERENICE RIVERA PALACIOS"], ["PSYCH", "PWI  TL COMPLEX", "DANNEVI GARCIA HERNANDEZ"], ["PSYCH", "PWI AGENT", "LUIS ENRIQUE RICO CASTAÑEDA"], ["PSYCH", "PWI AGENT", "CARLOS ALBERTO CORTES ARELLANO"], ["PSYCH", "PWI AGENT", "DULCE AMAIRANI MARTINEZ BAUTISTA"], ["PSYCH", "PWI AGENT", "ROBERTO SEGURA CONTRERAS"], ["PSYCH", "PWI AGENT", "JENY MACEDO LOPEZ"], ["PSYCH", "PWI AGENT", "CINTYA JOSELYN LOPEZ VILLANUEVA"], ["PSYCH", "PWI AGENT", "DIANA VIDAL HERNANDEZ"], ["PSYCH", "PWI AGENT", "CAROLINA ELIZABETH HERNANDEZ POUPARD"], ["PWI", "PRE WELCOME CALL COORDINATOR JR", "RENATA RAMIREZ FLORES"], ["PCR", "RAPSHEETS TL", "JONATHAN SAUL MIGUEL ROMERO"], ["PCR", "PCR AGENT", "GREGG DALADIER LLUCK CHAVEZ"], ["PCR", "PCR AGENT", "SABDIEL CASTAÑEDA REZA"], ["PCR", "PCR AGENT", "VERONICA DIAZ RICO"], ["PCR", "PCR AGENT", "MIGUEL ANGEL ZAPATA CASTREJON"], ["PCR", "PCR AGENT", "REBECA ITZEL MARTINEZ SANTOS"], ["PCR", "PCR AGENT", "LEONEL LUNA NICOLAS"], ["PCR", "PCR AGENT", "ANDRE ARMENTA GUTIERREZ"], ["FU", "PCR  TL", "GIOVANA LIZETE AYALA GONZALEZ"], ["FU", "PCR AGENT", "EILEEN NAYELLI RAMIREZ DOMINGUEZ"], ["FU", "PCR AGENT", "ANA LIZBETH FIERRO DURAN"], ["FU", "PCR AGENT", "VALERIA BENITEZ MONROY"], ["FU", "PCR AGENT", "ANA KAREN MARTINEZ RUIZ"], ["FU", "PCR AGENT", "NALLELY ALCANTARA MARTINEZ"], ["FU", "PCR AGENT", "DIEGO ALBERTO VAZQUEZ REYES"], ["FU", "PCR AGENT", "WENDY AYLIN VALDOVINOS GONZALEZ"], ["FU", "PCR AGENT", "RAQUEL ANGELINA VALDEZ LARIOS"], ["RFE", "LEGAL INTELLIGENCE AND RFE MANAGER", "BRENDA CASTELLANOS GARCIA"], ["RFE", "RFE COORDINATOR", "VALERIA DAFNE PEREZ CUEVAS"], ["RFE", "PARALEGAL - RFE / DANIEL PATIÑO", "GALILEA DIAZ PIÑON"], ["RFE", "CASE STRATEGIST", "CONSUELO GARCIA GARCIA"], ["RFE", "CASE STRATEGIST", "AGUSTIN NAVA GARCIA"], ["RFE", "PARALEGAL - ATTY ANNA", "DIANA PAULINA GUTIERREZ VELAZQUEZ"], ["RFE", "TL GAMMA", "ANGEL FERNANDO PEREZ NEGRETE"], ["RFE", "PARALEGAL - RFE", "DIANA BONIFACIO DE LA PALMA"], ["RFE", "PARALEGAL - RFE", "PAULINA DEL CARMEN PONCE RODRIGUEZ"], ["RFE", "PARALEGAL - RFE", "BRANDON OSWALDO CERVANTES GARCIA"], ["RFE", "INVESTIGADOR DE ABUSO", "SUSANA ESQUIVEL ALVARADO"], ["RFE", "INVESTIGADOR DE ABUSO", "LUIS FERNANDO MURILLO NARES"], ["RFE", "INVESTIGADOR DE ABUSO", "BARBARA FERNANDA TAPIA INFANTE"], ["RFE", "EVIDENCE ANALYST RFE", "JESUS ALONSO BOCANEGRA VEGA"], ["RFE", "EVIDENCE ANALYST RFE", "PAULA SOFIA BAUTISTA SALAS"], ["RFE", "TL ALPHA", "NAYELI RIOJA PADILLA"], ["RFE", "INVESTIGADOR DE ABUSO", "FERNANDA VALERIA VALS HERNANDEZ"], ["RFE", "INVESTIGADOR DE ABUSO", "ALBERTO DAVID RAMIREZ DIAZ"], ["RFE", "INVESTIGADOR DE ABUSO", "NATALIA MOLINA AYALA"], ["RFE", "PARALEGAL - RFE", "MAYLA NAHOMY PONCE RODRIGUEZ"], ["RFE", "PARALEGAL - RFE", "CARLOS ARTURO MONTOYA CASTILLO"], ["RFE", "PARALEGAL - RFE", "EVELYN JAZMIN LARA MARTINEZ"], ["RFE", "PARALEGAL - RFE", "PAOLA PEREZ YEPEZ"], ["RFE", "EVIDENCE ANALYST RFE", "ANDRES ALONSO RAMIREZ CASAS"], ["RFE", "EVIDENCE ANALYST RFE", "ALEJANDRO ERNESTO GONZALEZ GONZALEZ"], ["RFE", "EVIDENCE ANALYST RFE", "HECTOR JESUS GUTIERREZ CRUZ"], ["RFE", "EVIDENCE ANALYST RFE", "LESLY GABRIELA CAMARGO AGUILAR"], ["RFE", "GOVERNMENT BRANCH  & SPECIAL REPORTS TL", "GERSON YOAV SANCHEZ BERNAL"], ["RFE", "GOVERNMENT BRANCH SUPERVISOR", "JACOB NAVARRETE SANCHEZ"], ["RFE", "PARALEGAL - RFE", "ITZEL CALZADA PEREZ"], ["RFE", "PARALEGAL - RFE", "RENATA SANDOVAL MONTES DE OCA"], ["RFE", "PARALEGAL - RFE", "ARMANDO URIEL MAGAÑA ACEVEDO"], ["RFE", "PARALEGAL - RFE", "ERIK OMAR VAZQUEZ MARCIAL"], ["RFE", "PARALEGAL - RFE", "VIVIANA NYSSEN PEDROZA"], ["RFE", "PARALEGAL - RFE", "MARTHA YARETH CASTRO ROMERO"], ["RFE", "PARALEGAL - RFE", "VIATOR FLORES CABALLERO"], ["RFE", "EVIDENCE ANALYST RFE", "SCARLET REYES LAGUNES"], ["RFE", "SPECIAL REPORTS & TRANSLATIONS SUPERVISOR", "CAROLINA GARCIA MARTINEZ"], ["RFE", "PARALEGAL - RFE", "LUIS ENRIQUE LOPEZ OJEDA"], ["REJECTIONS", "SPECIAL PROCESS TL", "JOSE ROBERTO MALIACHI PUIG"], ["REJECTIONS", "LEGAL STRATEGY ATTORNEY", "DANIELA ROSANA URUETA GONZALEZ"], ["REJECTIONS", "EVIDENCE ANALYST RFE", "RAFAEL VARGAS LANDEROS"], ["REJECTIONS", "PARALEGAL REJECTIONS", "LUCIO JOAQUIN GUTIERREZ URBINA"], ["REJECTIONS", "PARALEGAL - WAIVERS / 245i", "LETICIA ESPERILLA RAMOS"], ["RFE", "PARALEGAL - RFE", "ALEJANDRO ANTONIO RIOS QUINTANA"], ["RFE", "PARALEGAL - RFE", "DIANA LIZBETH HERRERA BARRERA"], ["RFE", "PARALEGAL - RFE", "LUCIA MICHELLE CORZAS CORONA"], ["RFE", "INVESTIGADOR DE ABUSO", "KARLA JUDITH VIGIL ASTUDILLO"], ["RFE", "INVESTIGADOR DE ABUSO", "MARIA FERNANDA LOPEZ SERRATOS"], ["LITIGATION", "LITIGATION SUPERVISOR", "PAULA KARIME GARCIA ROMO"], ["LITIGATION", "LITIGATION SPECIALIST", "BARBARA DANIELA VANEGAS LASCANO"], ["LITIGATION", "LITIGATION SPECIALIST III", "ANDREA ROMERO CASTRO"], ["LITIGATION", "LITIGATION AGENT I", "ERICK ISLAS GUERRERO"], ["LITIGATION", "LITIGATION AGENT I", "MARIO ALONSO PEREZ ELIZALDE"], ["LITIGATION", "LITIGATION AGENT I", "GALA MARIANA JIMENEZ MENDOZA"], ["LITIGATION", "LITIGATION AGENT I", "FERNANDA ABIGAIL SANCHEZ VILLEGAS"], ["BACK OFFICE", "BACK OFFICE SUPERVISOR", "MARIA ELISA URBAN GARCIA"], ["BACK OFFICE", "BACK OFFICE SPECIALIST I", "CRISTOPHER ZEPEDA MENDOZA"], ["BACK OFFICE", "BACK OFFICE SPECIALIST I", "JORGE TORRES ARIZMENDI"], ["BACK OFFICE", "BACK OFFICE SPECIALIST I", "JULIETA RAMIREZ SANCHEZ"], ["BACK OFFICE", "BACK OFFICE AGENT", "BRENDA PIÑA BECERRIL"], ["BACK OFFICE", "BACK OFFICE AGENT", "ALEJANDRA DEL CONSUELO NIETO GARCIA"], ["BACK OFFICE", "BACK OFFICE AGENT", "JOSUE MOSHE HERNANDEZ RAMIREZ"], ["BACK OFFICE", "BACK OFFICE AGENT", "LLUVIA TORRES GOMEZ"], ["BACK OFFICE", "BACK OFFICE AGENT", "FATIMA SOFIA BUENROSTRO CARDOSO"], ["COMPLIANCE", "CHIEF COMPLIANCE OFFICER", "FRANCISCO JAVIER MONROY CANEL"], ["COMPLIANCE", "COMPLIANCE MONITOR COORDINATOR", "DANIELA CRISTINA SILVA ARCE"], ["COMPLIANCE", "SUPERVISOR", "NAYELI SANCHEZ GONZALEZ"], ["COMPLIANCE", "COMPLIANCE MONITOR", "KAREN ESPINOSA SALINAS"], ["COMPLIANCE", "COMPLIANCE MONITOR", "YESICA MONTIEL TREJO"], ["COMPLIANCE", "COMPLIANCE MONITOR", "LUIS ENRIQUE RAMIREZ TERRAZAS"], ["COMPLIANCE", "COMPLIANCE MONITOR", "BRADLEY RICARDO SAMPSON GUTIERREZ"], ["COMPLIANCE", "COMPLIANCE SPECIALIST SUPERVISOR", "SARA MARIA VIURQUIS ANDRADE"], ["COMPLIANCE", "COMPLIANCE SPECIALIST", "ANDREA PARRA MENDEZ"], ["COMPLIANCE", "COMPLIANCE SPECIALIST", "CARLA MELISA REY ZEPEDA"], ["COMPLIANCE", "COMPLIANCE SPECIALIST", "PAOLA ORZUA RAMIREZ"], ["COMPLIANCE", "COMPLIANCE SPECIALIST", "VICTORIA LOPEZ PRADO"], ["COMPLIANCE", "COMPLIANCE SPECIALIST", "MISAEL BANDALA PARRA"], ["COMPLIANCE", "COMPLIANCE SPECIALIST", "EUNICE FRAGA ORTIZ"], ["COMPLIANCE", "COMPLIANCE ENABLEMENT ANALYST", "MARIANA DIAZ FERRUSQUIA"], ["COMPLIANCE", "LITIGATION & BACK OFFICE MANAGER", "HORACIO ALFONSO ORANTES ALTUZAR"], ["COMPLIANCE", "BACK OFFICE & LITIGATION COORDINATOR", "GABRIELA ADORAHIN GOMEZ GONZALEZ"]];
+const ROSTER_RAW = [["PACKETS", "PACKETS MANAGER", "JUAN CARLOS SANDOVAL VILLA"], ["PACKETS", "PACKETS COORDINATOR", "VICTOR MANUEL MENDOZA MEDINA"], ["PACKETS", "PARALEGAL PR ATTY SAQUIA", "CLARISA MENDIETA AHUMADA"], ["PACKETS", "CASE REVIEW / ATTY REVIEW TL", "CHRISTIAN PEREZ QUIJADA"], ["PACKETS", "PARALEGAL", "MICHEL DANIELA FLORES TORRES"], ["PACKETS", "PARALEGAL", "AKETZALI MARGARITA GONZALEZ LOPEZ"], ["PACKETS", "PARALEGAL", "ZAIRA YAMILE TIRADO PLIEGO"], ["PACKETS", "PARALEGAL", "GABRIELA HERNANDEZ GARCIA"], ["PACKETS", "PARALEGAL", "LIZETH ESTELA IBAÑEZ LOZADA"], ["PACKETS", "PARALEGAL", "STEPHANIE GIOVANNA ORDUÑA CHAVEZ"], ["PACKETS", "PARALEGAL", "XIMENA QUIROZ GONZALEZ"], ["PACKETS", "PARALEGAL", "FATIMA MONSERRATH PUNARO PARRA"], ["PACKETS", "PARALEGAL", "SUSANA DENNISSE PEDRAZA CANO"], ["PACKETS", "PARALEGAL", "PAULINA ORTIZ GONZALEZ"], ["PACKETS", "PARALEGAL", "MARIA XARENY MENDEZ RUIZ"], ["PACKETS", "PARALEGAL", "ANAHI MONTIEL ARCOS"], ["PACKETS", "PARALEGAL", "ALBERTO LOZADA GONZALEZ"], ["PACKETS", "FINAL REVIEW / ATTY REVIEW TL", "FRIDA LISSETE ALTAMIRANO CAPILLA"], ["PACKETS", "PARALEGAL FINAL ATTY REVIEW", "MIGUEL ANGEL AGUILAR GUERRERO"], ["PACKETS", "PARALEGAL FINAL ATTY REVIEW", "RODRIGO IGNACIO PEREZ RAMIREZ"], ["PACKETS", "PARALEGAL FINAL ATTY REVIEW", "ARTURO CARO CAMPUZANO"], ["PACKETS", "PARALEGAL FINAL ATTY REVIEW", "AMANDA MEGAN RANGEL RESENDIZ"], ["PACKETS", "LEA COOPERATION TL", "KEVIN EMMANUEL MIRANDA PEREZ"], ["PACKETS", "PARALEGAL REMOVALS", "ANGEL DANARIEL CURIEL ARRIAGA"], ["PACKETS", "PARALEGAL REMOVALS", "DIANA GABRIELA HERNANDEZ ARCE"], ["PACKETS", "INCOMMING MAIL RECEIPTS SPECIALIST", "LUZ IVANNIA SALGADO MENDOZA"], ["PACKETS", "PARALEGAL - FBI/PD", "MARCOS GABRIEL NARVAEZ LOPEZ"], ["PACKETS", "PARALEGAL LEA", "FRIDA CAMILA CARRASCO REVUELTAS"], ["PACKETS", "PARALEGAL CASE REVIEW 485 INTERVIEWS", "MEGAL LEON OLVERA"], ["CASE REVIEW", "CASE REVIEW PARALEGAL", "FRANCIS MILENA PACHECO CORREA"], ["CASE REVIEW", "CASE REVIEW PARALEGAL", "DANIEL REYNA CRUZ"], ["CASE REVIEW", "CASE REVIEW PARALEGAL", "VALENTINA ZEPEDA GARCIA"], ["CASE REVIEW", "PARALEGAL CASE REVIEW 485 INTERVIEWS", "CLAUDIA RIVERA ROCHA"], ["PCR", "FU - ENSAMBLE TL", "JUAN MANUEL DELGADO DE LUNA"], ["PCR", "FU - PRE CASE REVIEWER", "LIZBETH PEREA GONZALEZ"], ["PCR", "FU - PRE CASE REVIEWER", "NAOMI RODRIGUEZ NAVA"], ["PCR", "FU - PRE CASE REVIEWER", "ANGELA PAOLA SALGADO MARTINEZ"], ["PCR", "FU - PRE CASE REVIEWER", "MARISOL PALMA SANCHEZ"], ["PCR", "FU - PRE CASE REVIEWER", "URSULA ESTEFANY BERNAL CHAVEZ"], ["PCR", "FU - PRE CASE REVIEWER", "ELIAS DANIEL DELGADO DE LUNA"], ["PCR", "FU - PRE CASE REVIEWER", "HUGO ISAAC CERQUEDA VAZQUEZ"], ["PCR", "FU - PRE CASE REVIEWER", "SERGIO ALEXIS GOMEZ ESPINOSA"], ["PCR", "FU - PRE CASE REVIEWER", "KARINA ISABEL CORRALES PONCE"], ["PWI", "PWI MANAGER", "RAUL ESCALANTE LOPEZ"], ["PWI", "PWI COORDINATOR", "ALICIA SORIA REYES"], ["PWI", "PWI  TL", "TATIANA ITZEL JAIMES AGUIRRE"], ["PWI", "PWI AGENT", "VERONICA ALEXANDRA AVILA LOPEZ"], ["PWI", "PWI AGENT", "CRISTIAN RENE ARREOLA GARCIA"], ["PWI", "PWI AGENT", "ALONDRA LIZETH HUERTA VAZQUEZ"], ["PWI", "PWI AGENT", "DIVIA HUERTA TEODOSIO"], ["PSYCH", "PWI AGENT", "MARTIN MARTINEZ LUNA"], ["PSYCH", "PWI AGENT", "NANCY GABRIELA SOLANO ANGUIANO"], ["PSYCH", "PWI AGENT", "LIZETH ANAHI LEYVA JACOME"], ["PSYCH", "PWI  TL", "JOSE FRANCISCO DIAZ CASTAÑEDA"], ["PWI", "PWI AGENT", "RODRIGO MONROY ZAVALA"], ["PWI", "PWI AGENT", "GUSTAVO DIEGO CAMPOS MARTINEZ"], ["PWI", "PWI AGENT", "KENIA DHAMAR BECERRA PARRA"], ["PWI", "PWI AGENT", "ANGEL VENTURA YAÑEZ"], ["PWI", "PWI AGENT", "GUILLERMO ALBERTO RAMIREZ ROMERO"], ["PWI", "PWI AGENT", "ANGEL ALBERTO MURILLO MEZA"], ["PWI", "PWI AGENT", "FERNANDO DAVID FIERRO DURAN"], ["PSYCH", "PWI  TL", "ALMA ERENDIRA DURAN RIVERA"], ["PSYCH", "PWI AGENT", "NORMA ANGELICA ZAVALA DAVILA"], ["PSYCH", "PWI AGENT", "DIEGO MARTINEZ HIDALGO"], ["PSYCH", "PWI AGENT", "SAMANTHA FONSECA SALAZAR"], ["PSYCH", "PWI AGENT", "KARLA ANGELICA CARDENAS REYES"], ["PSYCH", "PWI AGENT", "SUSLAY YACARANDAY CASTILLO MENDOZA"], ["PSYCH", "PWI AGENT", "ARELY BERENICE RIVERA PALACIOS"], ["PSYCH", "PWI  TL COMPLEX", "DANNEVI GARCIA HERNANDEZ"], ["PSYCH", "PWI AGENT", "LUIS ENRIQUE RICO CASTAÑEDA"], ["PSYCH", "PWI AGENT", "CARLOS ALBERTO CORTES ARELLANO"], ["PSYCH", "PWI AGENT", "DULCE AMAIRANI MARTINEZ BAUTISTA"], ["PSYCH", "PWI AGENT", "ROBERTO SEGURA CONTRERAS"], ["PSYCH", "PWI AGENT", "JENY MACEDO LOPEZ"], ["PSYCH", "PWI AGENT", "CINTYA JOSELYN LOPEZ VILLANUEVA"], ["PSYCH", "PWI AGENT", "DIANA VIDAL HERNANDEZ"], ["PSYCH", "PWI AGENT", "CAROLINA ELIZABETH HERNANDEZ POUPARD"], ["PWI", "PRE WELCOME CALL COORDINATOR JR", "RENATA RAMIREZ FLORES"], ["PCR", "RAPSHEETS TL", "JONATHAN SAUL MIGUEL ROMERO"], ["PCR", "PCR AGENT", "GREGG DALADIER LLUCK CHAVEZ"], ["PCR", "PCR AGENT", "SABDIEL CASTAÑEDA REZA"], ["PCR", "PCR AGENT", "VERONICA DIAZ RICO"], ["PCR", "PCR AGENT", "MIGUEL ANGEL ZAPATA CASTREJON"], ["PCR", "PCR AGENT", "REBECA ITZEL MARTINEZ SANTOS"], ["PCR", "PCR AGENT", "LEONEL LUNA NICOLAS"], ["PCR", "PCR AGENT", "ANDRE ARMENTA GUTIERREZ"], ["FU", "PCR  TL", "GIOVANA LIZETE AYALA GONZALEZ"], ["FU", "PCR AGENT", "EILEEN NAYELLI RAMIREZ DOMINGUEZ"], ["FU", "PCR AGENT", "ANA LIZBETH FIERRO DURAN"], ["FU", "PCR AGENT", "VALERIA BENITEZ MONROY"], ["FU", "PCR AGENT", "ANA KAREN MARTINEZ RUIZ"], ["FU", "PCR AGENT", "NALLELY ALCANTARA MARTINEZ"], ["FU", "PCR AGENT", "DIEGO ALBERTO VAZQUEZ REYES"], ["FU", "PCR AGENT", "WENDY AYLIN VALDOVINOS GONZALEZ"], ["FU", "PCR AGENT", "RAQUEL ANGELINA VALDEZ LARIOS"], ["RFE", "LEGAL INTELLIGENCE AND RFE MANAGER", "BRENDA CASTELLANOS GARCIA"], ["RFE", "RFE COORDINATOR", "VALERIA DAFNE PEREZ CUEVAS"], ["RFE", "PARALEGAL - RFE / DANIEL PATIÑO", "GALILEA DIAZ PIÑON"], ["RFE", "CASE STRATEGIST", "CONSUELO GARCIA GARCIA"], ["RFE", "CASE STRATEGIST", "AGUSTIN NAVA GARCIA"], ["RFE", "PARALEGAL - ATTY ANNA", "DIANA PAULINA GUTIERREZ VELAZQUEZ"], ["RFE", "TL GAMMA", "ANGEL FERNANDO PEREZ NEGRETE"], ["RFE", "PARALEGAL - RFE", "DIANA BONIFACIO DE LA PALMA"], ["RFE", "PARALEGAL - RFE", "PAULINA DEL CARMEN PONCE RODRIGUEZ"], ["RFE", "PARALEGAL - RFE", "BRANDON OSWALDO CERVANTES GARCIA"], ["RFE", "INVESTIGADOR DE ABUSO", "SUSANA ESQUIVEL ALVARADO"], ["RFE", "INVESTIGADOR DE ABUSO", "LUIS FERNANDO MURILLO NARES"], ["RFE", "INVESTIGADOR DE ABUSO", "BARBARA FERNANDA TAPIA INFANTE"], ["RFE", "EVIDENCE ANALYST RFE", "JESUS ALONSO BOCANEGRA VEGA"], ["RFE", "EVIDENCE ANALYST RFE", "PAULA SOFIA BAUTISTA SALAS"], ["RFE", "TL ALPHA", "NAYELI RIOJA PADILLA"], ["RFE", "INVESTIGADOR DE ABUSO", "FERNANDA VALERIA VALS HERNANDEZ"], ["RFE", "INVESTIGADOR DE ABUSO", "ALBERTO DAVID RAMIREZ DIAZ"], ["RFE", "INVESTIGADOR DE ABUSO", "NATALIA MOLINA AYALA"], ["RFE", "PARALEGAL - RFE", "MAYLA NAHOMY PONCE RODRIGUEZ"], ["RFE", "PARALEGAL - RFE", "CARLOS ARTURO MONTOYA CASTILLO"], ["RFE", "PARALEGAL - RFE", "EVELYN JAZMIN LARA MARTINEZ"], ["RFE", "PARALEGAL - RFE", "PAOLA PEREZ YEPEZ"], ["RFE", "EVIDENCE ANALYST RFE", "ANDRES ALONSO RAMIREZ CASAS"], ["RFE", "EVIDENCE ANALYST RFE", "ALEJANDRO ERNESTO GONZALEZ GONZALEZ"], ["RFE", "EVIDENCE ANALYST RFE", "HECTOR JESUS GUTIERREZ CRUZ"], ["RFE", "EVIDENCE ANALYST RFE", "LESLY GABRIELA CAMARGO AGUILAR"], ["RFE", "GOVERNMENT BRANCH  & SPECIAL REPORTS TL", "GERSON YOAV SANCHEZ BERNAL"], ["RFE", "GOVERNMENT BRANCH SUPERVISOR", "JACOB NAVARRETE SANCHEZ"], ["RFE", "PARALEGAL - RFE", "ITZEL CALZADA PEREZ"], ["RFE", "PARALEGAL - RFE", "RENATA SANDOVAL MONTES DE OCA"], ["RFE", "PARALEGAL - RFE", "ARMANDO URIEL MAGAÑA ACEVEDO"], ["RFE", "PARALEGAL - RFE", "ERIK OMAR VAZQUEZ MARCIAL"], ["RFE", "PARALEGAL - RFE", "VIVIANA NYSSEN PEDROZA"], ["RFE", "PARALEGAL - RFE", "MARTHA YARETH CASTRO ROMERO"], ["RFE", "PARALEGAL - RFE", "VIATOR FLORES CABALLERO"], ["RFE", "EVIDENCE ANALYST RFE", "SCARLET REYES LAGUNES"], ["RFE", "SPECIAL REPORTS & TRANSLATIONS SUPERVISOR", "CAROLINA GARCIA MARTINEZ"], ["RFE", "PARALEGAL - RFE", "LUIS ENRIQUE LOPEZ OJEDA"], ["REJECTIONS", "SPECIAL PROCESS TL", "JOSE ROBERTO MALIACHI PUIG"], ["REJECTIONS", "LEGAL STRATEGY ATTORNEY", "DANIELA ROSANA URUETA GONZALEZ"], ["REJECTIONS", "EVIDENCE ANALYST RFE", "RAFAEL VARGAS LANDEROS"], ["REJECTIONS", "PARALEGAL REJECTIONS", "LUCIO JOAQUIN GUTIERREZ URBINA"], ["REJECTIONS", "PARALEGAL - WAIVERS / 245i", "LETICIA ESPERILLA RAMOS"], ["RFE", "PARALEGAL - RFE", "ALEJANDRO ANTONIO RIOS QUINTANA"], ["RFE", "PARALEGAL - RFE", "DIANA LIZBETH HERRERA BARRERA"], ["RFE", "PARALEGAL - RFE", "LUCIA MICHELLE CORZAS CORONA"], ["RFE", "INVESTIGADOR DE ABUSO", "KARLA JUDITH VIGIL ASTUDILLO"], ["RFE", "INVESTIGADOR DE ABUSO", "MARIA FERNANDA LOPEZ SERRATOS"], ["LITIGATION", "LITIGATION SUPERVISOR", "PAULA KARIME GARCIA ROMO"], ["LITIGATION", "LITIGATION SPECIALIST", "BARBARA DANIELA VANEGAS LASCANO"], ["LITIGATION", "LITIGATION SPECIALIST III", "ANDREA ROMERO CASTRO"], ["LITIGATION", "LITIGATION AGENT I", "ERICK ISLAS GUERRERO"], ["LITIGATION", "LITIGATION AGENT I", "MARIO ALONSO PEREZ ELIZALDE"], ["LITIGATION", "LITIGATION AGENT I", "GALA MARIANA JIMENEZ MENDOZA"], ["LITIGATION", "LITIGATION AGENT I", "FERNANDA ABIGAIL SANCHEZ VILLEGAS"], ["BACK OFFICE", "BACK OFFICE SUPERVISOR", "MARIA ELISA URBAN GARCIA"], ["BACK OFFICE", "BACK OFFICE SPECIALIST I", "CRISTOPHER ZEPEDA MENDOZA"], ["BACK OFFICE", "BACK OFFICE SPECIALIST I", "JORGE TORRES ARIZMENDI"], ["BACK OFFICE", "BACK OFFICE SPECIALIST I", "JULIETA RAMIREZ SANCHEZ"], ["BACK OFFICE", "BACK OFFICE AGENT", "BRENDA PIÑA BECERRIL"], ["BACK OFFICE", "BACK OFFICE AGENT", "ALEJANDRA DEL CONSUELO NIETO GARCIA"], ["BACK OFFICE", "BACK OFFICE AGENT", "JOSUE MOSHE HERNANDEZ RAMIREZ"], ["BACK OFFICE", "BACK OFFICE AGENT", "LLUVIA TORRES GOMEZ"], ["BACK OFFICE", "BACK OFFICE AGENT", "FATIMA SOFIA BUENROSTRO CARDOSO"], ["COMPLIANCE", "CHIEF COMPLIANCE OFFICER", "FRANCISCO JAVIER MONROY CANEL"], ["COMPLIANCE", "COMPLIANCE MONITOR COORDINATOR", "DANIELA CRISTINA SILVA ARCE"], ["COMPLIANCE", "SUPERVISOR", "NAYELI SANCHEZ GONZALEZ"], ["COMPLIANCE", "COMPLIANCE MONITOR", "KAREN ESPINOSA SALINAS"], ["COMPLIANCE", "COMPLIANCE MONITOR", "YESICA MONTIEL TREJO"], ["COMPLIANCE", "COMPLIANCE MONITOR", "LUIS ENRIQUE RAMIREZ TERRAZAS"], ["COMPLIANCE", "COMPLIANCE MONITOR", "BRADLEY RICARDO SAMPSON GUTIERREZ"], ["COMPLIANCE", "COMPLIANCE SPECIALIST SUPERVISOR", "SARA MARIA VIURQUIS ANDRADE"], ["COMPLIANCE", "COMPLIANCE SPECIALIST", "ANDREA PARRA MENDEZ"], ["COMPLIANCE", "COMPLIANCE SPECIALIST", "CARLA MELISA REY ZEPEDA"], ["COMPLIANCE", "COMPLIANCE SPECIALIST", "PAOLA ORZUA RAMIREZ"], ["COMPLIANCE", "COMPLIANCE SPECIALIST", "VICTORIA LOPEZ PRADO"], ["COMPLIANCE", "COMPLIANCE SPECIALIST", "MISAEL BANDALA PARRA"], ["COMPLIANCE", "COMPLIANCE SPECIALIST", "EUNICE FRAGA ORTIZ"], ["COMPLIANCE", "COMPLIANCE ENABLEMENT ANALYST", "MARIANA DIAZ FERRUSQUIA"], ["COMPLIANCE", "LITIGATION & BACK OFFICE MANAGER", "HORACIO ALFONSO ORANTES ALTUZAR"], ["COMPLIANCE", "BACK OFFICE & LITIGATION COORDINATOR", "GABRIELA ADORAHIN GOMEZ GONZALEZ"], ["CALL BACKS", "CALL BACKS", "DIANA LIZETH ARANGURE ALVAREZ"], ["LSU", "LEGAL STRATEGY UNIT SUPERVISOR", "SERGIO CAMPOS ADAME"], ["LSU", "LEGAL STRATEGY UNIT TL", "NATASHA HERRERA PENICHE"], ["LSU", "PARALEGAL", "DANIELA ALVAREZ MANZUR"], ["LSU", "PARALEGAL", "NOHEMI LEVY AVILA"], ["LSU", "PARALEGAL", "ALAIN JULIAN CHAN PAT"], ["LSU", "PARALEGAL", "LEMUEL GEOVANI GONZALEZ MAY"], ["LSU", "PARALEGAL", "MARGARITA DE LOS ANGELES NOH CANCHE"], ["LSU", "LEGAL STRATEGY UNIT", "TERESA SANCHEZ ROSAS"], ["LSU", "LEGAL STRATEGY UNIT", "IVANA VALERIA GUTIERREZ SANCHEZ"], ["LSU", "LEGAL STRATEGY UNIT", "MARIO ALFREDO MEDINA BECERRA"], ["LSU", "LEGAL STRATEGY UNIT TL", "CLAUDIA RENEE ARCE GUZMAN"], ["LSU", "LEGAL STRATEGY UNIT", "MIGUEL EDUARDO REDONDO PEREZ"], ["LSU", "PARALEGAL INCOMMING MAIL", "ELIZABETH CHARLOTTE OLVERA MONTES DE OCA"], ["LSU", "LEGAL STRATEGY UNIT", "MIGUEL DAVID GONZALEZ PEREZ"], ["LSU", "LEGAL STRATEGY UNIT", "YAREZMI ISABEL MENA ALCOCER"], ["LSU", "LEGAL STRATEGY UNIT", "NAYELI ARISBET SOTELO ALCAZAR"], ["LSU", "LEGAL STRATEGY UNIT", "SERGIO ALEJANDRO ALCOCER OSORIO"], ["LSU", "LEGAL STRATEGY UNIT", "OSCAR WILFRIDO EK AY"], ["CALL BACKS", "CALL BACKS TL", "NALLELI ITZEL RATIA LABASTIDA"], ["CALL BACKS", "CALL BACKS & DISCOVERY CALLS TRACKER", "JUAN MANUEL BECERRIL VEGA"], ["CALL BACKS", "CALL BACKS SPECIALIST", "CARLOS EDUARDO MORALES AGUILAR"], ["CALL BACKS", "CALL BACKS SPECIALIST", "MARIA SABINA LINARES GARNICA"], ["CALL BACKS", "CALL BACKS SPECIALIST", "MARIA ELIZABETH VARGAS GOMEZ"], ["CALL BACKS", "CALL BACKS SPECIALIST", "LILIA CASTILLO TREJO"], ["CALL BACKS", "CALL BACKS SPECIALIST", "ANDREA ESTEFANY TAFOYA JORDAN"], ["CALL BACKS", "CALL BACKS SPECIALIST", "MARIA GUADALUPE VAZQUEZ ZAPATERO"]];
 </script>
 <script>
 (function(){
@@ -227,7 +232,9 @@ const BASE_IDS = new Set(BASE.map(r => r.id));
 /* Colaboradores agregados después (IDs que empiezan con N); se guardan junto con su registro */
 let ROSTER = BASE.slice();
 let BY_ID = Object.fromEntries(ROSTER.map(r => [r.id, r]));
-let AREAS = [...new Set(ROSTER.map(r => r.area))];
+/* Áreas que aún no tienen personas registradas (aparecen vacías hasta que se agreguen) */
+const EMPTY_AREAS = [];
+let AREAS = [...new Set([...ROSTER.map(r => r.area), ...EMPTY_AREAS])];
 const EXTRA = {};
 const isExtraId = id => /^N[0-9A-Z]{4,14}$/.test(String(id || ""));
 const okRecord = (id, x) => BASE_IDS.has(id) || (isExtraId(id) && !!x && typeof x.nombre === "string" && !!x.nombre.trim() && !!x.area);
@@ -235,7 +242,7 @@ function rebuildRoster(){
   const extras = Object.values(EXTRA).sort((a, b) => a.id.localeCompare(b.id));
   ROSTER = BASE.concat(extras);
   BY_ID = Object.fromEntries(ROSTER.map(r => [r.id, r]));
-  AREAS = [...new Set(ROSTER.map(r => r.area))];
+  AREAS = [...new Set([...ROSTER.map(r => r.area), ...EMPTY_AREAS])];
 }
 function addExtras(map){
   let ch = false;
@@ -322,8 +329,12 @@ const DOCS = [
 ];
 const DOC = Object.fromEntries(DOCS.map(d => [d.k, d]));
 const isSigned = (c, d) => (c || EMPTY)[d.est] === "firmado";
-const nSigned = c => DOCS.filter(d => isSigned(c, d)).length;
-const isComplete = c => nSigned(c) === DOCS.length;
+/* Dirección del abogado solo aplica para estas áreas */
+const DIR_AREAS = ["COMPLIANCE", "BACK OFFICE", "LITIGATION", "CALL BACKS", "CASE REVIEW", "LSU", "RFE"];
+const applies = (area, d) => d.k !== "d" || DIR_AREAS.includes(area);
+const reqDocs = area => DOCS.filter(d => applies(area, d));
+const nSigned = (c, area) => reqDocs(area).filter(d => isSigned(c, d)).length;
+const isComplete = (c, area) => nSigned(c, area) === reqDocs(area).length;
 
 function csvCell(v){ const s = v == null ? "" : String(v); return /[",\n\r;]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
 function toCsv(rows){ return "﻿" + rows.map(r => r.map(csvCell).join(",")).join("\r\n"); }
@@ -516,7 +527,7 @@ function App(){
     const cur = recs[id] || EMPTY;
     const f = today();
     const body = { ...cur, [d.est]: "firmado", [d.fec]: f, actualizado: new Date().toISOString(), historial: [...cur.historial, entry(d.short + ": marcado como firmado", f)].slice(-HIST_MAX) };
-    writeRec(id, body).then(ok => { if (ok || mode !== "db") say(d.short + " registrado: " + BY_ID[id].nombre + (isComplete(body) ? " · ambas firmas completas" : "")); });
+    writeRec(id, body).then(ok => { if (ok || mode !== "db") say(d.short + " registrado: " + BY_ID[id].nombre + (isComplete(body, BY_ID[id].area) ? " · firmas completas" : "")); });
   };
   const doRevert = (id, d) => {
     const cur = recs[id] || EMPTY;
@@ -541,7 +552,7 @@ function App(){
     const now = new Date().toISOString();
     const h = [entry("Colaborador agregado", "")];
     const body = { ...EMPTY, nombre: p.nombre, area: p.area, cargo: p.cargo, obs: p.obs, actualizado: now };
-    DOCS.forEach(d => { if (p.firmas[d.k]) { body[d.est] = "firmado"; body[d.fec] = p.fecha; h.push(entry(d.short + ": marcado como firmado", p.fecha)); } });
+    reqDocs(p.area).forEach(d => { if (p.firmas[d.k]) { body[d.est] = "firmado"; body[d.fec] = p.fecha; h.push(entry(d.short + ": marcado como firmado", p.fecha)); } });
     body.historial = h;
     EXTRA[id] = { id, nombre: p.nombre, area: p.area, cargo: p.cargo, agregado: true }; rebuildRoster();
     const ok = await writeRec(id, body);
@@ -566,14 +577,15 @@ function App(){
 
   /* Derivados */
   const stat = useMemo(() => {
-    const mk = () => ({ total: 0, c: 0, d: 0, comp: 0 });
+    const mk = () => ({ total: 0, c: 0, d: 0, dReq: 0, comp: 0 });
     const byArea = {}; AREAS.forEach(a => byArea[a] = mk());
     const t = mk();
     ROSTER.forEach(r => {
       const c = recs[r.id] || EMPTY;
-      [t, byArea[r.area]].forEach(o => { o.total++; if (isSigned(c, DOC.c)) o.c++; if (isSigned(c, DOC.d)) o.d++; if (isComplete(c)) o.comp++; });
+      const ap = applies(r.area, DOC.d);
+      [t, byArea[r.area]].forEach(o => { o.total++; if (isSigned(c, DOC.c)) o.c++; if (ap) { o.dReq++; if (isSigned(c, DOC.d)) o.d++; } if (isComplete(c, r.area)) o.comp++; });
     });
-    const fin = o => { o.firmas = o.c + o.d; o.req = o.total * DOCS.length; o.pc = pct(o.firmas, o.req); o.pend = o.total - o.comp; return o; };
+    const fin = o => { o.firmas = o.c + o.d; o.req = o.total + o.dReq; o.pc = pct(o.firmas, o.req); o.pend = o.total - o.comp; return o; };
     AREAS.forEach(a => fin(byArea[a]));
     return { ...fin(t), byArea };
   }, [recs]);
@@ -581,9 +593,9 @@ function App(){
   const cargos = useMemo(() => [...new Set(ROSTER.filter(r => !fArea || r.area === fArea).map(r => r.cargo))].sort((a, b) => a.localeCompare(b, "es")), [fArea, recs]);
   useEffect(() => { if (fCargo && !cargos.includes(fCargo)) setFCargo(""); }, [cargos]);
 
-  const ESTADOS = [["todos", "Todos"], ["completos", "Ambas firmas completas"], ["pendientes", "Con alguna firma pendiente"], ["falta_c", "Falta Consentimiento"], ["falta_d", "Falta Dirección del abogado"], ["ninguna", "Sin ninguna firma"]];
-  const passEstado = (c, f) => f === "todos" ? true : f === "completos" ? isComplete(c) : f === "pendientes" ? !isComplete(c)
-    : f === "falta_c" ? !isSigned(c, DOC.c) : f === "falta_d" ? !isSigned(c, DOC.d) : nSigned(c) === 0;
+  const ESTADOS = [["todos", "Todos"], ["completos", "Firmas completas"], ["pendientes", "Con alguna firma pendiente"], ["falta_c", "Falta Consentimiento"], ["falta_d", "Falta Dirección del abogado"], ["ninguna", "Sin ninguna firma"]];
+  const passEstado = (c, f, area) => f === "todos" ? true : f === "completos" ? isComplete(c, area) : f === "pendientes" ? !isComplete(c, area)
+    : f === "falta_c" ? !isSigned(c, DOC.c) : f === "falta_d" ? applies(area, DOC.d) && !isSigned(c, DOC.d) : nSigned(c, area) === 0;
 
   const rows = useMemo(() => {
     const nq = norm(q).split(/\s+/).filter(Boolean);
@@ -591,7 +603,7 @@ function App(){
       const c = recs[r.id] || EMPTY;
       if (fArea && r.area !== fArea) return false;
       if (fCargo && r.cargo !== fCargo) return false;
-      if (!passEstado(c, fEstado)) return false;
+      if (!passEstado(c, fEstado, r.area)) return false;
       if (nq.length) { const n = norm(r.nombre); if (!nq.every(t => n.includes(t))) return false; }
       return true;
     });
@@ -630,17 +642,17 @@ function App(){
   };
   const estTxt = (c, d) => isSigned(c, d) ? "Firmado" : "Pendiente de firma";
   const recRow = r => { const c = recs[r.id] || EMPTY; return [r.id, r.nombre, r.area, r.cargo,
-    ...DOCS.flatMap(d => [estTxt(c, d), fmtDate(c[d.fec]), c[d.enl]]),
-    isComplete(c) ? "Completo" : nSigned(c) ? "Parcial" : "Sin firmas", c.obs, fmtTs(c.actualizado), r.agregado ? "Agregado" : "Plantilla"]; };
+    ...DOCS.flatMap(d => applies(r.area, d) ? [estTxt(c, d), fmtDate(c[d.fec]), c[d.enl]] : ["No aplica", "", ""]),
+    isComplete(c, r.area) ? "Completo" : nSigned(c, r.area) ? "Parcial" : "Sin firmas", c.obs, fmtTs(c.actualizado), r.agregado ? "Agregado" : "Plantilla"]; };
   const HEAD = ["ID", "Nombre", "Área", "Cargo", ...DOCS.flatMap(d => [d.short + " - Estado", d.short + " - Fecha de firma", d.short + " - Enlace"]), "Estatus general", "Observaciones", "Última actualización", "Origen"];
   const stamp = today();
   const exportCsv = which => {
-    const list = ROSTER.filter(r => passEstado(recs[r.id] || EMPTY, which));
+    const list = ROSTER.filter(r => passEstado(recs[r.id] || EMPTY, which, r.area));
     saveFile("Firmas_" + which + "_" + stamp + ".csv", toCsv([HEAD, ...list.map(recRow)]));
   };
   const exportAreas = () => {
-    const out = [["Área", "Total", "Consentimiento firmados", "Consentimiento pendientes", "Dirección del abogado firmados", "Dirección del abogado pendientes", "Ambas firmas completas", "Con alguna pendiente", "% cumplimiento (firmas registradas / requeridas)"]];
-    const line = (a, s) => [a, s.total, s.c, s.total - s.c, s.d, s.total - s.d, s.comp, s.pend, fmtPct(s.pc)];
+    const out = [["Área", "Total", "Consentimiento firmados", "Consentimiento pendientes", "Dirección del abogado firmados", "Dirección del abogado pendientes", "Firmas completas", "Con alguna pendiente", "% cumplimiento (firmas registradas / requeridas)"]];
+    const line = (a, s) => [a, s.total, s.c, s.total - s.c, s.dReq ? s.d : "No aplica", s.dReq ? s.dReq - s.d : "No aplica", s.comp, s.pend, s.total ? fmtPct(s.pc) : "Sin colaboradores"];
     AREAS.forEach(a => out.push(line(a, stat.byArea[a])));
     out.push(line("TOTAL", stat));
     out.push([]); out.push(["Generado", fmtTs(new Date().toISOString())]);
@@ -655,12 +667,12 @@ function App(){
   /* Pendientes por área (texto para portapapeles) */
   const pendText = useMemo(() => {
     const lines = ["PENDIENTES DE FIRMA — CONSENTIMIENTO INFORMADO Y DIRECCIÓN DEL ABOGADO", "The Mendoza Law Firm · corte " + fmtDate(today()),
-      "Personas con firmas pendientes: " + stat.pend + " de " + stat.total + " · Falta Consentimiento: " + (stat.total - stat.c) + " · Falta Dirección del abogado: " + (stat.total - stat.d), ""];
+      "Personas con firmas pendientes: " + stat.pend + " de " + stat.total + " · Falta Consentimiento: " + (stat.total - stat.c) + " · Falta Dirección del abogado: " + (stat.dReq - stat.d), ""];
     AREAS.forEach(a => {
-      const l = ROSTER.filter(r => r.area === a && !isComplete(recs[r.id] || EMPTY));
+      const l = ROSTER.filter(r => r.area === a && !isComplete(recs[r.id] || EMPTY, r.area));
       if (!l.length) return;
       lines.push(a + " (" + l.length + ")");
-      l.forEach(r => { const c = recs[r.id] || EMPTY; lines.push("• " + r.nombre + " — " + r.cargo + " · Falta: " + DOCS.filter(d => !isSigned(c, d)).map(d => d.short).join(" y ")); });
+      l.forEach(r => { const c = recs[r.id] || EMPTY; lines.push("• " + r.nombre + " — " + r.cargo + " · Falta: " + reqDocs(r.area).filter(d => !isSigned(c, d)).map(d => d.short).join(" y ")); });
       lines.push("");
     });
     return lines.join("\n").trim();
@@ -685,6 +697,7 @@ function App(){
 
   const TABS = [["panel", "Panel por área"], ["colab", "Colaboradores", stat.total], ["pend", "Pendientes de seguimiento", stat.pend], ["resp", "Exportar y respaldo"]];
   const docCount = d => d.k === "c" ? stat.c : stat.d;
+  const docTotal = d => d.k === "c" ? stat.total : stat.dReq;
 
   const DocCell = ({ r, c, d }) => { const f = isSigned(c, d); return html`<div className="dcell">
     <div className="toggle" role="group" aria-label=${d.label + " de " + r.nombre}>
@@ -700,19 +713,19 @@ function App(){
         <div>
           <div className="firm">THE MENDOZA LAW FIRM</div>
           <h1>Control de Firmas</h1>
-          <div className="docs-sub">${DOCS.map((d, i) => html`<span key=${d.k}>${i ? " · " : ""}${d.label}</span>`)}</div>
+          <div className="docs-sub">Consentimiento informado (todas las áreas) · Dirección del abogado (${DIR_AREAS.length} áreas)</div>
         </div>
         <span className="store" role="status"><span className=${"dot " + dotCls}></span>${storeTxt}</span>
       </div>
       <div className="kpis">
-        <div className="kpi"><div className="lbl">TOTAL DE COLABORADORES</div><div className="val num">${stat.total}</div><div className="sub num">${stat.comp} con ambas firmas</div></div>
-        ${DOCS.map(d => html`<div key=${d.k} className="kpi g"><div className="lbl">${d.label.toUpperCase()}</div><div className="val num">${docCount(d)}</div><div className="sub num">firmados · ${stat.total - docCount(d)} pendientes</div></div>`)}
+        <div className="kpi"><div className="lbl">TOTAL DE COLABORADORES</div><div className="val num">${stat.total}</div><div className="sub num">${stat.comp} con firmas completas</div></div>
+        ${DOCS.map(d => html`<div key=${d.k} className="kpi g"><div className="lbl">${d.label.toUpperCase()}</div><div className="val num">${docCount(d)}</div><div className="sub num">firmados · ${docTotal(d) - docCount(d)} pendientes${d.k === "d" ? " de " + docTotal(d) + " que aplican" : ""}</div></div>`)}
         <div className="kpi"><div className="lbl">PENDIENTES DE FIRMA</div><div className="val num">${stat.pend}</div><div className="sub">personas con al menos una firma pendiente</div></div>
         <div className="kpi"><div className="lbl">PORCENTAJE DE CUMPLIMIENTO</div><div className="val num">${fmtPct(stat.pc)}</div><div className="sub num">${stat.firmas} de ${stat.req} firmas</div></div>
       </div>
       <div className="prog">
-        ${DOCS.map(d => { const p = pct(docCount(d), stat.total); return html`<div key=${d.k} className="prog-item">
-          <div className="prog-row"><span>${d.label}</span><span className="num">${docCount(d)} de ${stat.total} · ${fmtPct(p)}</span></div>
+        ${DOCS.map(d => { const p = pct(docCount(d), docTotal(d)); return html`<div key=${d.k} className="prog-item">
+          <div className="prog-row"><span>${d.label}${d.k === "d" ? " · áreas que aplican" : ""}</span><span className="num">${docCount(d)} de ${docTotal(d)} · ${fmtPct(p)}</span></div>
           <div className="bar" role="progressbar" aria-label=${d.label} aria-valuemin="0" aria-valuemax="100" aria-valuenow=${p}><i style=${{ width: p + "%" }}></i></div></div>`; })}
       </div>
       <nav className="tabs" role="tablist">
@@ -728,18 +741,26 @@ function App(){
     ${mode === "db" && readOnly ? html`<div className="notice warn"><span>🔒</span><div><b>Modo de solo lectura.</b> Puedes consultar y exportar, pero tu nivel de acceso no permite registrar firmas. Pide acceso de colaborador a quien administra la herramienta.</div></div>` : null}
 
     ${tab === "panel" ? html`
-      <div className="sec-h"><div><h2>Avance por área</h2><p>Cada colaborador firma dos documentos. Selecciona un área para ver únicamente a sus colaboradores.</p></div>${readOnly ? null : html`<button className="btn pri" onClick=${() => setAdding(true)}>+ Agregar colaborador</button>`}</div>
+      <div className="sec-h"><div><h2>Avance por área</h2><p>Consentimiento informado aplica para todas las áreas; Dirección del abogado solo para ${DIR_AREAS.join(", ")}. Selecciona un área para ver a sus colaboradores.</p></div>${readOnly ? null : html`<button className="btn pri" onClick=${() => setAdding(true)}>+ Agregar colaborador</button>`}</div>
       <div className="areas">
-        ${AREAS.map(a => { const s = stat.byArea[a]; return html`
+        ${AREAS.map(a => { const s = stat.byArea[a]; const nd = reqDocs(a).length;
+          if (!s.total) return html`<div key=${a} className="acard empty-area">
+            <div className="top"><span className="nm">${a}</span><span className="doctag">${nd} ${nd === 1 ? "documento" : "documentos"}</span></div>
+            <p className="muted" style=${{margin:0,fontSize:"12.5px"}}>Sin colaboradores registrados todavía.</p>
+            ${readOnly ? null : html`<button className="btn sm" style=${{alignSelf:"flex-start"}} onClick=${() => setAdding(a)}>+ Agregar a ${a}</button>`}
+          </div>`;
+          return html`
           <button key=${a} className=${"acard" + (s.comp === s.total ? " done" : "")} onClick=${() => goArea(a)}>
             <div className="top"><span className="nm">${a}</span><span className="pc num">${fmtPct(s.pc)}</span></div>
-            ${DOCS.map(d => { const n = d.k === "c" ? s.c : s.d; const p = pct(n, s.total); return html`<div key=${d.k} className="drow">
+            <span className="doctag">${nd} ${nd === 1 ? "documento" : "documentos"}</span>
+            ${DOCS.map(d => { if (!applies(a, d)) return html`<div key=${d.k} className="drow na"><div className="drow-l"><span>${d.short}</span><span>No aplica</span></div></div>`;
+              const n = d.k === "c" ? s.c : s.d; const p = pct(n, s.total); return html`<div key=${d.k} className="drow">
               <div className="drow-l"><span>${d.short}</span><span className="num">${n}/${s.total}</span></div>
               <div className="mbar"><i style=${{ width: p + "%" }}></i></div></div>`; })}
             <div className="meta num"><span><b>${s.total}</b> total</span><span><b>${s.comp}</b> completos</span><span><b>${s.pend}</b> con pendientes</span></div>
           </button>`; })}
       </div>
-      <p className="foot">Marcar un documento como "Firmado" es un registro administrativo de confirmación. No constituye una firma electrónica ni demuestra por sí solo que exista un documento firmado; los documentos deben resguardarse en el repositorio autorizado de la firma. El porcentaje de cumplimiento cuenta las firmas registradas sobre las requeridas (dos por colaborador).</p>
+      <p className="foot">Marcar un documento como "Firmado" es un registro administrativo de confirmación. No constituye una firma electrónica ni demuestra por sí solo que exista un documento firmado; los documentos deben resguardarse en el repositorio autorizado de la firma. El porcentaje de cumplimiento cuenta las firmas registradas sobre las requeridas: una por colaborador (Consentimiento) más Dirección del abogado en las áreas donde aplica.</p>
     ` : null}
 
     ${tab === "colab" ? html`
@@ -752,7 +773,7 @@ function App(){
         ${readOnly ? null : html`<button className="btn pri" onClick=${() => setAdding(true)}>+ Agregar colaborador</button>`}
       </div>
       <div className="resline"><span className="num">Mostrando <b>${rows.length}</b> de ${stat.total} colaboradores${fArea ? html`<span className="chipf">Área: ${fArea}</span>` : null}</span>
-        <span className="num">${(() => { const f = rows.filter(r => isComplete(recs[r.id] || EMPTY)).length; return html`En esta vista: <b style=${{color:"var(--green)"}}>${f}</b> con ambas firmas · <b>${rows.length - f}</b> con pendientes`; })()}</span></div>
+        <span className="num">${(() => { const f = rows.filter(r => isComplete(recs[r.id] || EMPTY, r.area)).length; return html`En esta vista: <b style=${{color:"var(--green)"}}>${f}</b> con firmas completas · <b>${rows.length - f}</b> con pendientes`; })()}</span></div>
       <div className="tbox">
         <table>
           <thead><tr>
@@ -760,12 +781,12 @@ function App(){
             <th><span className="plain">Observaciones</span></th><th><span className="plain">Acciones</span></th>
           </tr></thead>
           <tbody>
-            ${rows.length ? rows.map(r => { const c = recs[r.id] || EMPTY; const n = nSigned(c); return html`
-              <tr key=${r.id} className=${n === DOCS.length ? "signed" : n ? "partial" : ""}>
+            ${rows.length ? rows.map(r => { const c = recs[r.id] || EMPTY; const n = nSigned(c, r.area); return html`
+              <tr key=${r.id} className=${n === reqDocs(r.area).length ? "signed" : n ? "partial" : ""}>
                 <td><button className="nmbtn" onClick=${() => setOpenId(r.id)}>${r.nombre}</button><span className="idt">${r.id}${r.agregado ? html` <span className="newtag">Agregado</span>` : null}</span></td>
                 <td><span className="area-tag">${r.area}</span></td>
                 <td><div className="cargo">${r.cargo}</div></td>
-                ${DOCS.map(d => html`<td key=${d.k}>${DocCell({ r, c, d })}</td>`)}
+                ${DOCS.map(d => html`<td key=${d.k}>${applies(r.area, d) ? DocCell({ r, c, d }) : html`<span className="na-cell">No aplica</span>`}</td>`)}
                 <td><div className="obs" title=${c.obs}>${c.obs || html`<span className="muted">—</span>`}</div></td>
                 <td><button className="btn sm" onClick=${() => setOpenId(r.id)}>${readOnly ? "Ver" : "Ver / editar"}</button></td>
               </tr>`; }) : html`<tr><td colSpan="7"><div className="empty">Ningún colaborador coincide con estos filtros. <button className="btn sm" onClick=${clearFilters}>Limpiar filtros</button></div></td></tr>`}
@@ -775,16 +796,16 @@ function App(){
     ` : null}
 
     ${tab === "pend" ? html`
-      <div className="sec-h"><div><h2>Pendientes de seguimiento</h2><p className="num">${stat.pend} colaboradores con al menos una firma pendiente · faltan ${stat.total - stat.c} de Consentimiento y ${stat.total - stat.d} de Dirección del abogado.</p></div>
+      <div className="sec-h"><div><h2>Pendientes de seguimiento</h2><p className="num">${stat.pend} colaboradores con al menos una firma pendiente · faltan ${stat.total - stat.c} de Consentimiento y ${stat.dReq - stat.d} de Dirección del abogado.</p></div>
         <button className="btn pri" onClick=${copyPend} disabled=${!stat.pend}>Copiar lista por área</button></div>
-      ${stat.pend === 0 ? html`<div className="alldone">Todos los colaboradores tienen ambas firmas registradas.</div>` : html`
+      ${stat.pend === 0 ? html`<div className="alldone">Todos los colaboradores tienen sus firmas registradas.</div>` : html`
       <div className="pgrid">
-        ${AREAS.map(a => { const l = ROSTER.filter(r => r.area === a && !isComplete(recs[r.id] || EMPTY)); if (!l.length) return null; return html`
+        ${AREAS.map(a => { const l = ROSTER.filter(r => r.area === a && !isComplete(recs[r.id] || EMPTY, r.area)); if (!l.length) return null; return html`
           <section key=${a} className="pgroup">
             <h3><span>${a}</span><span className="num muted">${l.length} de ${stat.byArea[a].total}</span></h3>
             <ul>${l.map(r => { const c = recs[r.id] || EMPTY; return html`<li key=${r.id}><div className="who"><b>${r.nombre}</b><span>${r.cargo}</span>
-                <div className="miss">${DOCS.map(d => html`<span key=${d.k} className=${"pill " + (isSigned(c, d) ? "f" : "p")}>${isSigned(c, d) ? "✓ " : ""}${d.short}</span>`)}</div></div>
-              ${readOnly ? null : html`<div className="regs">${DOCS.filter(d => !isSigned(c, d)).map(d => html`<button key=${d.k} className="btn sm" onClick=${() => setEstado(r.id, d, "firmado")}>Registrar ${d.short}</button>`)}</div>`}</li>`; })}</ul>
+                <div className="miss">${reqDocs(r.area).map(d => html`<span key=${d.k} className=${"pill " + (isSigned(c, d) ? "f" : "p")}>${isSigned(c, d) ? "✓ " : ""}${d.short}</span>`)}</div></div>
+              ${readOnly ? null : html`<div className="regs">${reqDocs(r.area).filter(d => !isSigned(c, d)).map(d => html`<button key=${d.k} className="btn sm" onClick=${() => setEstado(r.id, d, "firmado")}>Registrar ${d.short}</button>`)}</div>`}</li>`; })}</ul>
           </section>`; })}
       </div>`}
     ` : null}
@@ -792,7 +813,7 @@ function App(){
     ${tab === "resp" ? html`<${Respaldo} recs=${recs} mode=${mode} readOnly=${readOnly} exportCsv=${exportCsv} exportAreas=${exportAreas} exportJson=${exportJson} stat=${stat} writeRec=${writeRec} pushList=${pushList} say=${say} setConfirm=${setConfirm} meRef=${meRef} cfg=${cfg} setCfg=${setCfg} sheetErr=${sheetErr} reload=${() => setReloadKey(k => k + 1)} />` : null}
   </main>
 
-  ${adding ? html`<${AddPerson} onClose=${() => setAdding(false)} onSave=${async p => { await addPerson(p); setAdding(false); }} />` : null}
+  ${adding ? html`<${AddPerson} presetArea=${typeof adding === "string" ? adding : ""} onClose=${() => setAdding(false)} onSave=${async p => { await addPerson(p); setAdding(false); }} />` : null}
   ${openId && BY_ID[openId] ? html`<${Ficha} key=${openId} id=${openId} rec=${recs[openId] || EMPTY} readOnly=${readOnly} onDelete=${deletePerson} names=${names} onClose=${() => setOpenId(null)} writeRec=${writeRec} say=${say} setConfirm=${setConfirm} meRef=${meRef} />` : null}
   ${confirm ? html`<${Confirm} ...${confirm} onClose=${() => setConfirm(null)} />` : null}
   ${copyFallback ? html`<${CopyBox} ...${copyFallback} onClose=${() => setCopyFallback(null)} />` : null}
@@ -825,7 +846,7 @@ function Ficha({ id, rec, readOnly, names, onClose, writeRec, say, setConfirm, m
     if (est[d.k] === "firmado" && fec[d.k] > today()) return "futura";
     return "";
   };
-  const anyProb = DOCS.some(d => prob(d));
+  const anyProb = reqDocs(extra ? nArea : r.area).some(d => prob(d));
   const docDirty = d => est[d.k] !== (rec[d.est] === "firmado" ? "firmado" : "pendiente") || (est[d.k] === "firmado" && fec[d.k] !== (rec[d.fec] || "")) || enl[d.k] !== (rec[d.enl] || "");
   const dirty = idDirty || obs !== (rec.obs || "") || DOCS.some(docDirty);
   const reverts = DOCS.filter(d => rec[d.est] === "firmado" && est[d.k] === "pendiente");
@@ -869,7 +890,8 @@ function Ficha({ id, rec, readOnly, names, onClose, writeRec, say, setConfirm, m
           <datalist id="dl-areas">${AREAS.map(a => html`<option key=${a} value=${a} />`)}</datalist>
           <datalist id="dl-cargos-m">${[...new Set(ROSTER.filter(x => x.area === nArea).map(x => x.cargo))].map(c => html`<option key=${c} value=${c} />`)}</datalist>
         </div>` : html`<dl className="ro"><dt>Nombre</dt><dd>${r.nombre}</dd><dt>Área</dt><dd>${r.area}</dd><dt>Cargo</dt><dd>${r.cargo}</dd></dl>`}
-        ${DOCS.map(d => { const p = prob(d); const f = est[d.k] === "firmado"; return html`<fieldset key=${d.k} className=${"docbox" + (f ? " ok" : "")}>
+        ${!applies(extra ? nArea : r.area, DOC.d) ? html`<span className="hint">Dirección del abogado no aplica para ${extra ? nArea : r.area}.</span>` : null}
+        ${reqDocs(extra ? nArea : r.area).map(d => { const p = prob(d); const f = est[d.k] === "firmado"; return html`<fieldset key=${d.k} className=${"docbox" + (f ? " ok" : "")}>
           <legend>${d.label}</legend>
           <div className="two">
             <div className="fld"><span>Estado</span><div className="toggle" role="group">
@@ -894,9 +916,9 @@ function Ficha({ id, rec, readOnly, names, onClose, writeRec, say, setConfirm, m
 }
 
 /* ---------- Agregar colaborador ---------- */
-function AddPerson({ onClose, onSave }){
+function AddPerson({ onClose, onSave, presetArea }){
   const [nombre, setNombre] = useState("");
-  const [areaSel, setAreaSel] = useState("");
+  const [areaSel, setAreaSel] = useState(presetArea || "");
   const [areaNew, setAreaNew] = useState("");
   const [cargo, setCargo] = useState("");
   const [firmas, setFirmas] = useState({ c: false, d: false });
@@ -908,7 +930,7 @@ function AddPerson({ onClose, onSave }){
   const nNombre = normName(nombre);
   const area = areaSel === "__otra" ? normName(areaNew) : areaSel;
   const nCargo = normName(cargo);
-  const algun = firmas.c || firmas.d;
+  const algun = reqDocs(area).some(d => firmas[d.k]);
   const dupe = nNombre ? ROSTER.find(x => norm(x.nombre) === norm(nNombre)) : null;
   const cargosArea = [...new Set(ROSTER.filter(x => x.area === area).map(x => x.cargo))].sort((a, b) => a.localeCompare(b, "es"));
   const errs = {
@@ -921,7 +943,7 @@ function AddPerson({ onClose, onSave }){
   const submit = async e => {
     e.preventDefault(); setTried(true); if (!valid || saving) return;
     setSaving(true);
-    await onSave({ nombre: nNombre, area, cargo: nCargo, firmas, fecha, obs: obs.trim() });
+    await onSave({ nombre: nNombre, area, cargo: nCargo, firmas: Object.fromEntries(reqDocs(area).map(d => [d.k, !!firmas[d.k]])), fecha, obs: obs.trim() });
     setSaving(false);
   };
   const show = k => (tried || (k === "nombre" && dupe)) && errs[k] ? html`<span className="err">${errs[k]}</span>` : null;
@@ -939,7 +961,7 @@ function AddPerson({ onClose, onSave }){
         </div>
         <div className="two">
           <div className="fld"><span>Documentos ya firmados</span>
-            ${DOCS.map(d => html`<label key=${d.k} className="chk"><input type="checkbox" id=${"a-f-" + d.k} checked=${firmas[d.k]} onChange=${e => { const v = e.target.checked; setFirmas(s => ({ ...s, [d.k]: v })); }} /> ${d.label}</label>`)}
+            ${reqDocs(area).map(d => html`<label key=${d.k} className="chk"><input type="checkbox" id=${"a-f-" + d.k} checked=${firmas[d.k]} onChange=${e => { const v = e.target.checked; setFirmas(s => ({ ...s, [d.k]: v })); }} /> ${d.label}</label>`)}
             <span className="hint">Déjalos sin marcar si aún no firma.</span></div>
           <label className="fld"><span>Fecha de firma</span><input id="a-fecha" type="date" className="inp" max=${today()} disabled=${!algun} value=${algun ? fecha : ""} onChange=${e => setFecha(e.target.value)} />${show("fecha")}</label>
         </div>
@@ -1031,9 +1053,9 @@ function Respaldo({ recs, mode, readOnly, exportCsv, exportAreas, exportJson, st
         <div className="btnlist">
           <button className="btn" onClick=${() => exportCsv("todos")}>Todos los registros <small className="num">${stat.total}</small></button>
           <button className="btn" onClick=${() => exportCsv("pendientes")}>Con alguna firma pendiente <small className="num">${stat.pend}</small></button>
-          <button className="btn" onClick=${() => exportCsv("completos")}>Con ambas firmas <small className="num">${stat.comp}</small></button>
+          <button className="btn" onClick=${() => exportCsv("completos")}>Con firmas completas <small className="num">${stat.comp}</small></button>
           <button className="btn" onClick=${() => exportCsv("falta_c")}>Falta Consentimiento <small className="num">${stat.total - stat.c}</small></button>
-          <button className="btn" onClick=${() => exportCsv("falta_d")}>Falta Dirección del abogado <small className="num">${stat.total - stat.d}</small></button>
+          <button className="btn" onClick=${() => exportCsv("falta_d")}>Falta Dirección del abogado <small className="num">${stat.dReq - stat.d}</small></button>
           <button className="btn" onClick=${exportAreas}>Reporte consolidado por área <small className="num">${AREAS.length} áreas</small></button>
         </div></section>
       <section className="panel"><h3>Respaldo JSON</h3>
