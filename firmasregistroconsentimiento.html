@@ -336,7 +336,19 @@ const DIR_TODAS = true;
 const DIR_AREAS = ["COMPLIANCE", "BACK OFFICE", "LITIGATION", "CALL BACKS", "CASE REVIEW", "LSU", "RFE"];
 /* Firma de las formas: NO aplica para estas áreas */
 const FORMAS_EXCLUIDAS = ["CUSTOMER SERVICE", "CALL BACKS", "COLLECTIONS", "DVS", "PMO", "WAES", "MARKETING"];
-const applies = (area, d) => d.k === "c" ? !FORMAS_EXCLUIDAS.includes(area) : (DIR_TODAS || DIR_AREAS.includes(area));
+/* Personas que NO firman Firma de las formas aunque su área sí la firme (solo Dirección del abogado) */
+const FORMAS_EXCLUIDAS_IDS = {
+  C079: "JONATHAN SAUL MIGUEL ROMERO", C080: "GREGG DALADIER LLUCK CHAVEZ", C081: "SABDIEL CASTAÑEDA REZA",
+  C082: "VERONICA DIAZ RICO", C083: "MIGUEL ANGEL ZAPATA CASTREJON", C084: "REBECA ITZEL MARTINEZ SANTOS",
+  C085: "LEONEL LUNA NICOLAS", C086: "ANDRE ARMENTA GUTIERREZ"
+};
+/* "who" puede ser el nombre de un área o un colaborador { id, area } */
+const applies = (who, d) => {
+  const area = typeof who === "string" ? who : (who && who.area) || "";
+  const id = typeof who === "string" ? "" : (who && who.id) || "";
+  if (d.k === "c") return !FORMAS_EXCLUIDAS.includes(area) && !(id in FORMAS_EXCLUIDAS_IDS);
+  return DIR_TODAS || DIR_AREAS.includes(area);
+};
 const reqDocs = area => DOCS.filter(d => applies(area, d));
 const nSigned = (c, area) => reqDocs(area).filter(d => isSigned(c, d)).length;
 const isComplete = (c, area) => nSigned(c, area) === reqDocs(area).length;
@@ -532,7 +544,7 @@ function App(){
     const cur = recs[id] || EMPTY;
     const f = today();
     const body = { ...cur, [d.est]: "firmado", [d.fec]: f, actualizado: new Date().toISOString(), historial: [...cur.historial, entry(d.short + ": marcado como firmado", f)].slice(-HIST_MAX) };
-    writeRec(id, body).then(ok => { if (ok || mode !== "db") say(d.short + " registrado: " + BY_ID[id].nombre + (isComplete(body, BY_ID[id].area) ? " · firmas completas" : "")); });
+    writeRec(id, body).then(ok => { if (ok || mode !== "db") say(d.short + " registrado: " + BY_ID[id].nombre + (isComplete(body, BY_ID[id]) ? " · firmas completas" : "")); });
   };
   const doRevert = (id, d) => {
     const cur = recs[id] || EMPTY;
@@ -587,8 +599,8 @@ function App(){
     const t = mk();
     ROSTER.forEach(r => {
       const c = recs[r.id] || EMPTY;
-      const apC = applies(r.area, DOC.c), apD = applies(r.area, DOC.d);
-      [t, byArea[r.area]].forEach(o => { o.total++; if (apC) { o.cReq++; if (isSigned(c, DOC.c)) o.c++; } if (apD) { o.dReq++; if (isSigned(c, DOC.d)) o.d++; } if (isComplete(c, r.area)) o.comp++; });
+      const apC = applies(r, DOC.c), apD = applies(r, DOC.d);
+      [t, byArea[r.area]].forEach(o => { o.total++; if (apC) { o.cReq++; if (isSigned(c, DOC.c)) o.c++; } if (apD) { o.dReq++; if (isSigned(c, DOC.d)) o.d++; } if (isComplete(c, r)) o.comp++; });
     });
     const fin = o => { o.firmas = o.c + o.d; o.req = o.cReq + o.dReq; o.pc = pct(o.firmas, o.req); o.pend = o.total - o.comp; return o; };
     AREAS.forEach(a => fin(byArea[a]));
@@ -608,7 +620,7 @@ function App(){
       const c = recs[r.id] || EMPTY;
       if (fArea && r.area !== fArea) return false;
       if (fCargo && r.cargo !== fCargo) return false;
-      if (!passEstado(c, fEstado, r.area)) return false;
+      if (!passEstado(c, fEstado, r)) return false;
       if (nq.length) { const n = norm(r.nombre); if (!nq.every(t => n.includes(t))) return false; }
       return true;
     });
@@ -647,12 +659,12 @@ function App(){
   };
   const estTxt = (c, d) => isSigned(c, d) ? "Firmado" : "Pendiente de firma";
   const recRow = r => { const c = recs[r.id] || EMPTY; return [r.id, r.nombre, r.area, r.cargo,
-    ...DOCS.flatMap(d => applies(r.area, d) ? [estTxt(c, d), fmtDate(c[d.fec]), c[d.enl]] : ["No aplica", "", ""]),
-    isComplete(c, r.area) ? "Completo" : nSigned(c, r.area) ? "Parcial" : "Sin firmas", c.obs, fmtTs(c.actualizado), r.agregado ? "Agregado" : "Plantilla"]; };
+    ...DOCS.flatMap(d => applies(r, d) ? [estTxt(c, d), fmtDate(c[d.fec]), c[d.enl]] : ["No aplica", "", ""]),
+    isComplete(c, r) ? "Completo" : nSigned(c, r) ? "Parcial" : "Sin firmas", c.obs, fmtTs(c.actualizado), r.agregado ? "Agregado" : "Plantilla"]; };
   const HEAD = ["ID", "Nombre", "Área", "Cargo", ...DOCS.flatMap(d => [d.short + " - Estado", d.short + " - Fecha de firma", d.short + " - Enlace"]), "Estatus general", "Observaciones", "Última actualización", "Origen"];
   const stamp = today();
   const exportCsv = which => {
-    const list = ROSTER.filter(r => passEstado(recs[r.id] || EMPTY, which, r.area));
+    const list = ROSTER.filter(r => passEstado(recs[r.id] || EMPTY, which, r));
     saveFile("Firmas_" + which + "_" + stamp + ".csv", toCsv([HEAD, ...list.map(recRow)]));
   };
   const exportAreas = () => {
@@ -674,10 +686,10 @@ function App(){
     const lines = ["PENDIENTES DE FIRMA — FIRMA DE LAS FORMAS Y DIRECCIÓN DEL ABOGADO", "The Mendoza Law Firm · corte " + fmtDate(today()),
       "Personas con firmas pendientes: " + stat.pend + " de " + stat.total + " · Falta Firma de las formas: " + (stat.cReq - stat.c) + " · Falta Dirección del abogado: " + (stat.dReq - stat.d), ""];
     AREAS.forEach(a => {
-      const l = ROSTER.filter(r => r.area === a && !isComplete(recs[r.id] || EMPTY, r.area));
+      const l = ROSTER.filter(r => r.area === a && !isComplete(recs[r.id] || EMPTY, r));
       if (!l.length) return;
       lines.push(a + " (" + l.length + ")");
-      l.forEach(r => { const c = recs[r.id] || EMPTY; lines.push("• " + r.nombre + " — " + r.cargo + " · Falta: " + reqDocs(r.area).filter(d => !isSigned(c, d)).map(d => d.short).join(" y ")); });
+      l.forEach(r => { const c = recs[r.id] || EMPTY; lines.push("• " + r.nombre + " — " + r.cargo + " · Falta: " + reqDocs(r).filter(d => !isSigned(c, d)).map(d => d.short).join(" y ")); });
       lines.push("");
     });
     return lines.join("\n").trim();
@@ -746,9 +758,9 @@ function App(){
     ${mode === "db" && readOnly ? html`<div className="notice warn"><span>🔒</span><div><b>Modo de solo lectura.</b> Puedes consultar y exportar, pero tu nivel de acceso no permite registrar firmas. Pide acceso de colaborador a quien administra la herramienta.</div></div>` : null}
 
     ${tab === "panel" ? html`
-      <div className="sec-h"><div><h2>Avance por área</h2><p>Dirección del abogado aplica para todas las áreas; Firma de las formas no aplica para ${FORMAS_EXCLUIDAS.join(", ")}. Selecciona un área para ver a sus colaboradores.</p></div>${readOnly ? null : html`<button className="btn pri" onClick=${() => setAdding(true)}>+ Agregar colaborador</button>`}</div>
+      <div className="sec-h"><div><h2>Avance por área</h2><p>Dirección del abogado aplica para todas las áreas; Firma de las formas no aplica para ${FORMAS_EXCLUIDAS.join(", ")}, ni para ${Object.keys(FORMAS_EXCLUIDAS_IDS).length} colaboradores de PCR. Selecciona un área para ver a sus colaboradores.</p></div>${readOnly ? null : html`<button className="btn pri" onClick=${() => setAdding(true)}>+ Agregar colaborador</button>`}</div>
       <div className="areas">
-        ${AREAS.map(a => { const s = stat.byArea[a]; const nd = reqDocs(a).length;
+        ${AREAS.map(a => { const s = stat.byArea[a]; const nd = s.total ? (s.cReq ? 1 : 0) + (s.dReq ? 1 : 0) : reqDocs(a).length;
           if (!s.total) return html`<div key=${a} className="acard empty-area">
             <div className="top"><span className="nm">${a}</span><span className="doctag">${nd} ${nd === 1 ? "documento" : "documentos"}</span></div>
             <p className="muted" style=${{margin:0,fontSize:"12.5px"}}>Sin colaboradores registrados todavía.</p>
@@ -757,10 +769,10 @@ function App(){
           return html`
           <button key=${a} className=${"acard" + (s.comp === s.total ? " done" : "")} onClick=${() => goArea(a)}>
             <div className="top"><span className="nm">${a}</span><span className="pc num">${fmtPct(s.pc)}</span></div>
-            <span className="doctag">${nd} ${nd === 1 ? "documento" : "documentos"}</span>
-            ${DOCS.map(d => { if (!applies(a, d)) return html`<div key=${d.k} className="drow na"><div className="drow-l"><span>${d.short}</span><span>No aplica</span></div></div>`;
-              const n = d.k === "c" ? s.c : s.d; const p = pct(n, s.total); return html`<div key=${d.k} className="drow">
-              <div className="drow-l"><span>${d.short}</span><span className="num">${n}/${s.total}</span></div>
+            <span className="doctag">${nd} ${nd === 1 ? "documento" : "documentos"}${s.cReq && s.cReq < s.total ? " · " + (s.total - s.cReq) + " solo Dirección" : ""}</span>
+            ${DOCS.map(d => { if (!(d.k === "c" ? s.cReq : s.dReq)) return html`<div key=${d.k} className="drow na"><div className="drow-l"><span>${d.short}</span><span>No aplica</span></div></div>`;
+              const n = d.k === "c" ? s.c : s.d; const req = d.k === "c" ? s.cReq : s.dReq; const p = pct(n, req); return html`<div key=${d.k} className="drow">
+              <div className="drow-l"><span>${d.short}</span><span className="num">${n}/${req}</span></div>
               <div className="mbar"><i style=${{ width: p + "%" }}></i></div></div>`; })}
             <div className="meta num"><span><b>${s.total}</b> total</span><span><b>${s.comp}</b> completos</span><span><b>${s.pend}</b> con pendientes</span></div>
           </button>`; })}
@@ -778,7 +790,7 @@ function App(){
         ${readOnly ? null : html`<button className="btn pri" onClick=${() => setAdding(true)}>+ Agregar colaborador</button>`}
       </div>
       <div className="resline"><span className="num">Mostrando <b>${rows.length}</b> de ${stat.total} colaboradores${fArea ? html`<span className="chipf">Área: ${fArea}</span>` : null}</span>
-        <span className="num">${(() => { const f = rows.filter(r => isComplete(recs[r.id] || EMPTY, r.area)).length; return html`En esta vista: <b style=${{color:"var(--green)"}}>${f}</b> con firmas completas · <b>${rows.length - f}</b> con pendientes`; })()}</span></div>
+        <span className="num">${(() => { const f = rows.filter(r => isComplete(recs[r.id] || EMPTY, r)).length; return html`En esta vista: <b style=${{color:"var(--green)"}}>${f}</b> con firmas completas · <b>${rows.length - f}</b> con pendientes`; })()}</span></div>
       <div className="tbox">
         <table>
           <thead><tr>
@@ -786,12 +798,12 @@ function App(){
             <th><span className="plain">Observaciones</span></th><th><span className="plain">Acciones</span></th>
           </tr></thead>
           <tbody>
-            ${rows.length ? rows.map(r => { const c = recs[r.id] || EMPTY; const n = nSigned(c, r.area); return html`
-              <tr key=${r.id} className=${n === reqDocs(r.area).length ? "signed" : n ? "partial" : ""}>
+            ${rows.length ? rows.map(r => { const c = recs[r.id] || EMPTY; const n = nSigned(c, r); return html`
+              <tr key=${r.id} className=${n === reqDocs(r).length ? "signed" : n ? "partial" : ""}>
                 <td><button className="nmbtn" onClick=${() => setOpenId(r.id)}>${r.nombre}</button><span className="idt">${r.id}${r.agregado ? html` <span className="newtag">Agregado</span>` : null}</span></td>
                 <td><span className="area-tag">${r.area}</span></td>
                 <td><div className="cargo">${r.cargo}</div></td>
-                ${DOCS.map(d => html`<td key=${d.k}>${applies(r.area, d) ? DocCell({ r, c, d }) : html`<span className="na-cell">No aplica</span>`}</td>`)}
+                ${DOCS.map(d => html`<td key=${d.k}>${applies(r, d) ? DocCell({ r, c, d }) : html`<span className="na-cell">No aplica</span>`}</td>`)}
                 <td><div className="obs" title=${c.obs}>${c.obs || html`<span className="muted">—</span>`}</div></td>
                 <td><button className="btn sm" onClick=${() => setOpenId(r.id)}>${readOnly ? "Ver" : "Ver / editar"}</button></td>
               </tr>`; }) : html`<tr><td colSpan="7"><div className="empty">Ningún colaborador coincide con estos filtros. <button className="btn sm" onClick=${clearFilters}>Limpiar filtros</button></div></td></tr>`}
@@ -805,12 +817,12 @@ function App(){
         <button className="btn pri" onClick=${copyPend} disabled=${!stat.pend}>Copiar lista por área</button></div>
       ${stat.pend === 0 ? html`<div className="alldone">Todos los colaboradores tienen sus firmas registradas.</div>` : html`
       <div className="pgrid">
-        ${AREAS.map(a => { const l = ROSTER.filter(r => r.area === a && !isComplete(recs[r.id] || EMPTY, r.area)); if (!l.length) return null; return html`
+        ${AREAS.map(a => { const l = ROSTER.filter(r => r.area === a && !isComplete(recs[r.id] || EMPTY, r)); if (!l.length) return null; return html`
           <section key=${a} className="pgroup">
             <h3><span>${a}</span><span className="num muted">${l.length} de ${stat.byArea[a].total}</span></h3>
             <ul>${l.map(r => { const c = recs[r.id] || EMPTY; return html`<li key=${r.id}><div className="who"><b>${r.nombre}</b><span>${r.cargo}</span>
-                <div className="miss">${reqDocs(r.area).map(d => html`<span key=${d.k} className=${"pill " + (isSigned(c, d) ? "f" : "p")}>${isSigned(c, d) ? "✓ " : ""}${d.short}</span>`)}</div></div>
-              ${readOnly ? null : html`<div className="regs">${reqDocs(r.area).filter(d => !isSigned(c, d)).map(d => html`<button key=${d.k} className="btn sm" onClick=${() => setEstado(r.id, d, "firmado")}>Registrar ${d.short}</button>`)}</div>`}</li>`; })}</ul>
+                <div className="miss">${reqDocs(r).map(d => html`<span key=${d.k} className=${"pill " + (isSigned(c, d) ? "f" : "p")}>${isSigned(c, d) ? "✓ " : ""}${d.short}</span>`)}</div></div>
+              ${readOnly ? null : html`<div className="regs">${reqDocs(r).filter(d => !isSigned(c, d)).map(d => html`<button key=${d.k} className="btn sm" onClick=${() => setEstado(r.id, d, "firmado")}>Registrar ${d.short}</button>`)}</div>`}</li>`; })}</ul>
           </section>`; })}
       </div>`}
     ` : null}
@@ -851,7 +863,7 @@ function Ficha({ id, rec, readOnly, names, onClose, writeRec, say, setConfirm, m
     if (est[d.k] === "firmado" && fec[d.k] > today()) return "futura";
     return "";
   };
-  const anyProb = reqDocs(extra ? nArea : r.area).some(d => prob(d));
+  const anyProb = reqDocs(extra ? { id, area: nArea } : r).some(d => prob(d));
   const docDirty = d => est[d.k] !== (rec[d.est] === "firmado" ? "firmado" : "pendiente") || (est[d.k] === "firmado" && fec[d.k] !== (rec[d.fec] || "")) || enl[d.k] !== (rec[d.enl] || "");
   const dirty = idDirty || obs !== (rec.obs || "") || DOCS.some(docDirty);
   const reverts = DOCS.filter(d => rec[d.est] === "firmado" && est[d.k] === "pendiente");
@@ -895,8 +907,8 @@ function Ficha({ id, rec, readOnly, names, onClose, writeRec, say, setConfirm, m
           <datalist id="dl-areas">${AREAS.map(a => html`<option key=${a} value=${a} />`)}</datalist>
           <datalist id="dl-cargos-m">${[...new Set(ROSTER.filter(x => x.area === nArea).map(x => x.cargo))].map(c => html`<option key=${c} value=${c} />`)}</datalist>
         </div>` : html`<dl className="ro"><dt>Nombre</dt><dd>${r.nombre}</dd><dt>Área</dt><dd>${r.area}</dd><dt>Cargo</dt><dd>${r.cargo}</dd></dl>`}
-        ${!applies(extra ? nArea : r.area, DOC.d) ? html`<span className="hint">Dirección del abogado no aplica para ${extra ? nArea : r.area}.</span>` : null}
-        ${reqDocs(extra ? nArea : r.area).map(d => { const p = prob(d); const f = est[d.k] === "firmado"; return html`<fieldset key=${d.k} className=${"docbox" + (f ? " ok" : "")}>
+        ${!applies(extra ? { id, area: nArea } : r, DOC.d) ? html`<span className="hint">Dirección del abogado no aplica para ${extra ? nArea : r.area}.</span>` : null}
+        ${reqDocs(extra ? { id, area: nArea } : r).map(d => { const p = prob(d); const f = est[d.k] === "firmado"; return html`<fieldset key=${d.k} className=${"docbox" + (f ? " ok" : "")}>
           <legend>${d.label}</legend>
           <div className="two">
             <div className="fld"><span>Estado</span><div className="toggle" role="group">
