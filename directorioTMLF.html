@@ -140,8 +140,24 @@ a{color:inherit;}
 .section-heading h2{font-family:var(--font-display); font-size:19px; font-weight:700; color:var(--ink);}
 .section-heading .count-tag{font-size:11.5px; color:var(--muted); background:var(--border-soft); padding:2px 9px; border-radius:10px; font-weight:600;}
 
-.people-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(290px,1fr)); gap:16px;}
-.area-card-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:16px;}
+.people-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(290px,340px)); gap:16px; justify-content:flex-start;}
+.area-card-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,230px)); gap:16px; justify-content:flex-start;}
+.area-drop-bar{display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:12px 20px; margin:0 20px 10px; background:rgba(201,168,76,.08); border:1.5px dashed var(--gold); border-radius:12px;}
+.area-drop-hint{font-size:12.5px; color:var(--ink-soft); white-space:nowrap; display:flex; align-items:center; gap:6px;}
+.area-drop-chips{display:flex; flex-wrap:wrap; gap:8px; flex:1;}
+.area-drop-chip{padding:6px 14px; border-radius:20px; background:var(--surface); border:1.5px solid var(--border); font-size:12.5px; font-weight:600; color:var(--ink); cursor:default; transition:all .15s;}
+.area-drop-chip.drag-over{background:var(--gold); color:var(--navy-deep); border-color:var(--gold); transform:scale(1.06);}
+.area-manage-row{display:flex; align-items:center; gap:10px; padding:10px 4px; border-bottom:1px solid var(--border-soft);}
+.area-manage-row:last-child{border-bottom:none;}
+.area-manage-name{flex:1; font-weight:600; font-size:13.5px; color:var(--ink);}
+.area-manage-count{font-size:12px; color:var(--muted); min-width:96px; text-align:right;}
+.area-manage-list{max-height:52vh; overflow-y:auto;}
+.btn-sm{padding:6px 12px !important; font-size:12px !important;}
+.org-node.drop-target{outline:2px dashed var(--gold); outline-offset:3px; background:var(--gold-dim);}
+.org-node[draggable="true"]{cursor:grab;}
+.org-node.dragging{opacity:.4;}
+.p-card.dragging, .p-row.dragging{opacity:.4;}
+.p-card[draggable="true"], .p-row[draggable="true"]{cursor:grab;}
 .area-card{background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); padding:26px 20px; box-shadow:var(--shadow-sm); text-align:left; transition:transform .18s, box-shadow .18s; position:relative; overflow:hidden;}
 .area-card::before{content:''; position:absolute; top:0; left:0; width:100%; height:3px; background:linear-gradient(90deg,var(--gold),transparent);}
 .area-card:hover{transform:translateY(-3px); box-shadow:var(--shadow-md); border-color:var(--gold-mid);}
@@ -418,6 +434,12 @@ mark{background:var(--gold-2); color:var(--navy-deep); padding:0 2px; border-rad
     <div class="result-count" id="resultCount"></div>
   </div>
 
+  <!-- ═══════════ ÁREA DRAG & DROP BAR (solo admin) ═══════════ -->
+  <div class="area-drop-bar" id="areaDropBar" style="display:none;">
+    <span class="area-drop-hint"><i class="fa-solid fa-hand"></i> Arrastra una tarjeta aquí para reasignar de área:</span>
+    <div class="area-drop-chips" id="areaDropChips"></div>
+  </div>
+
   <!-- ═══════════ FILTERS PANEL ═══════════ -->
   <div class="filters-panel" id="filtersPanel">
     <div class="filter-group">
@@ -479,6 +501,8 @@ mark{background:var(--gold-2); color:var(--navy-deep); padding:0 2px; border-rad
       </div>
       <div class="field-row"><label>Correo</label><input id="fCorreo" type="email"></div>
       <div class="field-row"><label>Correo Support</label><input id="fCorreoSupport" type="email"></div>
+      <div class="field-row"><label>Nivel jerárquico</label><select id="fNivel"></select></div>
+      <div class="field-row"><label>Reporta a (jefe directo)</label><select id="fReportsTo"></select></div>
     </div>
     <div class="field-row"><label>Perfil profesional</label><textarea id="fPerfil"></textarea></div>
     <div class="field-row"><label>Fotografía (URL, opcional)</label><input id="fFoto" placeholder="https://…"></div>
@@ -510,6 +534,45 @@ mark{background:var(--gold-2); color:var(--navy-deep); padding:0 2px; border-rad
   <div class="modal-foot">
     <button class="btn btn-ghost" data-close="areaModal">Cancelar</button>
     <button class="btn btn-gold" id="areaModalSubmit">Crear área</button>
+  </div>
+</div>
+
+<!-- ═══════════ MANAGE AREAS MODAL ═══════════ -->
+<div class="modal wide" id="manageAreasModal">
+  <div class="modal-head"><i class="fa-solid fa-diagram-project"></i><h3>Gestionar áreas</h3><button class="modal-close" data-close="manageAreasModal"><i class="fa-solid fa-xmark"></i></button></div>
+  <div class="modal-body">
+    <p style="font-size:12.5px; color:var(--muted); margin-bottom:10px;">Renombra, fusiona o elimina áreas. Para fusionar dos áreas, renombra una con el nombre exacto de la otra.</p>
+    <div class="area-manage-list" id="manageAreasList"></div>
+  </div>
+  <div class="modal-foot">
+    <button class="btn btn-ghost" data-close="manageAreasModal">Cerrar</button>
+    <button class="btn btn-gold" id="manageAreasNewBtn"><i class="fa-solid fa-plus"></i> Nueva área</button>
+  </div>
+</div>
+
+<!-- ═══════════ RENAME AREA MODAL ═══════════ -->
+<div class="modal" id="renameAreaModal">
+  <div class="modal-head"><i class="fa-solid fa-pen"></i><h3>Renombrar área</h3><button class="modal-close" data-close="renameAreaModal"><i class="fa-solid fa-xmark"></i></button></div>
+  <div class="modal-body">
+    <div class="field-row"><label>Nuevo nombre para <strong id="renameAreaOld"></strong></label><input id="fRenameArea"></div>
+    <div class="error-msg" id="renameAreaError">Escribe un nombre distinto al actual.</div>
+  </div>
+  <div class="modal-foot">
+    <button class="btn btn-ghost" data-close="renameAreaModal">Cancelar</button>
+    <button class="btn btn-gold" id="renameAreaSubmit">Guardar</button>
+  </div>
+</div>
+
+<!-- ═══════════ DELETE AREA MODAL ═══════════ -->
+<div class="modal" id="deleteAreaModal">
+  <div class="modal-head"><i class="fa-solid fa-triangle-exclamation" style="color:#c0392b;"></i><h3>Eliminar área</h3><button class="modal-close" data-close="deleteAreaModal"><i class="fa-solid fa-xmark"></i></button></div>
+  <div class="modal-body">
+    <p style="font-size:13.5px; color:var(--ink-soft); line-height:1.5;" id="deleteAreaText"></p>
+    <div class="field-row" id="deleteAreaDestRow" style="margin-top:12px;"><label>Mover a sus colaboradores a:</label><select id="deleteAreaDest"></select></div>
+  </div>
+  <div class="modal-foot">
+    <button class="btn btn-ghost" data-close="deleteAreaModal">Cancelar</button>
+    <button class="btn btn-danger" id="deleteAreaConfirm">Eliminar área</button>
   </div>
 </div>
 
@@ -568,8 +631,12 @@ async function syncFromSheet(showToast){
       // confirmamos que llegaron al Sheet (pendingSync), para no borrarlos
       // de golpe por un reemplazo total si el Sheet todavía no los tiene.
       const incomingIds = new Set(incoming.map(p=>p.id));
+      const localPendingById = {};
+      people.forEach(p=>{ if(p.pendingSync) localPendingById[p.id] = p; });
+      // Si una persona tiene cambios locales aún sin confirmar en la Sheet, gana la versión local
+      const merged = incoming.map(p=> localPendingById[p.id] || p);
       const pendingLocal = people.filter(p=>p.pendingSync && !incomingIds.has(p.id) && !deletedIds.has(p.id));
-      people = incoming.concat(pendingLocal);
+      people = merged.concat(pendingLocal);
       saveState();
       renderDashboard(); buildFilterPanel(); renderMain(); renderCharts();
       if(showToast) toast('Directorio sincronizado con Google Sheets', 'cloud-arrow-down');
@@ -812,7 +879,176 @@ function buildFilterPanel(){
       renderMain();
     };
   });
+
+  renderAreaDropBar();
 }
+
+/* ═══════════════════════════ DRAG & DROP: cambiar de área ═══════════════════════════ */
+function renderAreaDropBar(){
+  const bar = document.getElementById('areaDropBar');
+  if(!bar) return;
+  if(!isAdmin){ bar.style.display='none'; return; }
+  bar.style.display = 'flex';
+  const areas = getAllAreas();
+  const rootChip = currentView==='org'
+    ? `<span class="area-drop-chip" data-root="1" title="Suelta aquí para quitarle su jefe directo"><i class="fa-solid fa-link-slash"></i> Sin jefe directo</span>` : '';
+  document.getElementById('areaDropChips').innerHTML = rootChip + areas.map(a=>
+    `<span class="area-drop-chip" data-area="${escapeHtml(a)}">${escapeHtml(a)}</span>`).join('');
+  document.querySelectorAll('.area-drop-chip').forEach(chip=>{
+    chip.addEventListener('dragover', e=>{ e.preventDefault(); chip.classList.add('drag-over'); });
+    chip.addEventListener('dragleave', ()=>chip.classList.remove('drag-over'));
+    chip.addEventListener('drop', e=>{
+      e.preventDefault();
+      chip.classList.remove('drag-over');
+      const id = e.dataTransfer.getData('text/plain');
+      if(!id) return;
+      if(chip.dataset.root) reassignManager(id, '');
+      else moveToArea(id, chip.dataset.area);
+    });
+  });
+}
+/* Cola para subir cambios a la Sheet de uno en uno (evita choques en operaciones masivas) */
+let syncChain = Promise.resolve();
+function queueUpsert(p){ syncChain = syncChain.then(()=>syncUpsertToSheet(p)).catch(()=>{}); }
+function touch(p){ p.pendingSync = true; p.updatedAt = new Date().toISOString(); queueUpsert(p); }
+function refreshAll(){ renderDashboard(); buildFilterPanel(); renderMain(); renderCharts(); }
+
+function getDescendants(id){
+  const out = [], seen = new Set([id]), stack = [id];
+  while(stack.length){
+    const cur = stack.pop();
+    people.forEach(x=>{ if(x.reportsTo===cur && !seen.has(x.id)){ seen.add(x.id); out.push(x); stack.push(x.id); } });
+  }
+  return out;
+}
+function wouldCreateCycle(id, newMgrId){
+  let cur = newMgrId; const seen = new Set();
+  while(cur){
+    if(cur===id) return true;
+    if(seen.has(cur)) break;
+    seen.add(cur);
+    const m = people.find(x=>x.id===cur);
+    cur = m ? m.reportsTo : '';
+  }
+  return false;
+}
+function personName(id){ const m = people.find(x=>x.id===id); return m ? m.nombreDisplay : 'nadie'; }
+
+function moveToArea(id, newArea){
+  const p = people.find(x=>x.id===id);
+  if(!p || p.area === newArea) return;
+  const oldArea = p.area, oldMgr = p.reportsTo || '';
+  const subs = getDescendants(id);
+  let moveTeam = false;
+  if(subs.length){
+    moveTeam = confirm(`${p.nombreDisplay} tiene ${subs.length} persona(s) en su equipo.\n\nAceptar: mover también a su equipo a ${newArea}.\nCancelar: mover solo a ${p.nombreDisplay}; su equipo se queda en ${oldArea} y pasa a reportar a ${oldMgr ? personName(oldMgr) : 'nadie (queda sin jefe directo)'}.`);
+  }
+  // Quien cambia de área deja de reportarle a su jefe anterior (se dividió el área o cambió de puesto)
+  p.area = newArea; p.reportsTo = ''; touch(p);
+  if(moveTeam){
+    subs.forEach(s=>{ s.area = newArea; touch(s); });
+  } else {
+    people.filter(x=>x.reportsTo===id).forEach(s=>{ s.reportsTo = oldMgr; touch(s); });
+  }
+  saveState();
+  logHistory('edit', `${p.nombreDisplay}: ${oldArea} → ${newArea}`);
+  toast(`${p.nombreDisplay}${moveTeam?' y su equipo':''} movido a ${newArea}`, 'arrows-turn-to-dots');
+  refreshAll();
+}
+
+/* Reasignar jefe directo (organigrama): arrastrar un nodo sobre su nuevo jefe */
+function reassignManager(id, mgrId){
+  const p = people.find(x=>x.id===id);
+  if(!p || id===mgrId) return;
+  if((p.reportsTo||'') === (mgrId||'')) return;
+  if(mgrId && wouldCreateCycle(id, mgrId)){ toast('No se puede: crearía un ciclo en el organigrama', 'triangle-exclamation'); return; }
+  const mgr = mgrId ? people.find(x=>x.id===mgrId) : null;
+  p.reportsTo = mgrId || '';
+  touch(p);
+  if(mgr && mgr.area !== p.area){
+    const team = [p].concat(getDescendants(id));
+    team.forEach(t=>{ t.area = mgr.area; touch(t); });
+  }
+  saveState();
+  logHistory('edit', `${p.nombreDisplay}: ahora reporta a ${mgr ? mgr.nombreDisplay : 'nadie'}`);
+  toast(mgr ? `${p.nombreDisplay} ahora reporta a ${mgr.nombreDisplay}` : `${p.nombreDisplay} quedó sin jefe directo`, 'sitemap');
+  refreshAll();
+}
+
+/* ═══════════════════════════ GESTIÓN DE ÁREAS (renombrar / fusionar / eliminar) ═══════════════════════════ */
+let areaActionTarget = null;
+function openManageAreas(){
+  const areas = getAllAreas();
+  document.getElementById('manageAreasList').innerHTML = areas.length ? areas.map(a=>{
+    const n = people.filter(p=>p.area===a).length;
+    return `<div class="area-manage-row">
+      <div class="area-manage-name">${escapeHtml(a)}</div>
+      <div class="area-manage-count">${n} colaborador${n===1?'':'es'}</div>
+      <button class="btn btn-ghost btn-sm" data-area-rename="${escapeHtml(a)}"><i class="fa-solid fa-pen"></i> Renombrar</button>
+      <button class="btn btn-danger btn-sm" data-area-delete="${escapeHtml(a)}"><i class="fa-solid fa-trash"></i> Eliminar</button>
+    </div>`;
+  }).join('') : '<div style="padding:14px; color:var(--muted); font-size:13px;">No hay áreas todavía.</div>';
+  document.querySelectorAll('[data-area-rename]').forEach(b=>b.onclick = ()=>{
+    areaActionTarget = b.dataset.areaRename;
+    closeModal('manageAreasModal');
+    document.getElementById('renameAreaOld').textContent = areaActionTarget;
+    document.getElementById('fRenameArea').value = areaActionTarget;
+    document.getElementById('renameAreaError').classList.remove('show');
+    openModal('renameAreaModal');
+    setTimeout(()=>document.getElementById('fRenameArea').select(), 100);
+  });
+  document.querySelectorAll('[data-area-delete]').forEach(b=>b.onclick = ()=>{
+    areaActionTarget = b.dataset.areaDelete;
+    const members = people.filter(p=>p.area===areaActionTarget);
+    closeModal('manageAreasModal');
+    document.getElementById('deleteAreaText').innerHTML = members.length
+      ? `El área <strong>${escapeHtml(areaActionTarget)}</strong> tiene <strong>${members.length}</strong> colaborador(es). Elige a qué área pasarán antes de eliminarla.`
+      : `¿Confirmas eliminar el área vacía <strong>${escapeHtml(areaActionTarget)}</strong>?`;
+    const dests = getAllAreas().filter(a=>a!==areaActionTarget);
+    if(!dests.includes('SIN ÁREA')) dests.push('SIN ÁREA');
+    document.getElementById('deleteAreaDest').innerHTML = dests.map(a=>`<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join('');
+    document.getElementById('deleteAreaDestRow').style.display = members.length ? 'block' : 'none';
+    openModal('deleteAreaModal');
+  });
+  openModal('manageAreasModal');
+}
+document.getElementById('manageAreasNewBtn').onclick = ()=>{ closeModal('manageAreasModal'); openAreaModal(); };
+
+document.getElementById('renameAreaSubmit').onclick = ()=>{
+  const oldName = areaActionTarget;
+  const newName = document.getElementById('fRenameArea').value.trim().toUpperCase();
+  if(!newName || newName===oldName){ document.getElementById('renameAreaError').classList.add('show'); return; }
+  const merged = getAllAreas().includes(newName);
+  people.filter(p=>p.area===oldName).forEach(p=>{ p.area = newName; touch(p); });
+  saveCustomAreas([...new Set(getCustomAreas().map(a=>a===oldName?newName:a))]);
+  if(activeFilters.area.has(oldName)){ activeFilters.area.delete(oldName); }
+  if(selectedArea===oldName) selectedArea = newName;
+  saveState();
+  logHistory('edit', `Área ${oldName} → ${newName}`);
+  toast(merged ? `Áreas fusionadas en ${newName}` : `Área renombrada a ${newName}`, 'pen');
+  closeModal('renameAreaModal');
+  refreshAll();
+  openManageAreas();
+};
+document.getElementById('fRenameArea').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('renameAreaSubmit').click(); });
+
+document.getElementById('deleteAreaConfirm').onclick = ()=>{
+  const name = areaActionTarget;
+  const members = people.filter(p=>p.area===name);
+  if(members.length){
+    const dest = document.getElementById('deleteAreaDest').value;
+    members.forEach(p=>{ p.area = dest; touch(p); });
+  }
+  saveCustomAreas(getCustomAreas().filter(a=>a!==name));
+  activeFilters.area.delete(name);
+  if(selectedArea===name) selectedArea = null;
+  saveState();
+  logHistory('delete', `Área ${name}`);
+  toast(`Área ${name} eliminada`, 'trash');
+  closeModal('deleteAreaModal');
+  refreshAll();
+  openManageAreas();
+};
 function updateFilterCount(){
   const total = activeFilters.area.size + activeFilters.level.size + activeFilters.other.size;
   const btn = document.getElementById('filterToggle');
@@ -829,7 +1065,7 @@ function avatarHtml(p, size=''){
 function cardHtml(p){
   const fav = favorites.has(p.id);
   return `
-  <div class="p-card ${p.nuevo?'is-new':''}" data-id="${p.id}">
+  <div class="p-card ${p.nuevo?'is-new':''}" data-id="${p.id}" ${isAdmin?'draggable="true"':''}>
     <button class="fav-star ${fav?'active':''}" data-fav="${p.id}"><i class="fa-solid fa-star"></i></button>
     <div class="p-top">
       ${avatarHtml(p)}
@@ -855,7 +1091,7 @@ function cardHtml(p){
 function rowHtml(p){
   const fav = favorites.has(p.id);
   return `
-  <div class="p-row" data-id="${p.id}" data-open="${p.id}">
+  <div class="p-row" data-id="${p.id}" data-open="${p.id}" ${isAdmin?'draggable="true"':''}>
     ${avatarHtml(p)}
     <div class="r-name">${highlight(p.nombreDisplay, searchQuery)}</div>
     <div class="r-cargo">${highlight(p.cargo, searchQuery)}</div>
@@ -870,6 +1106,7 @@ function rowHtml(p){
 
 /* ═══════════════════════════ MAIN RENDER ROUTER ═══════════════════════════ */
 function renderMain(){
+  renderAreaDropBar();
   const list = getFiltered();
   document.getElementById('resultCount').textContent = `${list.length} de ${people.length} colaboradores`;
   const container = document.getElementById('mainContent');
@@ -969,7 +1206,7 @@ function renderOrgChart(list, container){
   function nodeHtml(p){
     const kids = childrenMap[p.id] || [];
     return `<li>
-      <div class="org-node" data-open="${p.id}">
+      <div class="org-node" data-open="${p.id}" data-id="${p.id}" ${isAdmin?'draggable="true"':''}>
         ${avatarHtml(p)}
         <div><div class="n-name">${escapeHtml(p.nombreDisplay)}</div><div class="n-cargo">${escapeHtml(p.cargo)}</div></div>
       </div>
@@ -994,7 +1231,7 @@ function renderOrgChart(list, container){
       <div class="org-tier">
         <div class="tier-label">${LEVEL_NAMES[rank]}</div>
         ${tiers[rank].map(p=>`
-          <div class="org-node" data-open="${p.id}">
+          <div class="org-node" data-open="${p.id}" data-id="${p.id}" ${isAdmin?'draggable="true"':''}>
             ${avatarHtml(p)}
             <div><div class="n-name">${escapeHtml(p.nombreDisplay)}</div><div class="n-cargo">${escapeHtml(p.cargo)}</div></div>
           </div>`).join('')}
@@ -1018,6 +1255,25 @@ function bindCardEvents(){
   });
   document.querySelectorAll('[data-share]').forEach(el=>{
     el.onclick = (e)=>{ e.stopPropagation(); shareContact(el.dataset.share); };
+  });
+  document.querySelectorAll('.p-card[draggable="true"], .p-row[draggable="true"], .org-node[draggable="true"]').forEach(el=>{
+    el.addEventListener('dragstart', e=>{
+      e.dataTransfer.setData('text/plain', el.dataset.id);
+      e.dataTransfer.effectAllowed = 'move';
+      el.classList.add('dragging');
+    });
+    el.addEventListener('dragend', ()=>el.classList.remove('dragging'));
+  });
+  // Organigrama: soltar un nodo sobre otro lo hace reportar a ese jefe
+  document.querySelectorAll('.org-node[draggable="true"]').forEach(el=>{
+    el.addEventListener('dragover', e=>{ e.preventDefault(); el.classList.add('drop-target'); });
+    el.addEventListener('dragleave', ()=>el.classList.remove('drop-target'));
+    el.addEventListener('drop', e=>{
+      e.preventDefault(); e.stopPropagation();
+      el.classList.remove('drop-target');
+      const id = e.dataTransfer.getData('text/plain');
+      if(id) reassignManager(id, el.dataset.id);
+    });
   });
 }
 function toggleFav(id){
@@ -1088,6 +1344,8 @@ function openDrawer(id, silent){
               <option value="nuevo" ${p.estatus==='nuevo'?'selected':''}>Nuevo ingreso</option>
             </select>
           </div>
+          <div><label>Nivel jerárquico</label><select id="eNivel">${levelOptionsHtml(p.rank)}</select></div>
+          <div><label>Reporta a (jefe directo)</label><select id="eReportsTo">${managerOptionsHtml(p.id, p.reportsTo)}</select></div>
           <div><label>Perfil</label><textarea id="ePerfil">${escapeHtml(p.perfil)}</textarea></div>
           <div><label>URL de fotografía</label><input id="eFoto" value="${escapeHtml(p.foto||'')}" placeholder="https://…"></div>
           <div class="d-save-row">
@@ -1121,6 +1379,16 @@ function openDrawer(id, silent){
 
   if(!silent) currentEditId = null;
 }
+function levelOptionsHtml(selected){
+  return Object.keys(LEVEL_NAMES).map(k=>`<option value="${k}" ${Number(selected)===Number(k)?'selected':''}>${LEVEL_NAMES[k]}</option>`).join('');
+}
+function managerOptionsHtml(selfId, selectedId){
+  const blocked = new Set([selfId, ...getDescendants(selfId).map(x=>x.id)]);
+  const opts = people.filter(x=>!blocked.has(x.id)).slice()
+    .sort((a,b)=>a.nombreDisplay.localeCompare(b.nombreDisplay))
+    .map(x=>`<option value="${escapeHtml(x.id)}" ${x.id===selectedId?'selected':''}>${escapeHtml(x.nombreDisplay)} — ${escapeHtml(x.cargo)}</option>`).join('');
+  return `<option value="">— Sin jefe directo —</option>${opts}`;
+}
 function closeDrawer(){
   document.getElementById('overlay').classList.remove('show');
   document.getElementById('drawer').classList.remove('open');
@@ -1136,6 +1404,13 @@ function saveEditFromDrawer(id){
   p.estatus = document.getElementById('eEstatus').value;
   p.perfil = document.getElementById('ePerfil').value.trim();
   p.foto = document.getElementById('eFoto').value.trim() || null;
+  p.rank = Number(document.getElementById('eNivel').value);
+  const newMgr = document.getElementById('eReportsTo').value;
+  if(newMgr && wouldCreateCycle(p.id, newMgr)){
+    toast('No se puede: ese jefe directo crearía un ciclo en el organigrama', 'triangle-exclamation');
+  } else {
+    p.reportsTo = newMgr;
+  }
   p.updatedAt = new Date().toISOString();
   p.pendingSync = true;
   saveState();
@@ -1217,8 +1492,10 @@ document.getElementById('adminToggle').onclick = ()=>{
     document.getElementById('syncNowBtn').style.display = 'none';
     const qb=document.getElementById('quickAddBtn'); if(qb) qb.style.display = 'none';
     const nb=document.getElementById('newAreaBtn'); if(nb) nb.style.display = 'none';
+    const mb=document.getElementById('manageAreasBtn'); if(mb) mb.style.display = 'none';
     document.body.classList.remove('admin-on');
     toast('Modo administrador desactivado', 'lock');
+    renderAreaDropBar();
     renderMain();
   } else {
     document.getElementById('adminPassInput').value = '';
@@ -1240,9 +1517,11 @@ function submitAdminLogin(){
     document.getElementById('syncNowBtn').style.display = 'flex';
     const qb=document.getElementById('quickAddBtn'); if(qb) qb.style.display = 'flex';
     const nb=document.getElementById('newAreaBtn'); if(nb) nb.style.display = 'flex';
+    const mb=document.getElementById('manageAreasBtn'); if(mb) mb.style.display = 'flex';
     document.body.classList.add('admin-on');
     closeModal('adminLoginModal');
     toast('Modo administrador activado', 'user-shield');
+    renderAreaDropBar();
     renderMain();
   } else {
     document.getElementById('adminLoginError').classList.add('show');
@@ -1258,6 +1537,9 @@ function openAddModal(presetArea){
   ['fNombre','fArea','fCargo','fCorreo','fCorreoSupport','fPerfil','fFoto'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('fEstatus').value = 'nuevo';
   document.getElementById('areaList').innerHTML = getAllAreas().map(a=>`<option value="${escapeHtml(a)}">`).join('');
+  document.getElementById('fNivel').innerHTML = levelOptionsHtml(5);
+  document.getElementById('fNivel').dataset.touched = '';
+  document.getElementById('fReportsTo').innerHTML = managerOptionsHtml('', '');
   if(presetArea && typeof presetArea === 'string') document.getElementById('fArea').value = presetArea;
   document.getElementById('personModalError').classList.remove('show');
   openModal('personModal');
@@ -1289,7 +1571,7 @@ document.getElementById('personModalSubmit').onclick = ()=>{
     const id = (correo.split('@')[0]||nombre.toLowerCase().replace(/\s+/g,'-')).toLowerCase().replace(/[^a-z0-9]+/g,'-');
     const newP = {
       id, nombre:nombre.toUpperCase(), nombreDisplay:nombre, area, cargo, correo, correoSupport, perfil,
-      estatus, foto: foto||null, nuevo:true, rank: guessRank(cargo), updatedAt:new Date().toISOString(), pendingSync:true
+      estatus, foto: foto||null, nuevo:true, rank: Number(document.getElementById('fNivel').value), reportsTo: document.getElementById('fReportsTo').value, updatedAt:new Date().toISOString(), pendingSync:true
     };
     // Si este id había sido eliminado antes, un alta nueva cancela ese tombstone
     const ds = getDeletedIds();
@@ -1303,6 +1585,11 @@ document.getElementById('personModalSubmit').onclick = ()=>{
   closeModal('personModal');
   renderDashboard(); buildFilterPanel(); renderMain(); renderCharts();
 };
+document.getElementById('fNivel').addEventListener('change', e=>{ e.target.dataset.touched = '1'; });
+document.getElementById('fCargo').addEventListener('input', e=>{
+  const n = document.getElementById('fNivel');
+  if(!n.dataset.touched) n.value = String(guessRank(e.target.value));
+});
 function guessRank(cargo){
   const c = cargo.toUpperCase();
   if(c.includes('CHIEF')) return 0;
@@ -1359,6 +1646,17 @@ function ensureNewAreaButton(){
 }
 ensureNewAreaButton();
 document.getElementById('newAreaBtn') && (document.getElementById('newAreaBtn').style.display='none');
+
+function ensureManageAreasButton(){
+  if(document.getElementById('manageAreasBtn')) return;
+  const btn = document.createElement('button');
+  btn.className = 'filter-btn'; btn.id='manageAreasBtn';
+  btn.innerHTML = '<i class="fa-solid fa-diagram-project"></i> Gestionar áreas';
+  btn.onclick = openManageAreas;
+  btn.style.display = 'none';
+  document.querySelector('.toolbar').insertBefore(btn, document.getElementById('importBtn'));
+}
+ensureManageAreasButton();
 
 function openAreaModal(){
   document.getElementById('fAreaName').value = '';
