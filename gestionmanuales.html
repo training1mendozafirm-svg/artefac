@@ -1,0 +1,647 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Control de Manuales y SOP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Estilo «Control de Firmas»: banda navy con indicadores y pestañas, contenido sobre gris claro.
+   Navy #13294B · verde #3DCB86 · gris claro #F3F5F9 · blanco */
+:root{
+  --navy:#13294B; --navy2:#1D3761; --navy3:#2A4675;
+  --green:#3DCB86; --green-d:#1B8A55; --green-s:#DCF5E8;
+  --blue:#2F5D9E; --blue-s:#E3ECF9;
+  --bg:#F3F5F9; --surface:#FFFFFF; --soft:#EEF1F6; --line:#DDE3EC; --line2:#EBEFF5;
+  --ink:#13294B; --ink2:#4B5B73; --ink3:#7D8AA0;
+  --h-ink2:#B5C3D9; --h-ink3:#8FA1BD;
+  --warn:#C98A12; --warn-s:#FBF1DC; --bad:#C8432F; --bad-s:#F9E3DE; --pend:#A9B4C6;
+  /* alias usados en el resto del archivo */
+  --ok:var(--green-d); --deep:var(--navy); --teal:var(--blue); --sky:var(--blue-s); --mist:var(--soft); --white:#FFFFFF;
+  --f-d:'Source Serif 4',Georgia,'Times New Roman',serif; --f-b:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif; --f-l:'IBM Plex Sans',system-ui,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 var(--f-b)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.in{max-width:1480px;margin:0 auto;padding-left:max(24px,env(safe-area-inset-left));padding-right:max(24px,env(safe-area-inset-right))}
+/* encabezado */
+.top{background:var(--navy);color:#fff}
+.top .in{padding-top:22px}
+.hrow{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.hrow .grow{flex:1 1 280px}
+.mk{font:600 11px var(--f-l);letter-spacing:.16em;text-transform:uppercase;color:var(--h-ink2)}
+.top h1{margin:6px 0 4px;font:700 30px/1.1 var(--f-d)}
+.hsub{font-size:13px;color:var(--h-ink2)}
+.pill{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:6px 14px;font-size:12.5px;color:#fff;background:rgba(255,255,255,.04)}
+.pill i{width:8px;height:8px;border-radius:50%;background:var(--green)}
+button.pill{cursor:pointer;font:inherit;font-size:12.5px}
+button.pill:hover{background:rgba(255,255,255,.1)}
+.pill.sync i{background:#F5C451}.pill.err i{background:#FF8E7C}.pill.local i{background:var(--h-ink3)}
+.gs{border:1px solid var(--line);border-radius:10px;padding:12px;display:grid;gap:10px}
+.gs h3{margin:0;font:700 16px var(--f-d);color:var(--navy)}
+.gs .st{font-size:12.5px;color:var(--ink2)}.gs .st.bad{color:var(--bad);font-weight:600}.gs .st.good{color:var(--green-d);font-weight:600}
+.hbtn{border:1px solid rgba(255,255,255,.22);background:transparent;color:#fff;border-radius:999px;padding:6px 14px;font-size:12.5px;cursor:pointer;font-weight:500}
+.hbtn:hover{background:rgba(255,255,255,.08)}
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));margin-top:18px;border-top:1px solid rgba(255,255,255,.14)}
+.kpi{all:unset;box-sizing:border-box;padding:14px 18px 14px;display:grid;gap:4px;align-content:start;border-left:1px solid rgba(255,255,255,.14)}
+.kpi:first-child{border-left:0;padding-left:0}
+button.kpi{cursor:pointer}
+button.kpi:hover{background:rgba(255,255,255,.04)}
+button.kpi:focus-visible{outline:2px solid var(--green)}
+.kpi .l{font:600 11px var(--f-l);letter-spacing:.12em;text-transform:uppercase;color:var(--h-ink2)}
+.kpi .v{font:700 32px/1.1 var(--f-d);font-variant-numeric:tabular-nums;color:#fff}
+.kpi .d{font-size:12px;color:var(--h-ink2);line-height:1.4}
+.kpi.g .v{color:var(--green)}
+.kpi.bad .v{color:#FF8E7C} .kpi.warn .v{color:#F5C451} .kpi.ext .v{color:#A9C7F2}
+.kpi.on{box-shadow:inset 0 -3px 0 #FF8E7C}
+.hbars{display:grid;grid-template-columns:1fr 1fr;gap:28px;padding:4px 0 18px}
+.hbar .row{display:flex;justify-content:space-between;font-size:12.5px;color:#DCE4F0;margin-bottom:6px}
+.hbar .row span:last-child{font-variant-numeric:tabular-nums}
+.hbar .t{height:8px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden}
+.hbar .t i{display:block;height:100%;background:var(--green);border-radius:999px}
+.tabs{display:flex;gap:4px}
+.tabs button{border:0;background:none;color:#DCE4F0;padding:11px 16px;border-radius:8px 8px 0 0;cursor:pointer;font-weight:600;font-size:13.5px;display:inline-flex;gap:8px;align-items:center}
+.tabs button:hover{background:rgba(255,255,255,.06)}
+.tabs button[aria-pressed="true"]{background:var(--bg);color:var(--navy)}
+.tabs .cnt{background:rgba(255,255,255,.14);border-radius:999px;padding:0 8px;font-size:11.5px}
+.tabs button[aria-pressed="true"] .cnt{background:var(--soft)}
+/* contenido */
+.wrap{padding-top:22px;padding-bottom:44px;display:grid;gap:14px}
+.sec h2{margin:0;font:700 22px/1.2 var(--f-d);color:var(--navy)}
+.sec p{margin:4px 0 0;font-size:13px;color:var(--ink2);max-width:90ch}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:600;white-space:nowrap}
+.btn:hover{border-color:var(--ink3)}
+.btn.pri{background:var(--navy);border-color:var(--navy);color:#fff}
+.btn.pri:hover{background:var(--navy2)}
+.btn.danger{color:var(--bad)}
+.btn.sm{padding:5px 11px;font-size:12.5px}
+.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.bar input[type=search],.bar select{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 12px}
+.bar input[type=search]{width:240px;max-width:100%}
+.bar input:focus,.bar select:focus{border-color:var(--navy3);outline:none;box-shadow:0 0 0 3px rgba(19,41,75,.12)}
+.bar label{display:inline-flex;gap:6px;align-items:center;font-size:13px;color:var(--ink2)}
+.bar input[type=checkbox]{accent-color:var(--navy)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink2)}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.legend i{width:14px;height:14px;border-radius:4px;display:inline-block;border:1px solid transparent}
+.demo-note{background:#FFF8E8;border:1px solid #EFDDB3;border-radius:8px;padding:9px 14px;font-size:12.5px;color:#5E4A1F}
+.tag{font:700 10px var(--f-l);letter-spacing:.08em;color:var(--green-d);background:var(--green-s);border-radius:4px;padding:1px 5px;vertical-align:middle}
+/* tabla */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:auto;max-width:100%}
+table{border-collapse:separate;border-spacing:0;width:100%;min-width:1180px}
+th{position:sticky;top:0;z-index:2;background:var(--surface);font:600 10.5px/1.2 var(--f-l);letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);padding:10px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:bottom}
+th.ph{text-align:center;width:74px}
+th.ph b{display:block;color:var(--navy);font-size:13px;letter-spacing:0;margin-bottom:2px}
+th.ph.ext b::after{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--blue);margin-left:4px;vertical-align:middle}
+td{padding:6px;border-bottom:1px solid var(--line2);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:#F8FAFC}
+.pcol{position:sticky;left:0;z-index:1;background:var(--surface);min-width:230px;max-width:270px;border-right:1px solid var(--line2);padding-left:14px}
+th.pcol{z-index:3}
+.pname{all:unset;cursor:pointer;font-weight:600;display:block;color:var(--navy)}
+.pname:hover{text-decoration:underline}
+.pname:focus-visible{outline:2px solid var(--blue)}
+.sub{font-size:12px;color:var(--ink3)}
+.cell{width:100%;min-width:66px;white-space:nowrap;min-height:46px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer;display:grid;place-items:center;gap:1px;padding:3px 2px;font-size:11px;color:var(--ink3);font-variant-numeric:tabular-nums;line-height:1.15}
+.cell b{font-size:14px;line-height:1}
+.cell:hover{border-color:var(--navy3);filter:brightness(.98)}
+.cell.c{background:var(--green-s);border-color:#9EDFBE;color:var(--green-d);font-weight:600}
+.cell.e{background:var(--blue-s);border-color:var(--blue);color:var(--blue);font-weight:600}
+.cell.e.x{background:var(--blue-s);border-color:var(--navy);color:var(--navy)}
+.cell.w{background:var(--soft);border:1.5px dashed var(--navy);color:var(--navy);font-weight:600}
+.cell.na{background:repeating-linear-gradient(135deg,var(--soft) 0 4px,#fff 4px 8px);color:var(--ink3)}
+.cell.soon{box-shadow:inset 0 0 0 2px var(--warn)}
+.cell.over{box-shadow:inset 0 0 0 2px var(--bad);color:var(--bad)}
+.cell.over.e{background:var(--bad-s)}
+.cell.w.over{box-shadow:inset 0 0 0 2px var(--navy);color:var(--navy)}
+.prog{display:flex;align-items:center;gap:8px;min-width:100px}
+.prog .t{flex:1;height:7px;background:var(--soft);border-radius:999px;overflow:hidden}
+.prog .t i{display:block;height:100%;background:var(--green);border-radius:999px}
+.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap;background:var(--soft);color:var(--ink2)}
+.chip::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--pend)}
+.chip.ok{background:var(--green-s);color:var(--green-d)}.chip.ok::before{background:var(--green)}
+.chip.act{background:var(--blue-s);color:var(--blue)}.chip.act::before{background:var(--blue)}
+.chip.ext{background:var(--soft);color:var(--navy);box-shadow:inset 0 0 0 1px var(--line)}.chip.ext::before{background:var(--navy)}
+.chip.bad{background:var(--bad-s);color:var(--bad)}.chip.bad::before{background:var(--bad)}
+.chip.warn{background:var(--warn-s);color:#8a5e08}.chip.warn::before{background:var(--warn)}
+.late{color:var(--bad);font-weight:600}
+.empty{padding:52px 20px;text-align:center;color:var(--ink2)}
+.empty h2{font:700 24px var(--f-d);margin:0 0 6px;color:var(--navy)}
+/* cronograma */
+.gantt{display:grid;grid-template-columns:240px 1fr;min-width:0}
+.g-left{position:sticky;left:0;z-index:2;background:var(--surface);border-right:1px solid var(--line2)}
+.g-row{height:40px;border-bottom:1px solid var(--line2);display:flex;flex-direction:column;justify-content:center;padding:0 12px;overflow:hidden;white-space:nowrap}
+.g-row .pname{overflow:hidden;text-overflow:ellipsis;font-size:13px}
+.g-head{height:42px;border-bottom:1px solid var(--line);position:relative;background:var(--surface)}
+.g-canvas{position:relative}
+.g-seg{position:absolute;height:18px;top:11px;border-radius:4px;cursor:pointer;border:1px solid var(--surface)}
+.g-seg.c{background:var(--green)} .g-seg.e{background:var(--blue)} .g-seg.e.x{background:var(--navy)} .g-seg.p{background:#D3DAE5}
+.g-seg.w{background:repeating-linear-gradient(135deg,var(--navy) 0 3px,#B9C6DA 3px 7px)}
+.g-seg.over{outline:2px solid var(--bad);outline-offset:0;z-index:1}
+.g-seg.w.over{outline-color:var(--navy)}
+.g-seg:hover{filter:brightness(1.08);z-index:2}
+.g-today{position:absolute;top:0;bottom:0;width:2px;background:var(--bad);z-index:3}
+.g-due{position:absolute;top:6px;height:28px;border-left:2px dashed var(--navy);z-index:2}
+.g-due.late{border-color:var(--bad)}
+/* modal */
+.ov{position:fixed;inset:0;background:rgba(19,41,75,.5);display:flex;align-items:flex-start;justify-content:center;padding:6vh 16px;overflow:auto;z-index:50}
+.modal{background:var(--surface);border-radius:12px;width:min(580px,100%);box-shadow:0 24px 64px rgba(19,41,75,.35);overflow:hidden}
+.mh{padding:18px 22px 14px;background:var(--navy);color:#fff}
+.mh .k{font:600 11px var(--f-l);letter-spacing:.14em;text-transform:uppercase;color:var(--h-ink2)}
+.mh h2{margin:4px 0 0;font:700 24px/1.15 var(--f-d)}
+.mh p{margin:6px 0 0;font-size:12.5px;color:var(--h-ink2)}
+.mb{padding:16px 22px;display:grid;gap:12px}
+.mf{padding:12px 22px;border-top:1px solid var(--line2);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.f{display:grid;gap:4px}
+.f > span{font-size:12px;font-weight:600;color:var(--ink2)}
+.f input,.f select,.f textarea{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--surface);width:100%}
+.f input:focus,.f select:focus,.f textarea:focus{border-color:var(--navy3);outline:none;box-shadow:0 0 0 3px rgba(19,41,75,.12)}
+.f textarea{min-height:64px;resize:vertical}
+.hint{font-size:11.5px;color:var(--ink3)}
+.err{font-size:12.5px;color:var(--bad);font-weight:600}
+.stbtns{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.stbtns button{border:1.5px solid var(--line);background:var(--surface);border-radius:8px;padding:9px 4px;cursor:pointer;font-weight:600;font-size:12.5px;line-height:1.2;color:var(--ink2)}
+.stbtns button:hover{border-color:var(--navy3)}
+.stbtns button[aria-pressed="true"][data-s="p"]{border-color:var(--ink3);color:var(--navy)}
+.stbtns button[aria-pressed="true"][data-s="e"]{border-color:var(--blue);background:var(--blue-s);color:var(--blue)}
+.stbtns button[aria-pressed="true"][data-s="w"]{border:1.5px dashed var(--navy);background:var(--soft);color:var(--navy)}
+.stbtns button[aria-pressed="true"][data-s="c"]{border-color:var(--green-d);background:var(--green-s);color:var(--green-d)}
+.stbtns button[aria-pressed="true"][data-s="na"]{border-color:var(--ink3);background:var(--soft);color:var(--ink2)}
+.facts{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;background:var(--soft);border-radius:8px;padding:9px 12px}
+.facts b{font-variant-numeric:tabular-nums}
+.hist{max-height:170px;overflow:auto;font-size:12px;border-top:1px solid var(--line2);padding-top:8px;display:grid;gap:4px}
+.hist div{color:var(--ink2)} .hist time{color:var(--ink3);margin-right:6px;font-variant-numeric:tabular-nums}
+.toast{position:fixed;right:16px;bottom:16px;background:var(--navy);color:#fff;padding:11px 16px;border-radius:10px;font-size:13px;z-index:60}
+@media (max-width:1000px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.kpi:nth-child(4){border-left:0;padding-left:0}.hbars{grid-template-columns:1fr;gap:12px}}
+@media (max-width:640px){.stbtns{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:560px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.kpi{border-left:0;padding-left:0}.grid2{grid-template-columns:1fr}.stbtns{grid-template-columns:1fr 1fr}.gantt{grid-template-columns:150px 1fr}}
+</style>
+</head>
+<body>
+<header class="top"><div class="in">
+  <div class="hrow">
+    <div class="grow"><div class="mk">The Mendoza Law Firm · Training</div><h1>Control de Manuales y SOP</h1><div class="hsub">Seguimiento de las 11 fases por proyecto · fechas en días hábiles</div></div>
+    <button class="pill" id="sync-pill" title="Configurar respaldo en Google Sheets"><i></i><span>Guardado en este navegador</span></button>
+    <button class="hbtn" id="b-csv">Exportar CSV</button>
+    <button class="hbtn" id="b-cfg">Ajustes y respaldo</button>
+  </div>
+  <section class="kpis" id="kpis"></section>
+  <div class="hbars" id="hbars"></div>
+  <nav class="tabs" aria-label="Vista">
+    <button data-tab="seg" aria-pressed="true">Seguimiento</button>
+    <button data-tab="gan" aria-pressed="false">Cronograma</button>
+  </nav>
+</div></header>
+<main class="wrap in">
+  <div id="demo"></div>
+  <div class="sec"><h2 id="sec-t">Avance por proyecto</h2><p id="sec-p">Clic en una celda para actualizar la fase. Las fases marcadas con punto azul dependen de revisión de otras áreas.</p></div>
+  <div class="bar">
+    <button class="btn pri" id="b-new">+ Nuevo proyecto</button>
+    <input type="search" id="q" placeholder="Buscar proyecto o responsable" aria-label="Buscar">
+    <select id="fdept" aria-label="Departamento"></select>
+    <label><input type="checkbox" id="fatt"> Solo con atención</label>
+  </div>
+  <div class="legend">
+    <span><i style="background:var(--green-s);border-color:#9EDFBE"></i>Concluida</span>
+    <span><i style="background:var(--blue-s);border-color:var(--blue)"></i>En proceso</span>
+    <span><i style="background:var(--blue-s);border-color:var(--navy)"></i>En revisión externa</span>
+    <span><i style="background:var(--soft);border:1.5px dashed var(--navy)"></i>Esperando a terceros</span>
+    <span><i style="background:#fff;border-color:var(--line)"></i>Pendiente</span>
+    <span><i style="box-shadow:inset 0 0 0 2px var(--warn)"></i>Vence pronto</span>
+    <span><i style="box-shadow:inset 0 0 0 2px var(--bad)"></i>Vencida</span>
+  </div>
+  <section class="card" id="view"></section>
+  <p class="hint">Los datos se guardan solo en este navegador; descarga un respaldo desde «Ajustes y respaldo».</p>
+</main>
+<div id="modal"></div>
+
+<script>
+"use strict";
+/* ---------- Configuración institucional: 11 fases (horas hábiles, ext = revisión de terceros) ---------- */
+const PH=[
+ {c:'F1',n:'Entrevista',h:4,x:0,d:'Entrevistar a los involucrados para conocer el proceso, actividades, necesidades y puntos clave.'},
+ {c:'F2',n:'Información disponible',h:8,x:0,d:'Recopilar y organizar manuales, transcripts, recursos y documentos disponibles.'},
+ {c:'F3',n:'Formato',h:3,x:0,d:'Con apoyo de IA, estructurar y adaptar la información al formato requerido.'},
+ {c:'F4',n:'Borrador',h:3,x:0,d:'Generar el primer borrador con la información recopilada.'},
+ {c:'F5',n:'Revisión y feedback',h:24,x:1,d:'Los involucrados revisan el borrador y dan retroalimentación (2 a 3 días).'},
+ {c:'F6',n:'Versión final',h:16,x:0,d:'Integrar cambios y generar la versión final para un último check (1 a 2 días).'},
+ {c:'F7',n:'Aprobación',h:16,x:1,d:'Los responsables realizan la aprobación oficial (1 a 2 días).'},
+ {c:'F8',n:'Compliance',h:40,x:1,d:'Compliance revisa el documento y valida su cumplimiento (2 a 5 días).'},
+ {c:'F9',n:'Firma',h:24,x:1,d:'Gestionar y recopilar las firmas correspondientes (1 a 3 días).'},
+ {c:'F10',n:'Traducción',h:16,x:0,d:'Traducir el documento aprobado conservando sentido y terminología (1 a 2 días).'},
+ {c:'F11',n:'Entrega y almacenamiento',h:8,x:0,d:'Entregar y almacenar el documento en el repositorio institucional.'},
+];
+const ST={p:'Pendiente',e:'En proceso',w:'Esperando a terceros',c:'Concluida',na:'No aplica'};
+const DEPTS=['Intake','Consulta','DVS','PWI','Paralegals','Follow Up','Customer Service','Training'];
+const HOL_DEFAULT='2026-11-16 Día de la Revolución\n2026-12-25 Navidad\n2027-01-01 Año Nuevo\n2027-02-01 Día de la Constitución\n2027-03-15 Natalicio de Benito Juárez\n2027-05-01 Día del Trabajo\n2027-09-16 Independencia\n2027-11-15 Día de la Revolución\n2027-12-25 Navidad';
+const KEY='tmlf-sop-simple:v1';
+const M=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+
+/* ---------- Utilidades ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const p2=n=>String(n).padStart(2,'0');
+const today=()=>{const d=new Date();return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`};
+const isISO=s=>/^\d{4}-\d{2}-\d{2}$/.test(s||'');
+const dn=s=>Date.UTC(+s.slice(0,4),+s.slice(5,7)-1,+s.slice(8,10))/864e5;
+const ds=n=>new Date(n*864e5).toISOString().slice(0,10);
+const fd=s=>isISO(s)?`${+s.slice(8)} ${M[+s.slice(5,7)-1]}`:'—';
+const fdy=s=>isISO(s)?`${+s.slice(8)} ${M[+s.slice(5,7)-1]} ${s.slice(2,4)}`:'—';
+const uid=()=>Math.random().toString(36).slice(2,9);
+
+/* ---------- Datos ---------- */
+let db;
+function blankPhases(){return PH.map(()=>({s:'p',rs:'',re:'',n:''}))}
+function load(){try{const o=JSON.parse(localStorage.getItem(KEY));if(o&&Array.isArray(o.projects))return o}catch(e){}return null}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}schedulePush()}
+
+/* ---------- Respaldo en Google Sheets (Apps Script) ----------
+   Escritura: POST no-cors con el JSON completo + resumen legible.
+   Confirmación y carga: JSONP (action=status / action=load).
+   La URL y la clave viven en una llave aparte para que restaurar un respaldo no las borre. */
+const SKEY=KEY+':sheet';
+const SHEET_DEFAULT={url:'https://script.google.com/macros/s/AKfycbxO3Yrp0S6gl8JamHKnwNJ5Vjq3rL2T7fiu7-Nzg__U-g3RhSTCAWyK8EmjLyYM-ivs/exec',clave:'TMLF-SOP-2026',auto:true};
+let sheet=(()=>{let o={};try{o=JSON.parse(localStorage.getItem(SKEY))||{}}catch(e){}return o.url?o:{...SHEET_DEFAULT,...o,url:SHEET_DEFAULT.url}})();
+function saveSheetCfg(){try{localStorage.setItem(SKEY,JSON.stringify(sheet))}catch(e){}}
+function jsonp(params){return new Promise((res,rej)=>{
+  const cb='__gs'+Date.now()+Math.floor(Math.random()*1e5),sc=document.createElement('script');
+  const clean=()=>{clearTimeout(t);try{delete window[cb]}catch(e){window[cb]=undefined}sc.remove()};
+  const t=setTimeout(()=>{clean();rej(new Error('Google Sheets no respondió a tiempo'))},25000);
+  window[cb]=d=>{clean();res(d)};sc.onerror=()=>{clean();rej(new Error('No se pudo conectar con la URL del script'))};
+  sc.src=sheet.url+(sheet.url.includes('?')?'&':'?')+new URLSearchParams({...params,clave:sheet.clave||'',callback:cb,_:Date.now()});
+  document.body.appendChild(sc)})}
+function sheetSummary(){
+  setCal();const all=db.projects.map(info);
+  return {
+    proyectos:all.map(i=>{const w=i.waiting.map(r=>`${r.ph.c}: ${r.f.who||'tercero'}`).join('; ');
+      return [i.p.id,i.p.name,i.p.dept,i.p.type,i.p.owner,i.p.start,i.p.due,i.end,Math.max(0,i.dev),Math.round(i.pct),i.done.length,i.app.length,i.state,i.cur?`${i.cur.ph.c} ${i.cur.ph.n}`:'',w,i.p.notes||'',i.p.demo?'Sí':'No']}),
+    fases:all.flatMap(i=>i.s.map(r=>[i.p.id,i.p.name,i.p.dept,r.ph.c,r.ph.n,ST[r.f.s],r.f.rs||'',r.f.re||'',r.na?'':r.due,r.over?'Sí':'No',
+      r.f.s==='w'?(r.f.who||''):'',r.f.s==='w'?(r.f.ws||''):'',r.f.s==='w'?Math.max(0,wdays(r.f.ws||r.f.rs,today())):'',r.f.n||'',i.p.demo?'Sí':'No']))};
+}
+function setSync(st,msg){const b=$('#sync-pill');if(!b)return;b.className='pill '+st;
+  const hm=sheet.last?new Date(sheet.last).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}):'';
+  b.querySelector('span').textContent={local:'Guardado solo en este navegador',sync:'Guardando en Google Sheets…',ok:`Respaldado en Google Sheets${hm?' · '+hm:''}`,err:'Sin respaldo en Sheets'}[st];
+  b.title=msg||(st==='local'?'Configura el respaldo en Google Sheets':st==='err'?(sheet.err||'Error'):'Abrir ajustes de respaldo')}
+let pushT,pushing=false,pushAgain=false;
+function schedulePush(){if(sheet.url&&sheet.auto!==false){clearTimeout(pushT);pushT=setTimeout(()=>pushSheet(false),2500)}}
+async function pushSheet(manual){
+  if(!sheet.url){if(manual)toast('Primero pega la URL del script en Ajustes y respaldo');return false}
+  if(pushing){pushAgain=true;return false}
+  pushing=true;const sentId=uid();setSync('sync');
+  try{
+    await fetch(sheet.url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({action:'save',clave:sheet.clave||'',sentId,savedAt:new Date().toISOString(),data:db,resumen:sheetSummary()})});
+    const st=await jsonp({action:'status'});
+    if(!st||!st.ok)throw new Error(st&&st.error||'Respuesta inválida del script');
+    if(st.lastSentId!==sentId)throw new Error('La hoja no confirmó este guardado. Revisa la clave y que el script esté implementado como aplicación web.');
+    sheet.last=st.savedAt;sheet.err='';saveSheetCfg();setSync('ok');if(manual)toast('Respaldo guardado en Google Sheets');return true;
+  }catch(e){sheet.err=e.message;saveSheetCfg();setSync('err',e.message);if(manual)toast('No se guardó en Sheets: '+e.message);return false}
+  finally{pushing=false;if(pushAgain){pushAgain=false;schedulePush()}}
+}
+async function pullSheet(){
+  if(!sheet.url){toast('Primero pega la URL del script');return}
+  try{const r=await jsonp({action:'load'});
+    if(!r.ok)throw new Error(r.error);const o=r.data;
+    if(!o||!Array.isArray(o.projects)||!o.projects.every(p=>p.id&&p.name&&isISO(p.start)&&Array.isArray(p.ph)&&p.ph.length===11))throw new Error('El respaldo de la hoja no tiene el formato esperado');
+    if(!confirm(`La hoja tiene ${o.projects.length} proyecto(s), guardados el ${new Date(r.savedAt).toLocaleString('es-MX')}. ¿Reemplazar los datos de este navegador?`))return;
+    db={hours:8,soonDays:1,holidays:HOL_DEFAULT,log:[],...o};try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}
+    closeModal();render();toast('Datos cargados desde Google Sheets');
+  }catch(e){toast('No se pudo cargar: '+e.message)}
+}
+function log(pid,what,note){db.log.unshift({t:new Date().toISOString(),pid,a:what,n:note||''});if(db.log.length>3000)db.log.length=3000}
+
+/* ---------- Calendario hábil ---------- */
+let H=8,HOL=new Set();
+function setCal(){H=Math.max(1,+db.hours||8);HOL=new Set((db.holidays||'').split('\n').map(l=>l.trim().slice(0,10)).filter(isISO))}
+const isWork=s=>{const w=new Date(dn(s)*864e5).getUTCDay();return w!==0&&w!==6&&!HOL.has(s)};
+const onAfter=s=>{let g=0;while(!isWork(s)&&g++<400)s=ds(dn(s)+1);return s};
+const nextWork=s=>onAfter(ds(dn(s)+1));
+const norm=p=>{let d=p.d,u=p.u;if(!isWork(d)){d=onAfter(d);u=0}if(u>=H-1e-9){d=nextWork(d);u=0}return {d,u}};
+function addH(p,h){let {d,u}=norm(p);let g=0;while(h>H-u+1e-9&&g++<2000){h-=H-u;d=nextWork(d);u=0}return {d,u:u+h}}
+function wdays(a,b){if(!isISO(a)||!isISO(b))return 0;const s=dn(b)>=dn(a)?1:-1;let n=0,d=a,g=0;while(d!==b&&g++<3000){d=ds(dn(d)+s);if(isWork(d))n+=s}return n}
+function backWork(n){let d=onAfter(today());for(let i=0;i<n;i++){do d=ds(dn(d)-1);while(!isWork(d))}return d}
+function fwdWork(n){let d=onAfter(today());for(let i=0;i<n;i++)d=nextWork(d);return d}
+function planEnd(start){return addH({d:start,u:0},PH.reduce((a,f)=>a+f.h,0)).d}
+
+/* ---------- Programación y estado de cada proyecto ----------
+   Cada fase inicia al terminar la anterior. "Fecha límite" = término según la cadena real.
+   Una fase vencida empuja el pronóstico de las siguientes a partir de hoy. */
+function sched(p){
+  const t=today();let cur={d:p.start,u:0};
+  return PH.map((ph,i)=>{
+    const f=p.ph[i];
+    if(f.s==='na')return {f,ph,na:true};
+    let sp,ep,due,over=false;
+    if(f.s==='c'){sp={d:f.rs,u:0};ep={d:f.re,u:H};due=f.re}
+    else if(f.s==='e'||f.s==='w'){sp={d:f.rs,u:0};const dp=addH(sp,ph.h);due=dp.d;over=dn(due)<dn(t);ep=over?{d:onAfter(t),u:H}:dp}
+    else{const dp=addH(cur,ph.h);due=dp.d;over=dn(due)<dn(t);sp=dn(cur.d)<dn(t)?{d:onAfter(t),u:0}:norm(cur);ep=addH(sp,ph.h)}
+    cur=ep;
+    return {f,ph,sp:norm(sp),ep,due,over,soon:!over&&f.s!=='c'&&wdays(t,due)<=(+db.soonDays||1)};
+  });
+}
+function info(p){
+  const s=sched(p),app=s.filter(r=>!r.na),done=app.filter(r=>r.f.s==='c');
+  const pct=app.length?done.length/app.length*100:0;
+  let end=p.start;for(const r of app)if(dn(r.ep.d)>dn(end))end=r.ep.d;
+  const over=app.filter(r=>r.over),soon=app.filter(r=>r.soon);
+  const waiting=app.filter(r=>r.f.s==='w'),overMine=over.filter(r=>r.f.s!=='w');
+  const started=app.some(r=>r.f.s!=='p');
+  const finished=app.length&&done.length===app.length;
+  const lateDue=isISO(p.due)&&!finished&&dn(end)>dn(p.due);
+  /* Retraso propio: fase vencida que depende del equipo, o pronóstico tarde sin nada pendiente de terceros.
+     Si lo único que detiene el proyecto está en manos de terceros, el estado es «Esperando a terceros». */
+  const late=!finished&&(overMine.length>0||(lateDue&&!waiting.length));
+  const state=finished?'Concluido':late?'Retrasado':waiting.length?'Esperando a terceros':!started?'Pendiente':soon.length?'En riesgo':'En curso';
+  const cur=app.find(r=>r.f.s!=='c');
+  return {p,s,app,done,pct,end,over,soon,waiting,late,lateDue,state,cur,dev:isISO(p.due)?wdays(p.due,end):0};
+}
+
+/* ---------- DEMO ---------- */
+function demo(){
+  const specs=[
+    ['Manual operativo de Intake','Intake','Manual + SOP','Laura Méndez',30,11,{F8:2}],
+    ['SOP de agenda de consultas','Consulta','SOP','Carlos Ibarra',14,8,{}],
+    ['Manual DVS: intake de casos','DVS','Manual + SOP','Sofía Treviño',18,7,{F5:3}],
+    ['SOP de seguimiento PWI','PWI','SOP','Laura Méndez',9,4,{F2:1}],
+    ['Manual de Paralegals','Paralegals','Manual','Carlos Ibarra',1,2,{}],
+    ['SOP de Follow Up','Follow Up','SOP','',12,4,{F1:1,F2:2}],
+    ['Manual de Customer Service','Customer Service','Manual + SOP','Sofía Treviño',-3,0,{}],
+    ['SOP de Training: onboarding','Training','SOP','Mónica Salas',7,6,{}],
+  ];
+  const t=today();
+  for(const [name,dept,type,owner,back,done,delay] of specs){
+    const start=back>=0?backWork(back):fwdWork(-back);
+    const p={id:uid(),name,dept,type,owner,start,due:'',notes:'',demo:true,ph:blankPhases()};
+    if(dept==='Training')p.ph[9]={s:'na',rs:'',re:'',n:'Documento de uso interno solo en español.'};
+    let cur={d:start,u:0},k=0;
+    PH.forEach((ph,i)=>{
+      const f=p.ph[i];if(f.s==='na')return;
+      if(k<done){const s=norm(cur),e=addH(s,ph.h+(delay[ph.c]||0)*H);f.s='c';f.rs=dn(s.d)>dn(t)?t:s.d;f.re=dn(e.d)>dn(t)?t:e.d;cur=e}
+      else if(k===done&&back>0){const s=norm(cur);f.rs=dn(s.d)>dn(t)?t:s.d;if(ph.x&&dept!=='DVS'){f.s='w';f.who={F5:'Involucrados del área',F7:'Manager del área',F8:'Compliance',F9:'Manager del área'}[ph.c];f.ws=f.rs}else f.s='e'}
+      k++;
+    });
+    p.due=fwdWorkFrom(planEnd(start),2);
+    db.projects.push(p);
+  }
+}
+function fwdWorkFrom(d,n){d=onAfter(d);for(let i=0;i<n;i++)d=nextWork(d);return d}
+
+/* ---------- Estado de la interfaz ---------- */
+const ui={tab:'seg',q:'',dept:'',att:false};
+
+/* ---------- Render ---------- */
+function filtered(all){
+  const q=ui.q.trim().toLowerCase();
+  return all.filter(i=>(!ui.dept||i.p.dept===ui.dept)&&(!q||`${i.p.name} ${i.p.owner} ${i.p.dept}`.toLowerCase().includes(q))&&(!ui.att||i.late||i.soon.length||i.waiting.length));
+}
+function render(){
+  setCal();
+  const all=db.projects.map(info).sort((a,b)=>{const da=DEPTS.indexOf(a.p.dept),dbb=DEPTS.indexOf(b.p.dept);return (da<0?99:da)-(dbb<0?99:dbb)||a.p.name.localeCompare(b.p.name)});
+  $('#demo').innerHTML=db.projects.some(p=>p.demo)?`<div class="demo-note"><span class="tag">DEMO</span> Se muestran proyectos de ejemplo con datos ficticios. Elimínalos en «Ajustes y respaldo» cuando registres los reales.</div>`:'';
+  // KPIs
+  const appN=all.reduce((a,i)=>a+i.app.length,0),doneN=all.reduce((a,i)=>a+i.done.length,0);
+  const n=s=>all.filter(i=>i.state===s).length;
+  const lateN=all.filter(i=>i.late).length, soonN=all.filter(i=>!i.late&&i.soon.length).length;
+  const comp=all.filter(i=>{const r=i.s[7];return !r.na&&(r.f.s==='e'||r.f.s==='w')}).length;
+  const waitN=all.filter(i=>i.waiting.length&&!i.late).length;
+  const projDone=n('Concluido'),pctF=appN?doneN/appN*100:0,pctP=all.length?projDone/all.length*100:0;
+  $('#kpis').innerHTML=`
+    <div class="kpi"><span class="l">Proyectos</span><span class="v">${all.length}</span><span class="d">${projDone} concluidos · ${n('Pendiente')} sin iniciar</span></div>
+    <div class="kpi g"><span class="l">Avance global</span><span class="v">${Math.round(pctF)}%</span><span class="d">${doneN} de ${appN} fases concluidas</span></div>
+    <button class="kpi ${lateN?'bad':''} ${ui.att?'on':''}" id="k-late" title="Clic para ver solo los que requieren atención"><span class="l">Retrasados</span><span class="v">${lateN}</span><span class="d">Vencidos por fases a mi cargo</span></button>
+    <div class="kpi ${soonN?'warn':''}"><span class="l">En riesgo</span><span class="v">${soonN}</span><span class="d">Alguna fase vence pronto</span></div>
+    <div class="kpi ${waitN?'ext':''}"><span class="l">Esperando a terceros</span><span class="v">${waitN}</span><span class="d">Firma, aprobación o revisión externa · ${comp} en Compliance</span></div>`;
+  $('#hbars').innerHTML=`
+    <div class="hbar"><div class="row"><span>Fases concluidas · todos los proyectos</span><span>${doneN} de ${appN} · ${Math.round(pctF)}%</span></div><div class="t"><i style="width:${pctF}%"></i></div></div>
+    <div class="hbar"><div class="row"><span>Proyectos concluidos</span><span>${projDone} de ${all.length} · ${Math.round(pctP)}%</span></div><div class="t"><i style="width:${pctP}%"></i></div></div>`;
+  $('#sec-t').textContent=ui.tab==='seg'?'Avance por proyecto':'Cronograma';
+  $('#sec-p').textContent=ui.tab==='seg'?'Clic en una celda para actualizar la fase. Las fases con punto azul dependen de revisión de otras áreas.':'Cada barra es una fase. La línea roja marca hoy y la punteada, la fecha compromiso. Clic en un tramo para actualizarlo.';
+  $('#k-late').onclick=()=>{ui.att=!ui.att;$('#fatt').checked=ui.att;render()};
+  // filtro de departamentos
+  const depts=[...new Set([...DEPTS,...db.projects.map(p=>p.dept)])];
+  $('#fdept').innerHTML=`<option value="">Todos los departamentos</option>`+depts.map(d=>`<option ${d===ui.dept?'selected':''}>${esc(d)}</option>`).join('');
+  const rows=filtered(all);
+  if(!db.projects.length){$('#view').innerHTML=`<div class="empty"><h2>Sin proyectos todavía</h2><p>Registra el primer manual o SOP. Se crean sus 11 fases con las fechas calculadas en días hábiles.</p><button class="btn pri" onclick="openProject()">+ Nuevo proyecto</button></div>`;return}
+  if(!rows.length){$('#view').innerHTML=`<div class="empty"><h2>Sin coincidencias</h2><p>Cambia la búsqueda o los filtros.</p></div>`;return}
+  ui.tab==='seg'?renderTable(rows):renderGantt(rows);
+}
+function stateChip(i){const c={Concluido:'ok','En curso':'act',Retrasado:'bad','En riesgo':'warn','Esperando a terceros':'ext',Pendiente:''}[i.state];return `<span class="chip ${c}">${i.state}</span>`}
+function renderTable(rows){
+  const head=`<tr><th class="pcol">Proyecto</th><th>Avance</th>${PH.map(f=>`<th class="ph ${f.x?'ext':''}" title="${esc(f.n)}${f.x?' · revisión externa':''}"><b>${f.c}</b>${esc(f.n)}</th>`).join('')}<th>Compromiso</th><th>Pronóstico</th><th>Estado</th></tr>`;
+  const body=rows.map(i=>{const p=i.p;return `<tr>
+    <td class="pcol"><button class="pname" data-edit="${p.id}">${esc(p.name)}</button><div class="sub">${esc(p.dept)} · ${p.owner?esc(p.owner):'<span class="late">sin responsable</span>'} ${p.demo?'<span class="tag">DEMO</span>':''}</div></td>
+    <td><div class="prog"><div class="t"><i style="width:${i.pct}%"></i></div><span class="num">${Math.round(i.pct)}%</span></div></td>
+    ${i.s.map((r,k)=>{let cls,txt;
+      if(r.na){cls='na';txt='<b>—</b>N/A'}
+      else if(r.f.s==='c'){cls='c';txt=`<b>✓</b>${fd(r.f.re)}`}
+      else if(r.f.s==='w'){const dw=Math.max(0,wdays(r.f.ws||r.f.rs,today()));cls='w'+(r.over?' over':'');txt=`<b>⏳</b>${dw} d`}
+      else{cls=(r.f.s==='e'?'e':'p')+(r.ph.x?' x':'')+(r.over?' over':r.soon?' soon':'');txt=`<b>${r.f.s==='e'?'●':r.over?'!':'&nbsp;'}</b>${fd(r.due)}`}
+      const tip=`${r.ph.c} ${r.ph.n}: ${ST[r.f.s]}${r.f.s==='w'?` · ${r.f.who||'tercero sin especificar'} desde ${fdy(r.f.ws||r.f.rs)}`:''}${r.na?' · '+r.f.n:r.f.s==='c'?' el '+fdy(r.f.re):' · límite '+fdy(r.due)}${r.over?(r.f.s==='w'?' (vencida, depende de terceros)':' (vencida)'):''}`;
+      return `<td><button class="cell ${cls}" data-p="${p.id}" data-i="${k}" title="${esc(tip)}" aria-label="${esc(tip)}">${txt}</button></td>`}).join('')}
+    <td class="num">${fdy(p.due)}</td>
+    <td class="num ${i.lateDue?'late':''}">${fdy(i.end)}${i.lateDue?`<div class="sub late">+${i.dev} días hábiles</div>`:''}</td>
+    <td>${stateChip(i)}</td></tr>`}).join('');
+  $('#view').innerHTML=`<table><thead>${head}</thead><tbody>${body}</tbody></table>`;
+}
+function renderGantt(rows){
+  const px=24,t=today();
+  let lo=dn(t),hi=dn(t);
+  for(const i of rows){lo=Math.min(lo,dn(i.p.start));hi=Math.max(hi,dn(i.end),isISO(i.p.due)?dn(i.p.due):0)}
+  lo-=3;hi+=7;const days=hi-lo+1,W=days*px;
+  const X=pt=>(dn(pt.d)-lo+Math.min(pt.u,H)/H)*px;
+  let head='',bg='';
+  for(let k=0;k<days;k++){const d=ds(lo+k),x=k*px,dd=+d.slice(8);
+    if(!isWork(d))bg+=`<div style="position:absolute;left:${x}px;width:${px}px;top:0;bottom:0;background:#F6F8FB"></div>`;
+    if(dd===1||k===0)head+=`<div style="position:absolute;left:${x+4}px;top:4px;font-weight:600;font-size:12px;color:var(--ink2)">${M[+d.slice(5,7)-1]} ${d.slice(0,4)}</div><div style="position:absolute;left:${x}px;top:0;bottom:0;border-left:1px solid var(--line)"></div>`;
+    head+=`<div style="position:absolute;left:${x}px;width:${px}px;top:23px;text-align:center;font-size:10.5px;color:${isWork(d)?'var(--ink2)':'var(--ink3)'}">${dd}</div>`}
+  const tx=(dn(t)-lo+.5)*px;
+  head+=`<div class="g-today" style="left:${tx}px"></div>`;
+  const left=rows.map(i=>`<div class="g-row"><button class="pname" data-edit="${i.p.id}" title="${esc(i.p.name)}">${esc(i.p.name)}</button><span class="sub">${esc(i.p.dept)} · ${Math.round(i.pct)}% · ${i.state}</span></div>`).join('');
+  const lines=rows.map((i,r)=>{const y=r*40;
+    const segs=i.s.map((x,k)=>{if(x.na)return '';const a=X(x.sp),b=X(x.ep);const w=Math.max(4,b-a);
+      const cls=(x.f.s==='c'?'c':x.f.s==='w'?'w':x.f.s==='e'?'e':'p')+(x.ph.x?' x':'')+(x.over?' over':'');
+      return `<div class="g-seg ${cls}" data-p="${i.p.id}" data-i="${k}" style="left:${a}px;width:${w}px;top:${y+11}px" title="${esc(`${x.ph.c} ${x.ph.n} · ${ST[x.f.s]}\n${fdy(x.sp.d)} → ${fdy(x.ep.d)}${x.over?'\nVencida: límite '+fdy(x.due):''}`)}"></div>`}).join('');
+    const due=isISO(i.p.due)?`<div class="g-due ${i.lateDue?'late':''}" style="left:${(dn(i.p.due)-lo+1)*px}px;top:${y+6}px" title="Compromiso ${fdy(i.p.due)}"></div>`:'';
+    return `<div style="position:absolute;left:0;right:0;top:${y+39}px;border-bottom:1px solid var(--line2)"></div>${segs}${due}`}).join('');
+  $('#view').innerHTML=`<div class="gantt" style="min-width:${240+Math.min(W,600)}px">
+    <div class="g-left"><div class="g-row" style="height:42px;border-bottom:1px solid var(--line);font:600 12px var(--f-l);text-transform:uppercase;letter-spacing:.06em;color:var(--ink3)">Proyecto</div>${left}</div>
+    <div style="overflow-x:auto" id="gscroll"><div style="width:${W}px">
+      <div class="g-head">${head}</div>
+      <div class="g-canvas" style="height:${rows.length*40}px">${bg}${lines}<div class="g-today" style="left:${tx}px"></div></div>
+    </div></div></div>
+    <div class="legend" style="padding:10px 12px;margin:0;border-top:1px solid var(--line)"><span><i style="background:var(--bad);width:3px"></i>Hoy</span><span><i style="border-left:2px dashed var(--ink);border-radius:0;width:2px"></i>Fecha compromiso</span><span>Clic en un tramo para actualizar la fase</span></div>`;
+  const sc=$('#gscroll');sc.scrollLeft=Math.max(0,tx-sc.clientWidth*.35);
+}
+
+/* ---------- Modales ---------- */
+function modal(html){$('#modal').innerHTML=`<div class="ov" id="ov"><div class="modal" role="dialog" aria-modal="true">${html}</div></div>`;
+  $('#ov').addEventListener('mousedown',e=>{if(e.target.id==='ov')closeModal()});const f=$('#modal').querySelector('input,select,textarea,button');f&&f.focus()}
+function closeModal(){$('#modal').innerHTML=''}
+addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+function toast(m){const d=document.createElement('div');d.className='toast';d.textContent=m;document.body.appendChild(d);setTimeout(()=>d.remove(),2600)}
+
+/* Fase */
+function openPhase(pid,i){
+  const p=db.projects.find(x=>x.id===pid);if(!p)return;setCal();
+  const r=sched(p)[i],ph=PH[i],f={...p.ph[i]};
+  const hist=db.log.filter(l=>l.pid===pid&&l.a.startsWith(ph.c+' ')).slice(0,20);
+  modal(`<div class="mh"><div class="k">${esc(p.dept)} · ${esc(p.name)}</div><h2>${ph.c} · ${esc(ph.n)}</h2><p>${esc(ph.d)}</p></div>
+   <div class="mb">
+    ${r.na?'':`<div class="facts"><span>Duración: <b>${ph.h<H?ph.h+' h':ph.h/H+' día(s) hábil(es)'}</b></span><span>Fecha límite: <b class="${r.over?'late':''}">${fdy(r.due)}</b></span>${r.f.s==='w'?`<span style="color:var(--ext);font-weight:600">Esperando a ${esc(r.f.who||'terceros')} · ${Math.max(0,wdays(r.f.ws||r.f.rs,today()))} días hábiles</span>`:''}${r.over?'<span class="late">Vencida</span>':r.soon?'<span style="color:var(--warn);font-weight:600">Vence pronto</span>':''}</div>`}
+    <div class="stbtns" role="group" aria-label="Estatus">${Object.entries(ST).map(([k,v])=>`<button type="button" data-s="${k}" aria-pressed="${f.s===k}">${v}</button>`).join('')}</div>
+    <div class="grid2"><label class="f"><span>Inicio real</span><input type="date" id="ph-rs" value="${f.rs}"></label><label class="f"><span>Término real</span><input type="date" id="ph-re" value="${f.re}"></label></div>
+    <div class="grid2" id="ph-wbox" ${f.s==='w'?'':'hidden'}><label class="f"><span>¿De quién depende?</span><input id="ph-who" list="dl-who" value="${esc(f.who||'')}" placeholder="Ej. Manager de DVS"><datalist id="dl-who">${[...new Set(['Manager del área','Compliance','Dirección','Involucrados del área',...db.projects.flatMap(x=>x.ph.map(y=>y.who)).filter(Boolean)])].map(o=>`<option value="${esc(o)}">`).join('')}</datalist></label>
+     <label class="f"><span>Esperando desde</span><input type="date" id="ph-ws" value="${f.ws||''}"></label></div>
+    <label class="f"><span id="ph-nl">${f.s==='na'?'Justificación (obligatoria)':'Nota u observación'}</span><textarea id="ph-n" placeholder="Bloqueos, comentarios, quién debe liberar…">${esc(f.n)}</textarea></label>
+    <div class="err" id="ph-err"></div>
+    ${hist.length?`<div class="hist">${hist.map(l=>`<div><time>${fdy(l.t.slice(0,10))}</time>${esc(l.a.slice(ph.c.length+1))}${l.n?' · '+esc(l.n):''}</div>`).join('')}</div>`:''}
+   </div>
+   <div class="mf"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn pri" id="ph-save">Guardar</button></div>`);
+  let s=f.s;
+  const setS=v=>{s=v;document.querySelectorAll('.stbtns button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.s===v));
+    const rs=$('#ph-rs'),re=$('#ph-re'),t=today();
+    if(v==='p'||v==='na'){rs.value='';re.value=''}
+    if(v==='e'||v==='w'){if(!rs.value)rs.value=t;re.value=''}
+    if(v==='w'&&!$('#ph-ws').value)$('#ph-ws').value=t;
+    $('#ph-wbox').hidden=v!=='w';
+    if(v==='c'){if(!rs.value)rs.value=(r.sp&&dn(r.sp.d)<=dn(t))?r.sp.d:t;if(!re.value)re.value=t}
+    $('#ph-nl').textContent=v==='na'?'Justificación (obligatoria)':'Nota u observación'};
+  document.querySelectorAll('.stbtns button').forEach(b=>b.onclick=()=>setS(b.dataset.s));
+  $('#ph-save').onclick=()=>{
+    const rs=$('#ph-rs').value,re=$('#ph-re').value,n=$('#ph-n').value.trim(),t=today();let e='';
+    const who=$('#ph-who').value.trim(),ws=$('#ph-ws').value;
+    if((s==='e'||s==='w'||s==='c')&&!isISO(rs))e='Indica la fecha real de inicio.';
+    else if(s==='w'&&!who)e='Indica de quién depende (ej. Manager de DVS).';
+    else if(s==='w'&&(!isISO(ws)||dn(ws)>dn(t)))e='Indica desde cuándo esperas (no puede ser futura).';
+    else if(s==='c'&&!isISO(re))e='Indica la fecha real de término.';
+    else if(rs&&dn(rs)>dn(t)||re&&dn(re)>dn(t))e='Las fechas reales no pueden ser futuras.';
+    else if(rs&&re&&dn(re)<dn(rs))e='El término no puede ser anterior al inicio.';
+    else if(s==='na'&&n.length<5)e='Escribe por qué la fase no aplica.';
+    if(e){$('#ph-err').textContent=e;return}
+    const old=p.ph[i];const chg=[];
+    if(old.s!==s)chg.push(`${ST[old.s]} → ${ST[s]}`);
+    if(old.rs!==(s==='p'||s==='na'?'':rs))chg.push(`inicio ${fd(rs)}`);
+    if(old.re!==(s==='c'?re:''))chg.push(`término ${fd(re)}`);
+    if(s==='w'&&(old.who!==who||old.ws!==ws))chg.push(`con ${who} desde ${fd(ws)}`);
+    p.ph[i]={s,rs:s==='p'||s==='na'?'':rs,re:s==='c'?re:'',n,who:s==='w'?who:(old.who||''),ws:s==='w'?ws:''};
+    if(chg.length||old.n!==n)log(pid,`${ph.c} ${chg.join(', ')||'nota actualizada'}`,n!==old.n?n:'');
+    save();closeModal();render();toast(`${ph.c} actualizada`)};
+}
+
+/* Proyecto */
+function openProject(pid){
+  const p=pid?db.projects.find(x=>x.id===pid):null;setCal();
+  const v=p||{name:'',dept:'',type:'SOP',owner:'',start:onAfter(today()),due:'',notes:''};
+  const owners=[...new Set(db.projects.map(x=>x.owner).filter(Boolean))];
+  const hist=p?db.log.filter(l=>l.pid===p.id).slice(0,30):[];
+  modal(`<div class="mh"><div class="k">${p?'Editar proyecto':'Nuevo proyecto'}</div><h2>${p?esc(p.name):'Manual o SOP'}</h2>${p?'':'<p>Se crean las 11 fases con fechas calculadas en días hábiles.</p>'}</div>
+   <div class="mb">
+    <label class="f"><span>Nombre del proyecto</span><input id="pf-n" value="${esc(v.name)}" maxlength="120"></label>
+    <div class="grid2">
+     <label class="f"><span>Departamento</span><input id="pf-d" list="dl-d" value="${esc(v.dept)}"><datalist id="dl-d">${DEPTS.map(d=>`<option value="${d}">`).join('')}</datalist></label>
+     <label class="f"><span>Tipo</span><select id="pf-t">${['Manual','SOP','Manual + SOP'].map(t=>`<option ${t===v.type?'selected':''}>${t}</option>`).join('')}</select></label>
+     <label class="f"><span>Responsable</span><input id="pf-o" list="dl-o" value="${esc(v.owner)}"><datalist id="dl-o">${owners.map(o=>`<option value="${esc(o)}">`).join('')}</datalist></label>
+     <label class="f"><span>Fecha de inicio</span><input type="date" id="pf-s" value="${v.start}"></label>
+    </div>
+    <label class="f"><span>Fecha compromiso</span><input type="date" id="pf-c" value="${v.due}"><span class="hint" id="pf-h"></span></label>
+    <label class="f"><span>Observaciones</span><textarea id="pf-x">${esc(v.notes)}</textarea></label>
+    <div class="err" id="pf-err"></div>
+    ${hist.length?`<div class="hist">${hist.map(l=>`<div><time>${fdy(l.t.slice(0,10))}</time>${esc(l.a)}${l.n?' · '+esc(l.n):''}</div>`).join('')}</div>`:''}
+   </div>
+   <div class="mf">${p?'<button class="btn danger" id="pf-del" style="margin-right:auto">Eliminar</button>':''}<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn pri" id="pf-save">${p?'Guardar':'Crear proyecto'}</button></div>`);
+  const hint=()=>{const s=$('#pf-s').value;$('#pf-h').textContent=isISO(s)?`Con las duraciones estándar terminaría el ${fdy(planEnd(s))} (unos 21 días hábiles).`:''};
+  $('#pf-s').oninput=hint;hint();
+  if(!p)$('#pf-s').addEventListener('change',()=>{if(!$('#pf-c').value&&isISO($('#pf-s').value))$('#pf-c').value=planEnd($('#pf-s').value)});
+  if(!p&&!v.due)$('#pf-c').value=planEnd(v.start);
+  $('#pf-save').onclick=()=>{
+    const o={name:$('#pf-n').value.trim(),dept:$('#pf-d').value.trim(),type:$('#pf-t').value,owner:$('#pf-o').value.trim(),start:$('#pf-s').value,due:$('#pf-c').value,notes:$('#pf-x').value.trim()};
+    let e='';if(o.name.length<3)e='Escribe el nombre del proyecto.';else if(!o.dept)e='Indica el departamento.';else if(!isISO(o.start))e='Indica la fecha de inicio.';else if(!isISO(o.due))e='Indica la fecha compromiso.';else if(dn(o.due)<dn(o.start))e='La fecha compromiso no puede ser anterior al inicio.';
+    if(e){$('#pf-err').textContent=e;return}
+    if(p){const ch=['name','dept','type','owner','start','due'].filter(k=>p[k]!==o[k]);Object.assign(p,o);if(ch.length)log(p.id,'Proyecto editado: '+ch.map(k=>({name:'nombre',dept:'departamento',type:'tipo',owner:'responsable',start:'inicio',due:'compromiso'}[k])).join(', '))}
+    else{const n={id:uid(),...o,demo:false,ph:blankPhases()};db.projects.push(n);log(n.id,'Proyecto creado')}
+    save();closeModal();render();toast(p?'Proyecto actualizado':'Proyecto creado')};
+  if(p)$('#pf-del').onclick=()=>{if(!confirm(`¿Eliminar «${p.name}» y sus fases? No se puede deshacer.`))return;db.projects=db.projects.filter(x=>x.id!==p.id);db.log=db.log.filter(l=>l.pid!==p.id);save();closeModal();render();toast('Proyecto eliminado')};
+}
+
+/* Ajustes y respaldo */
+function download(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
+function openSettings(){
+  const nDemo=db.projects.filter(p=>p.demo).length;
+  modal(`<div class="mh"><div class="k">Configuración</div><h2>Ajustes y respaldo</h2></div>
+   <div class="mb">
+    <div class="grid2"><label class="f"><span>Horas por jornada</span><input type="number" id="s-h" min="1" max="12" step="0.5" value="${db.hours}"></label>
+     <label class="f"><span>Ámbar: días hábiles antes de vencer</span><input type="number" id="s-s" min="0" max="10" value="${db.soonDays}"></label></div>
+    <label class="f"><span>Feriados (uno por línea: AAAA-MM-DD nombre)</span><textarea id="s-hol" style="min-height:120px;font-family:ui-monospace,monospace;font-size:12px">${esc(db.holidays)}</textarea><span class="hint">Fines de semana y estas fechas no cuentan como días hábiles.</span></label>
+    <div class="gs">
+     <h3>Respaldo en Google Sheets</h3>
+     <label class="f"><span>URL de la aplicación web (termina en /exec)</span><input id="g-url" type="url" placeholder="https://script.google.com/macros/s/…/exec" value="${esc(sheet.url||'')}"></label>
+     <div class="grid2"><label class="f"><span>Clave</span><input id="g-key" value="${esc(sheet.clave||'')}" placeholder="La misma CLAVE del script"></label>
+      <label class="f" style="align-content:end"><span style="display:flex;gap:6px;align-items:center;font-weight:500"><input type="checkbox" id="g-auto" ${sheet.auto!==false?'checked':''}> Guardar automáticamente en cada cambio</span></label></div>
+     <div class="st ${sheet.err?'bad':sheet.last?'good':''}" id="g-st">${sheet.err?'Último intento falló: '+esc(sheet.err):sheet.last?'Último respaldo: '+new Date(sheet.last).toLocaleString('es-MX'):sheet.url?'Sin respaldos todavía.':'Sin configurar: los datos viven solo en este navegador.'}</div>
+     <div class="bar"><button class="btn sm" id="g-test">Probar conexión</button><button class="btn sm pri" id="g-push">Guardar ahora en Sheets</button><button class="btn sm" id="g-pull">Cargar desde Sheets</button></div>
+    </div>
+    <div class="demo-note">Sin Google Sheets, los datos se guardan solo en este navegador. No registres información de clientes.</div>
+    <div class="bar">
+     <button class="btn sm" id="s-bk">Descargar respaldo</button>
+     <label class="btn sm" for="s-file">Restaurar respaldo…</label><input type="file" id="s-file" accept=".json,application/json" hidden>
+     ${nDemo?`<button class="btn sm danger" id="s-demo">Quitar datos DEMO (${nDemo})</button>`:`<button class="btn sm" id="s-demo">Cargar datos DEMO</button>`}
+     <button class="btn sm danger" id="s-all">Borrar todo</button>
+    </div>
+    <div class="err" id="s-err"></div>
+   </div>
+   <div class="mf"><button class="btn" onclick="closeModal()">Cerrar</button><button class="btn pri" id="s-save">Guardar ajustes</button></div>`);
+  $('#s-save').onclick=()=>{const h=+$('#s-h').value,s=+$('#s-s').value;if(!(h>=1&&h<=12)||!(s>=0&&s<=10)){$('#s-err').textContent='Revisa los valores: jornada 1–12 h, ámbar 0–10 días.';return}
+    if(!readG())return;db.hours=h;db.soonDays=s;db.holidays=$('#s-hol').value;save();closeModal();render();toast('Ajustes guardados')};
+  const readG=()=>{const u=$('#g-url').value.trim();if(u&&!/^https:\/\/script\.google(usercontent)?\.com\/.+/.test(u)){$('#g-st').className='st bad';$('#g-st').textContent='La URL debe ser la de la aplicación web de Apps Script (https://script.google.com/…/exec).';return false}
+    const changed=u!==(sheet.url||'');sheet.url=u;sheet.clave=$('#g-key').value.trim();sheet.auto=$('#g-auto').checked;if(changed){sheet.last='';sheet.err=''}saveSheetCfg();setSync(u?(sheet.err?'err':sheet.last?'ok':'local'):'local');return true};
+  $('#g-test').onclick=async()=>{if(!readG())return;if(!sheet.url){$('#g-st').textContent='Pega primero la URL.';return}$('#g-st').className='st';$('#g-st').textContent='Probando…';
+    try{const r=await jsonp({action:'status'});if(!r.ok)throw new Error(r.error);$('#g-st').className='st good';$('#g-st').textContent=`Conexión correcta. ${r.savedAt?`Último respaldo en la hoja: ${new Date(r.savedAt).toLocaleString('es-MX')} (${r.projects} proyectos).`:'La hoja aún no tiene respaldos.'}`}
+    catch(e){$('#g-st').className='st bad';$('#g-st').textContent=e.message}};
+  $('#g-push').onclick=async()=>{if(!readG())return;$('#g-st').className='st';$('#g-st').textContent='Guardando…';const ok=await pushSheet(true);$('#g-st').className='st '+(ok?'good':'bad');$('#g-st').textContent=ok?'Último respaldo: '+new Date(sheet.last).toLocaleString('es-MX'):'Falló: '+sheet.err};
+  $('#g-pull').onclick=()=>{if(readG())pullSheet()};
+  $('#s-bk').onclick=()=>download(`respaldo-manuales-sop-${today()}.json`,JSON.stringify(db,null,1),'application/json');
+  $('#s-file').onchange=e=>{const file=e.target.files[0];if(!file)return;const rd=new FileReader();rd.onload=()=>{try{const o=JSON.parse(rd.result);
+      if(!Array.isArray(o.projects)||!o.projects.every(p=>p.id&&p.name&&isISO(p.start)&&Array.isArray(p.ph)&&p.ph.length===11))throw 0;
+      if(!confirm(`El respaldo tiene ${o.projects.length} proyecto(s). ¿Reemplazar los datos actuales?`))return;
+      db={hours:8,soonDays:1,holidays:HOL_DEFAULT,log:[],...o};save();closeModal();render();toast('Respaldo restaurado')}catch(x){$('#s-err').textContent='El archivo no es un respaldo válido de esta herramienta.'}};rd.readAsText(file)};
+  $('#s-demo').onclick=()=>{if(nDemo){const ids=new Set(db.projects.filter(p=>p.demo).map(p=>p.id));db.projects=db.projects.filter(p=>!p.demo);db.log=db.log.filter(l=>!ids.has(l.pid))}else{setCal();demo()}save();closeModal();render();toast(nDemo?'Datos DEMO eliminados':'Datos DEMO cargados')};
+  $('#s-all').onclick=()=>{if(!confirm('¿Borrar todos los proyectos y el historial de este navegador? Descarga un respaldo antes si lo necesitas.'))return;db.projects=[];db.log=[];save();closeModal();render();toast('Datos borrados')};
+}
+function exportCSV(){
+  setCal();const cell=v=>{v=String(v??'');return /[",\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:v};
+  const head=['Proyecto','Departamento','Tipo','Responsable','Inicio','Compromiso','Pronóstico','Días de atraso','Avance %','Estado',...PH.map(f=>`${f.c} ${f.n}`),'DEMO'];
+  const rows=db.projects.map(info).map(i=>[i.p.name,i.p.dept,i.p.type,i.p.owner,i.p.start,i.p.due,i.end,Math.max(0,i.dev),Math.round(i.pct),i.state,
+    ...i.s.map(r=>r.na?'No aplica':r.f.s==='c'?`Concluida ${r.f.re}`:r.f.s==='w'?`Esperando a ${r.f.who} desde ${r.f.ws} (límite ${r.due})${r.over?' VENCIDA':''}`:`${ST[r.f.s]} (límite ${r.due})${r.over?' VENCIDA':''}`),i.p.demo?'Sí':'No']);
+  download(`manuales-sop-${today()}.csv`,'﻿'+[head,...rows].map(r=>r.map(cell).join(',')).join('\r\n'),'text/csv');
+}
+
+/* ---------- Eventos ---------- */
+document.addEventListener('click',e=>{
+  const c=e.target.closest('[data-p][data-i]');if(c){openPhase(c.dataset.p,+c.dataset.i);return}
+  const ed=e.target.closest('[data-edit]');if(ed){openProject(ed.dataset.edit);return}
+  const tb=e.target.closest('[data-tab]');if(tb){ui.tab=tb.dataset.tab;document.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-pressed',b===tb));render()}
+});
+$('#q').oninput=e=>{ui.q=e.target.value;render()};
+$('#fdept').onchange=e=>{ui.dept=e.target.value;render()};
+$('#fatt').onchange=e=>{ui.att=e.target.checked;render()};
+$('#b-new').onclick=()=>openProject();
+$('#b-cfg').onclick=openSettings;
+$('#b-csv').onclick=exportCSV;
+$('#sync-pill').onclick=openSettings;
+
+/* ---------- Inicio ---------- */
+db=load();
+if(!db){db={hours:8,soonDays:1,holidays:HOL_DEFAULT,projects:[],log:[]};setCal();demo();save()}
+render();
+setSync(sheet.url?(sheet.err?'err':sheet.last?'ok':'local'):'local');
+if(sheet.url&&sheet.auto!==false)schedulePush();
+setInterval(render,10*60*1000);
+</script>
+</body>
+</html>
