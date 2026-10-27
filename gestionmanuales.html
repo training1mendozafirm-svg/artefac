@@ -177,6 +177,8 @@ th.pcol{z-index:3}
 .facts b{font-variant-numeric:tabular-nums}
 .hist{max-height:170px;overflow:auto;font-size:12px;border-top:1px solid var(--line2);padding-top:8px;display:grid;gap:4px}
 .hist div{color:var(--ink2)} .hist time{color:var(--ink3);margin-right:6px;font-variant-numeric:tabular-nums}
+.alert{background:var(--bad-s);border:1px solid #EFC2B8;color:#7A2618;border-radius:8px;padding:10px 14px;font-size:13px;display:grid;gap:8px}
+.alert .row{display:flex;gap:8px;flex-wrap:wrap}
 .toast{position:fixed;right:16px;bottom:16px;background:var(--navy);color:#fff;padding:11px 16px;border-radius:10px;font-size:13px;z-index:60}
 @media (max-width:1000px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.kpi:nth-child(4){border-left:0;padding-left:0}.hbars{grid-template-columns:1fr;gap:12px}}
 @media (max-width:640px){.stbtns{grid-template-columns:repeat(3,1fr)}}
@@ -199,12 +201,13 @@ th.pcol{z-index:3}
   </nav>
 </div></header>
 <main class="wrap in">
+  <div id="syncmsg"></div>
   <div id="demo"></div>
   <div class="sec"><h2 id="sec-t">Avance por proyecto</h2><p id="sec-p">Clic en una celda para actualizar la fase. Las fases marcadas con punto azul dependen de revisión de otras áreas.</p></div>
   <div class="bar">
     <button class="btn pri" id="b-new">+ Nuevo proyecto</button>
     <input type="search" id="q" placeholder="Buscar proyecto o responsable" aria-label="Buscar">
-    <select id="fdept" aria-label="Departamento"></select>
+    <select id="fdept" aria-label="Área"></select>
     <label><input type="checkbox" id="fatt"> Solo con atención</label>
   </div>
   <div class="legend">
@@ -225,8 +228,8 @@ th.pcol{z-index:3}
 "use strict";
 /* ---------- Configuración institucional: 11 fases (horas hábiles, ext = revisión de terceros) ---------- */
 const PH=[
- {c:'F1',n:'Entrevista',h:4,x:0,d:'Entrevistar a los involucrados para conocer el proceso, actividades, necesidades y puntos clave.'},
- {c:'F2',n:'Información disponible',h:8,x:0,d:'Recopilar y organizar manuales, transcripts, recursos y documentos disponibles.'},
+ {c:'F1',n:'Información disponible',h:8,x:0,d:'Recopilar y organizar manuales, transcripts, recursos y documentos disponibles.'},
+ {c:'F2',n:'Entrevista',h:4,x:0,d:'Entrevistar a los involucrados para conocer el proceso, actividades, necesidades y puntos clave.'},
  {c:'F3',n:'Formato',h:3,x:0,d:'Con apoyo de IA, estructurar y adaptar la información al formato requerido.'},
  {c:'F4',n:'Borrador',h:3,x:0,d:'Generar el primer borrador con la información recopilada.'},
  {c:'F5',n:'Revisión y feedback',h:24,x:1,d:'Los involucrados revisan el borrador y dan retroalimentación (2 a 3 días).'},
@@ -238,7 +241,7 @@ const PH=[
  {c:'F11',n:'Entrega y almacenamiento',h:8,x:0,d:'Entregar y almacenar el documento en el repositorio institucional.'},
 ];
 const ST={p:'Pendiente',e:'En proceso',w:'Esperando a terceros',c:'Concluida',na:'No aplica'};
-const DEPTS=['Intake','Consulta','DVS','PWI','Paralegals','Follow Up','Customer Service','Training'];
+const DEPTS=['DVS','Marketing','Collection','PWI','Customer Service','LSU','Packets','Pre Case Review','Case Review','WAE','RFE','Back Office','Compliance','Compliance Monitores','Compliance Specialist','Call Backs'];
 const HOL_DEFAULT='2026-11-16 Día de la Revolución\n2026-12-25 Navidad\n2027-01-01 Año Nuevo\n2027-02-01 Día de la Constitución\n2027-03-15 Natalicio de Benito Juárez\n2027-05-01 Día del Trabajo\n2027-09-16 Independencia\n2027-11-15 Día de la Revolución\n2027-12-25 Navidad';
 const KEY='tmlf-sop-simple:v1';
 const M=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
@@ -258,16 +261,33 @@ const uid=()=>Math.random().toString(36).slice(2,9);
 /* ---------- Datos ---------- */
 let db;
 function blankPhases(){return PH.map(()=>({s:'p',rs:'',re:'',n:''}))}
-function load(){try{const o=JSON.parse(localStorage.getItem(KEY));if(o&&Array.isArray(o.projects))return o}catch(e){}return null}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}schedulePush()}
+/* Versión del orden de fases. v2: F1 Información disponible, F2 Entrevista (antes al revés).
+   Los datos guardados con el orden anterior se reacomodan al cargarse, junto con su historial. */
+const PHV=2;let migrated=false;
+function fix(o){o={hours:8,soonDays:1,holidays:HOL_DEFAULT,log:[],...o};
+  if((o.phv||1)<2){
+    for(const p of o.projects||[])if(Array.isArray(p.ph)&&p.ph.length===11){const t=p.ph[0];p.ph[0]=p.ph[1];p.ph[1]=t}
+    for(const l of o.log||[])if(typeof l.a==='string')l.a=l.a.replace(/^F([12]) /,(m,d)=>`F${d==='1'?2:1} `);
+    o.phv=PHV;migrated=true;
+  }
+  return o}
+function load(){try{const o=JSON.parse(localStorage.getItem(KEY));if(o&&Array.isArray(o.projects))return fix(o)}catch(e){}return null}
+let storeOK=true;
+function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify(db));storeOK=true}catch(e){storeOK=false}}
+function save(){db.updatedAt=new Date().toISOString();saveLocal();schedulePush()}
 
 /* ---------- Respaldo en Google Sheets (Apps Script) ----------
    Escritura: POST no-cors con el JSON completo + resumen legible.
    Confirmación y carga: JSONP (action=status / action=load).
    La URL y la clave viven en una llave aparte para que restaurar un respaldo no las borre. */
 const SKEY=KEY+':sheet';
-const SHEET_DEFAULT={url:'https://script.google.com/macros/s/AKfycbxO3Yrp0S6gl8JamHKnwNJ5Vjq3rL2T7fiu7-Nzg__U-g3RhSTCAWyK8EmjLyYM-ivs/exec',clave:'TMLF-SOP-2026',auto:true};
-let sheet=(()=>{let o={};try{o=JSON.parse(localStorage.getItem(SKEY))||{}}catch(e){}return o.url?o:{...SHEET_DEFAULT,...o,url:SHEET_DEFAULT.url}})();
+const SHEET_DEFAULT={url:'https://script.google.com/macros/s/AKfycbxRXd3n3fIqxDfDvTzm6HxgmmMGpd_nuv6GpV3qAEj0Q78wpgqbgWo7HRt1klMVUYzd/exec',clave:'TMLF-SOP-2026',auto:true};
+const OLD_URLS=['https://script.google.com/macros/s/AKfycbxO3Yrp0S6gl8JamHKnwNJ5Vjq3rL2T7fiu7-Nzg__U-g3RhSTCAWyK8EmjLyYM-ivs/exec'];
+let sheet=(()=>{let o={};try{o=JSON.parse(localStorage.getItem(SKEY))||{}}catch(e){}
+  if(o.url&&OLD_URLS.includes(o.url)){o.url=SHEET_DEFAULT.url;o.last='';o.err=''}   // implementación anterior → la nueva
+  return o.url?o:{...SHEET_DEFAULT,...o,url:SHEET_DEFAULT.url}})();
+saveSheetCfgInit();
+function saveSheetCfgInit(){try{localStorage.setItem(SKEY,JSON.stringify(sheet))}catch(e){}}
 function saveSheetCfg(){try{localStorage.setItem(SKEY,JSON.stringify(sheet))}catch(e){}}
 function jsonp(params){return new Promise((res,rej)=>{
   const cb='__gs'+Date.now()+Math.floor(Math.random()*1e5),sc=document.createElement('script');
@@ -289,28 +309,72 @@ function setSync(st,msg){const b=$('#sync-pill');if(!b)return;b.className='pill 
   b.querySelector('span').textContent={local:'Guardado solo en este navegador',sync:'Guardando en Google Sheets…',ok:`Respaldado en Google Sheets${hm?' · '+hm:''}`,err:'Sin respaldo en Sheets'}[st];
   b.title=msg||(st==='local'?'Configura el respaldo en Google Sheets':st==='err'?(sheet.err||'Error'):'Abrir ajustes de respaldo')}
 let pushT,pushing=false,pushAgain=false;
-function schedulePush(){if(sheet.url&&sheet.auto!==false){clearTimeout(pushT);pushT=setTimeout(()=>pushSheet(false),2500)}}
+let syncReady=false,dirty=false;
+function schedulePush(){dirty=true;if(sheet.url&&sheet.auto!==false&&syncReady){clearTimeout(pushT);pushT=setTimeout(()=>pushSheet(false),1500)}}
+function payload(sentId){return JSON.stringify({action:'save',clave:sheet.clave||'',sentId,savedAt:new Date().toISOString(),data:db,resumen:sheetSummary()})}
 async function pushSheet(manual){
   if(!sheet.url){if(manual)toast('Primero pega la URL del script en Ajustes y respaldo');return false}
   if(pushing){pushAgain=true;return false}
   pushing=true;const sentId=uid();setSync('sync');
   try{
-    await fetch(sheet.url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body:JSON.stringify({action:'save',clave:sheet.clave||'',sentId,savedAt:new Date().toISOString(),data:db,resumen:sheetSummary()})});
+    await fetch(sheet.url,{method:'POST',mode:'no-cors',credentials:'include',headers:{'Content-Type':'text/plain;charset=utf-8'},body:payload(sentId)});
     const st=await jsonp({action:'status'});
     if(!st||!st.ok)throw new Error(st&&st.error||'Respuesta inválida del script');
     if(st.lastSentId!==sentId)throw new Error('La hoja no confirmó este guardado. Revisa la clave y que el script esté implementado como aplicación web.');
-    sheet.last=st.savedAt;sheet.err='';saveSheetCfg();setSync('ok');if(manual)toast('Respaldo guardado en Google Sheets');return true;
-  }catch(e){sheet.err=e.message;saveSheetCfg();setSync('err',e.message);if(manual)toast('No se guardó en Sheets: '+e.message);return false}
+    sheet.last=st.savedAt;sheet.err='';dirty=false;saveSheetCfg();setSync('ok');syncBanner();if(manual)toast('Respaldo guardado en Google Sheets');return true;
+  }catch(e){sheet.err=e.message;saveSheetCfg();setSync('err',e.message);syncBanner();if(manual)toast('No se guardó en Sheets: '+e.message);return false}
   finally{pushing=false;if(pushAgain){pushAgain=false;schedulePush()}}
+}
+/* Arranque: la hoja es la fuente principal. Se carga primero lo que hay en Sheets;
+   solo se envía la copia local si es más reciente o si la hoja está vacía.
+   Mientras no se confirme la conexión, no se sobrescribe la hoja. */
+async function initialSync(){
+  if(!sheet.url){syncReady=true;syncBanner();return}
+  setSync('sync','Leyendo Google Sheets…');
+  try{
+    const r=await jsonp({action:'load'});
+    if(r.ok&&r.data&&Array.isArray(r.data.projects)){
+      const remote=r.data,lt=db.updatedAt||'',rt=remote.updatedAt||r.savedAt||'';
+      const localUseful=db.projects.some(p=>!p.demo);
+      if(!localUseful||!lt||rt>=lt){migrated=false;db=fix(remote);saveLocal();dirty=migrated}
+      else dirty=true;
+      sheet.last=r.savedAt;sheet.err='';saveSheetCfg();
+    }else if(r.ok===false&&/todav[ií]a no tiene respaldos/i.test(r.error||'')){dirty=db.projects.length>0}
+    else throw new Error(r.error||'Respuesta inválida del script');
+    syncReady=true;setSync('ok');render();
+    if(cleanSeed()){save();render()}else if(dirty)pushSheet(false);
+  }catch(e){sheet.err=e.message;saveSheetCfg();setSync('err',e.message);syncReady=false}
+  syncBanner();
+}
+/* Revisa si otra persona o equipo guardó cambios más nuevos. */
+async function pollSheet(){
+  if(!sheet.url||!syncReady||dirty||pushing||document.hidden||$('#modal').innerHTML)return;
+  try{const st=await jsonp({action:'status'});if(!st.ok||!st.savedAt||st.savedAt===sheet.last)return;
+    const r=await jsonp({action:'load'});if(r.ok&&r.data&&!dirty&&!$('#modal').innerHTML){migrated=false;db=fix(r.data);saveLocal();if(migrated)schedulePush();sheet.last=r.savedAt;saveSheetCfg();render();setSync('ok');toast('Se cargaron cambios recientes de Google Sheets')}}catch(e){}
+}
+/* Quita los 16 proyectos de la carga automática por área que nunca se tocaron. */
+function cleanSeed(){
+  if(!db.areasSeeded)return false;delete db.areasSeeded;
+  const keep=p=>!(p.name.startsWith('Manual y SOP · ')&&!p.owner&&p.ph.every(f=>f.s==='p'&&!f.n));
+  const gone=new Set(db.projects.filter(p=>!keep(p)).map(p=>p.id));
+  db.projects=db.projects.filter(keep);db.log=db.log.filter(l=>!gone.has(l.pid));return true;
+}
+function syncBanner(){
+  const el=$('#syncmsg');if(!el)return;let h='';
+  if(!storeOK)h+=`<div class="alert">Este navegador no permite guardar datos locales en esta vista (por ejemplo, una vista previa). Abre el archivo descargado en Chrome o Edge.</div>`;
+  if(sheet.url&&sheet.err)h+=`<div class="alert"><b>No se está guardando en Google Sheets.</b> ${esc(sheet.err)}${syncReady?'':' Para no borrar lo que ya está en la hoja, los cambios se guardan solo en este navegador hasta que se recupere la conexión.'}
+    <span class="row"><button class="btn sm" id="sy-retry">Reintentar</button><button class="btn sm" id="sy-cfg">Revisar ajustes</button></span></div>`;
+  el.innerHTML=h;
+  const rt=$('#sy-retry');if(rt)rt.onclick=()=>{syncReady?pushSheet(true):initialSync()};
+  const cf=$('#sy-cfg');if(cf)cf.onclick=openSettings;
 }
 async function pullSheet(){
   if(!sheet.url){toast('Primero pega la URL del script');return}
   try{const r=await jsonp({action:'load'});
     if(!r.ok)throw new Error(r.error);const o=r.data;
     if(!o||!Array.isArray(o.projects)||!o.projects.every(p=>p.id&&p.name&&isISO(p.start)&&Array.isArray(p.ph)&&p.ph.length===11))throw new Error('El respaldo de la hoja no tiene el formato esperado');
-    if(!confirm(`La hoja tiene ${o.projects.length} proyecto(s), guardados el ${new Date(r.savedAt).toLocaleString('es-MX')}. ¿Reemplazar los datos de este navegador?`))return;
-    db={hours:8,soonDays:1,holidays:HOL_DEFAULT,log:[],...o};try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}
+    if(!await ask(`La hoja tiene ${o.projects.length} proyecto(s), guardados el ${new Date(r.savedAt).toLocaleString('es-MX')}. ¿Reemplazar los datos de este navegador?`,'Reemplazar'))return;
+    db=fix(o);saveLocal();sheet.last=r.savedAt;saveSheetCfg();setSync('ok');
     closeModal();render();toast('Datos cargados desde Google Sheets');
   }catch(e){toast('No se pudo cargar: '+e.message)}
 }
@@ -365,20 +429,20 @@ function info(p){
 /* ---------- DEMO ---------- */
 function demo(){
   const specs=[
-    ['Manual operativo de Intake','Intake','Manual + SOP','Laura Méndez',30,11,{F8:2}],
-    ['SOP de agenda de consultas','Consulta','SOP','Carlos Ibarra',14,8,{}],
+    ['Manual operativo de Packets','Packets','Manual + SOP','Laura Méndez',30,11,{F8:2}],
+    ['SOP de Case Review','Case Review','SOP','Carlos Ibarra',14,8,{}],
     ['Manual DVS: intake de casos','DVS','Manual + SOP','Sofía Treviño',18,7,{F5:3}],
     ['SOP de seguimiento PWI','PWI','SOP','Laura Méndez',9,4,{F2:1}],
-    ['Manual de Paralegals','Paralegals','Manual','Carlos Ibarra',1,2,{}],
-    ['SOP de Follow Up','Follow Up','SOP','',12,4,{F1:1,F2:2}],
+    ['Manual de Collection','Collection','Manual','Carlos Ibarra',1,2,{}],
+    ['SOP de Call Backs','Call Backs','SOP','',12,4,{F1:1,F2:2}],
     ['Manual de Customer Service','Customer Service','Manual + SOP','Sofía Treviño',-3,0,{}],
-    ['SOP de Training: onboarding','Training','SOP','Mónica Salas',7,6,{}],
+    ['SOP de Compliance Specialist','Compliance Specialist','SOP','Mónica Salas',7,6,{}],
   ];
   const t=today();
   for(const [name,dept,type,owner,back,done,delay] of specs){
     const start=back>=0?backWork(back):fwdWork(-back);
     const p={id:uid(),name,dept,type,owner,start,due:'',notes:'',demo:true,ph:blankPhases()};
-    if(dept==='Training')p.ph[9]={s:'na',rs:'',re:'',n:'Documento de uso interno solo en español.'};
+    if(dept==='Compliance Specialist')p.ph[9]={s:'na',rs:'',re:'',n:'Documento de uso interno solo en español.'};
     let cur={d:start,u:0},k=0;
     PH.forEach((ph,i)=>{
       const f=p.ph[i];if(f.s==='na')return;
@@ -407,7 +471,7 @@ function render(){
   // KPIs
   const appN=all.reduce((a,i)=>a+i.app.length,0),doneN=all.reduce((a,i)=>a+i.done.length,0);
   const n=s=>all.filter(i=>i.state===s).length;
-  const lateN=all.filter(i=>i.late).length, soonN=all.filter(i=>!i.late&&i.soon.length).length;
+  const lateN=all.filter(i=>i.late).length, soonN=all.filter(i=>i.state==='En riesgo').length;
   const comp=all.filter(i=>{const r=i.s[7];return !r.na&&(r.f.s==='e'||r.f.s==='w')}).length;
   const waitN=all.filter(i=>i.waiting.length&&!i.late).length;
   const projDone=n('Concluido'),pctF=appN?doneN/appN*100:0,pctP=all.length?projDone/all.length*100:0;
@@ -425,7 +489,7 @@ function render(){
   $('#k-late').onclick=()=>{ui.att=!ui.att;$('#fatt').checked=ui.att;render()};
   // filtro de departamentos
   const depts=[...new Set([...DEPTS,...db.projects.map(p=>p.dept)])];
-  $('#fdept').innerHTML=`<option value="">Todos los departamentos</option>`+depts.map(d=>`<option ${d===ui.dept?'selected':''}>${esc(d)}</option>`).join('');
+  $('#fdept').innerHTML=`<option value="">Todas las áreas</option>`+depts.map(d=>`<option ${d===ui.dept?'selected':''}>${esc(d)}</option>`).join('');
   const rows=filtered(all);
   if(!db.projects.length){$('#view').innerHTML=`<div class="empty"><h2>Sin proyectos todavía</h2><p>Registra el primer manual o SOP. Se crean sus 11 fases con las fechas calculadas en días hábiles.</p><button class="btn pri" onclick="openProject()">+ Nuevo proyecto</button></div>`;return}
   if(!rows.length){$('#view').innerHTML=`<div class="empty"><h2>Sin coincidencias</h2><p>Cambia la búsqueda o los filtros.</p></div>`;return}
@@ -484,6 +548,9 @@ function modal(html){$('#modal').innerHTML=`<div class="ov" id="ov"><div class="
   $('#ov').addEventListener('mousedown',e=>{if(e.target.id==='ov')closeModal()});const f=$('#modal').querySelector('input,select,textarea,button');f&&f.focus()}
 function closeModal(){$('#modal').innerHTML=''}
 addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+function ask(msg,ok){return new Promise(res=>{const d=document.createElement('div');d.className='ov';d.style.zIndex=70;
+  d.innerHTML=`<div class="modal" role="alertdialog" aria-modal="true" style="width:min(440px,100%)"><div class="mb"><p style="margin:0;font-size:14px">${esc(msg)}</p></div><div class="mf"><button class="btn" data-a="0">Cancelar</button><button class="btn pri" data-a="1">${esc(ok||'Aceptar')}</button></div></div>`;
+  d.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(b||e.target===d){d.remove();res(!!(b&&b.dataset.a==='1'))}});document.body.appendChild(d);d.querySelector('[data-a="1"]').focus()})}
 function toast(m){const d=document.createElement('div');d.className='toast';d.textContent=m;document.body.appendChild(d);setTimeout(()=>d.remove(),2600)}
 
 /* Fase */
@@ -544,7 +611,7 @@ function openProject(pid){
    <div class="mb">
     <label class="f"><span>Nombre del proyecto</span><input id="pf-n" value="${esc(v.name)}" maxlength="120"></label>
     <div class="grid2">
-     <label class="f"><span>Departamento</span><input id="pf-d" list="dl-d" value="${esc(v.dept)}"><datalist id="dl-d">${DEPTS.map(d=>`<option value="${d}">`).join('')}</datalist></label>
+     <label class="f"><span>Área</span><select id="pf-d"><option value="">Selecciona…</option>${[...DEPTS,...(v.dept&&!DEPTS.includes(v.dept)?[v.dept]:[])].map(d=>`<option ${d===v.dept?'selected':''}>${esc(d)}</option>`).join('')}</select></label>
      <label class="f"><span>Tipo</span><select id="pf-t">${['Manual','SOP','Manual + SOP'].map(t=>`<option ${t===v.type?'selected':''}>${t}</option>`).join('')}</select></label>
      <label class="f"><span>Responsable</span><input id="pf-o" list="dl-o" value="${esc(v.owner)}"><datalist id="dl-o">${owners.map(o=>`<option value="${esc(o)}">`).join('')}</datalist></label>
      <label class="f"><span>Fecha de inicio</span><input type="date" id="pf-s" value="${v.start}"></label>
@@ -561,12 +628,12 @@ function openProject(pid){
   if(!p&&!v.due)$('#pf-c').value=planEnd(v.start);
   $('#pf-save').onclick=()=>{
     const o={name:$('#pf-n').value.trim(),dept:$('#pf-d').value.trim(),type:$('#pf-t').value,owner:$('#pf-o').value.trim(),start:$('#pf-s').value,due:$('#pf-c').value,notes:$('#pf-x').value.trim()};
-    let e='';if(o.name.length<3)e='Escribe el nombre del proyecto.';else if(!o.dept)e='Indica el departamento.';else if(!isISO(o.start))e='Indica la fecha de inicio.';else if(!isISO(o.due))e='Indica la fecha compromiso.';else if(dn(o.due)<dn(o.start))e='La fecha compromiso no puede ser anterior al inicio.';
+    let e='';if(o.name.length<3)e='Escribe el nombre del proyecto.';else if(!o.dept)e='Selecciona el área.';else if(!isISO(o.start))e='Indica la fecha de inicio.';else if(!isISO(o.due))e='Indica la fecha compromiso.';else if(dn(o.due)<dn(o.start))e='La fecha compromiso no puede ser anterior al inicio.';
     if(e){$('#pf-err').textContent=e;return}
     if(p){const ch=['name','dept','type','owner','start','due'].filter(k=>p[k]!==o[k]);Object.assign(p,o);if(ch.length)log(p.id,'Proyecto editado: '+ch.map(k=>({name:'nombre',dept:'departamento',type:'tipo',owner:'responsable',start:'inicio',due:'compromiso'}[k])).join(', '))}
     else{const n={id:uid(),...o,demo:false,ph:blankPhases()};db.projects.push(n);log(n.id,'Proyecto creado')}
     save();closeModal();render();toast(p?'Proyecto actualizado':'Proyecto creado')};
-  if(p)$('#pf-del').onclick=()=>{if(!confirm(`¿Eliminar «${p.name}» y sus fases? No se puede deshacer.`))return;db.projects=db.projects.filter(x=>x.id!==p.id);db.log=db.log.filter(l=>l.pid!==p.id);save();closeModal();render();toast('Proyecto eliminado')};
+  if(p)$('#pf-del').onclick=async()=>{if(!await ask(`¿Eliminar «${p.name}» y sus fases? No se puede deshacer.`,'Eliminar'))return;db.projects=db.projects.filter(x=>x.id!==p.id);db.log=db.log.filter(l=>l.pid!==p.id);save();closeModal();render();toast('Proyecto eliminado')};
 }
 
 /* Ajustes y respaldo */
@@ -584,7 +651,8 @@ function openSettings(){
      <div class="grid2"><label class="f"><span>Clave</span><input id="g-key" value="${esc(sheet.clave||'')}" placeholder="La misma CLAVE del script"></label>
       <label class="f" style="align-content:end"><span style="display:flex;gap:6px;align-items:center;font-weight:500"><input type="checkbox" id="g-auto" ${sheet.auto!==false?'checked':''}> Guardar automáticamente en cada cambio</span></label></div>
      <div class="st ${sheet.err?'bad':sheet.last?'good':''}" id="g-st">${sheet.err?'Último intento falló: '+esc(sheet.err):sheet.last?'Último respaldo: '+new Date(sheet.last).toLocaleString('es-MX'):sheet.url?'Sin respaldos todavía.':'Sin configurar: los datos viven solo en este navegador.'}</div>
-     <div class="bar"><button class="btn sm" id="g-test">Probar conexión</button><button class="btn sm pri" id="g-push">Guardar ahora en Sheets</button><button class="btn sm" id="g-pull">Cargar desde Sheets</button></div>
+     <div class="bar"><button class="btn sm" id="g-test">Probar conexión</button><button class="btn sm pri" id="g-push">Guardar ahora en Sheets</button><button class="btn sm" id="g-pull">Cargar desde Sheets</button><button class="btn sm" id="g-ver">Versiones anteriores</button></div>
+     <div id="g-vlist" class="hist" hidden></div>
     </div>
     <div class="demo-note">Sin Google Sheets, los datos se guardan solo en este navegador. No registres información de clientes.</div>
     <div class="bar">
@@ -598,20 +666,28 @@ function openSettings(){
    <div class="mf"><button class="btn" onclick="closeModal()">Cerrar</button><button class="btn pri" id="s-save">Guardar ajustes</button></div>`);
   $('#s-save').onclick=()=>{const h=+$('#s-h').value,s=+$('#s-s').value;if(!(h>=1&&h<=12)||!(s>=0&&s<=10)){$('#s-err').textContent='Revisa los valores: jornada 1–12 h, ámbar 0–10 días.';return}
     if(!readG())return;db.hours=h;db.soonDays=s;db.holidays=$('#s-hol').value;save();closeModal();render();toast('Ajustes guardados')};
-  const readG=()=>{const u=$('#g-url').value.trim();if(u&&!/^https:\/\/script\.google(usercontent)?\.com\/.+/.test(u)){$('#g-st').className='st bad';$('#g-st').textContent='La URL debe ser la de la aplicación web de Apps Script (https://script.google.com/…/exec).';return false}
-    const changed=u!==(sheet.url||'');sheet.url=u;sheet.clave=$('#g-key').value.trim();sheet.auto=$('#g-auto').checked;if(changed){sheet.last='';sheet.err=''}saveSheetCfg();setSync(u?(sheet.err?'err':sheet.last?'ok':'local'):'local');return true};
+  const readG=()=>{const prevUrl=sheet.url;const u=$('#g-url').value.trim();if(u&&!/^https:\/\/script\.google(usercontent)?\.com\/.+/.test(u)){$('#g-st').className='st bad';$('#g-st').textContent='La URL debe ser la de la aplicación web de Apps Script (https://script.google.com/…/exec).';return false}
+    const changed=u!==(sheet.url||'');sheet.url=u;sheet.clave=$('#g-key').value.trim();sheet.auto=$('#g-auto').checked;if(changed){sheet.last='';sheet.err='';syncReady=false;setTimeout(initialSync,0)}saveSheetCfg();setSync(u?(sheet.err?'err':sheet.last?'ok':'local'):'local');return true};
   $('#g-test').onclick=async()=>{if(!readG())return;if(!sheet.url){$('#g-st').textContent='Pega primero la URL.';return}$('#g-st').className='st';$('#g-st').textContent='Probando…';
     try{const r=await jsonp({action:'status'});if(!r.ok)throw new Error(r.error);$('#g-st').className='st good';$('#g-st').textContent=`Conexión correcta. ${r.savedAt?`Último respaldo en la hoja: ${new Date(r.savedAt).toLocaleString('es-MX')} (${r.projects} proyectos).`:'La hoja aún no tiene respaldos.'}`}
     catch(e){$('#g-st').className='st bad';$('#g-st').textContent=e.message}};
-  $('#g-push').onclick=async()=>{if(!readG())return;$('#g-st').className='st';$('#g-st').textContent='Guardando…';const ok=await pushSheet(true);$('#g-st').className='st '+(ok?'good':'bad');$('#g-st').textContent=ok?'Último respaldo: '+new Date(sheet.last).toLocaleString('es-MX'):'Falló: '+sheet.err};
+  $('#g-push').onclick=async()=>{if(!readG())return;if(!syncReady){if(!await ask('Aún no se pudo leer la hoja. Si guardas ahora, lo de este navegador reemplazará lo que haya en Google Sheets. ¿Continuar?','Guardar de todos modos'))return;syncReady=true}$('#g-st').className='st';$('#g-st').textContent='Guardando…';const ok=await pushSheet(true);$('#g-st').className='st '+(ok?'good':'bad');$('#g-st').textContent=ok?'Último respaldo: '+new Date(sheet.last).toLocaleString('es-MX'):'Falló: '+sheet.err};
   $('#g-pull').onclick=()=>{if(readG())pullSheet()};
+  $('#g-ver').onclick=async()=>{if(!readG())return;const box=$('#g-vlist');box.hidden=false;box.textContent='Cargando versiones…';
+    try{const r=await jsonp({action:'versions'});if(!r.ok)throw new Error(r.error);
+      if(!r.versiones||!r.versiones.length){box.textContent='La hoja no tiene versiones guardadas. Si el script es la versión anterior, vuelve a implementarlo con el código nuevo.';return}
+      box.innerHTML=r.versiones.map(x=>`<div style="display:flex;gap:8px;align-items:center"><time>${new Date(x.fecha).toLocaleString('es-MX')}</time><span>${x.proyectos} proyecto(s)</span><button class="btn sm" data-v="${x.v}" style="margin-left:auto">Restaurar</button></div>`).join('');
+      box.querySelectorAll('[data-v]').forEach(b=>b.onclick=async()=>{try{const d=await jsonp({action:'load',v:b.dataset.v});if(!d.ok)throw new Error(d.error);
+        if(!await ask(`¿Restaurar la versión del ${new Date(d.savedAt).toLocaleString('es-MX')} con ${d.data.projects.length} proyecto(s)? Reemplaza lo actual y se guarda como la versión más reciente.`,'Restaurar'))return;
+        db=fix(d.data);syncReady=true;save();closeModal();render();toast('Versión restaurada')}catch(e){toast('No se pudo restaurar: '+e.message)}})}
+    catch(e){box.textContent='No se pudieron leer las versiones: '+e.message}};
   $('#s-bk').onclick=()=>download(`respaldo-manuales-sop-${today()}.json`,JSON.stringify(db,null,1),'application/json');
-  $('#s-file').onchange=e=>{const file=e.target.files[0];if(!file)return;const rd=new FileReader();rd.onload=()=>{try{const o=JSON.parse(rd.result);
+  $('#s-file').onchange=e=>{const file=e.target.files[0];if(!file)return;const rd=new FileReader();rd.onload=async()=>{try{const o=JSON.parse(rd.result);
       if(!Array.isArray(o.projects)||!o.projects.every(p=>p.id&&p.name&&isISO(p.start)&&Array.isArray(p.ph)&&p.ph.length===11))throw 0;
-      if(!confirm(`El respaldo tiene ${o.projects.length} proyecto(s). ¿Reemplazar los datos actuales?`))return;
-      db={hours:8,soonDays:1,holidays:HOL_DEFAULT,log:[],...o};save();closeModal();render();toast('Respaldo restaurado')}catch(x){$('#s-err').textContent='El archivo no es un respaldo válido de esta herramienta.'}};rd.readAsText(file)};
+      if(!await ask(`El respaldo tiene ${o.projects.length} proyecto(s). ¿Reemplazar los datos actuales?`,'Reemplazar'))return;
+      db=fix(o);save();closeModal();render();toast('Respaldo restaurado')}catch(x){$('#s-err').textContent='El archivo no es un respaldo válido de esta herramienta.'}};rd.readAsText(file)};
   $('#s-demo').onclick=()=>{if(nDemo){const ids=new Set(db.projects.filter(p=>p.demo).map(p=>p.id));db.projects=db.projects.filter(p=>!p.demo);db.log=db.log.filter(l=>!ids.has(l.pid))}else{setCal();demo()}save();closeModal();render();toast(nDemo?'Datos DEMO eliminados':'Datos DEMO cargados')};
-  $('#s-all').onclick=()=>{if(!confirm('¿Borrar todos los proyectos y el historial de este navegador? Descarga un respaldo antes si lo necesitas.'))return;db.projects=[];db.log=[];save();closeModal();render();toast('Datos borrados')};
+  $('#s-all').onclick=async()=>{if(!await ask('¿Borrar todos los proyectos y el historial? También se reflejará en Google Sheets. Descarga un respaldo antes si lo necesitas.','Borrar todo'))return;db.projects=[];db.log=[];save();closeModal();render();toast('Datos borrados')};
 }
 function exportCSV(){
   setCal();const cell=v=>{v=String(v??'');return /[",\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:v};
@@ -637,10 +713,15 @@ $('#sync-pill').onclick=openSettings;
 
 /* ---------- Inicio ---------- */
 db=load();
-if(!db){db={hours:8,soonDays:1,holidays:HOL_DEFAULT,projects:[],log:[]};setCal();demo();save()}
+if(!db){db={hours:8,soonDays:1,holidays:HOL_DEFAULT,projects:[],log:[],phv:PHV}}
+if(!sheet.url)cleanSeed();
+saveLocal();
 render();
-setSync(sheet.url?(sheet.err?'err':sheet.last?'ok':'local'):'local');
-if(sheet.url&&sheet.auto!==false)schedulePush();
+setSync(sheet.url?'sync':'local');
+initialSync();
+setInterval(pollSheet,60*1000);
+/* Si se cierra la pestaña con cambios sin enviar, se mandan en segundo plano. */
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&dirty&&syncReady&&sheet.url){try{navigator.sendBeacon(sheet.url,new Blob([payload(uid())],{type:'text/plain;charset=utf-8'}))}catch(e){}}});
 setInterval(render,10*60*1000);
 </script>
 </body>
